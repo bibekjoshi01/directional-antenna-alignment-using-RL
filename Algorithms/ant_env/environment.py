@@ -17,8 +17,8 @@ class AntennaEnvironmentSim(AntennaEnvironmentBase):
         rssi_max=-30,
         rssi_min=-90,
         noise_std=2.0,
-        move_time_per_step=0.05,
-        measure_time=0.02,
+        move_time_per_step=0.0,
+        measure_time=0.0,
     ):
         """
         Args:

@@ -14,7 +14,7 @@ hc = HillClimb2D(
     max_iters=200,
     patience=15,
     settle_time=0.0,
-    init_point=(40, 70),  # deliberately bad start
+    init_point=(140, 70),  # deliberately bad start
 )
 
 start_time = time.time()

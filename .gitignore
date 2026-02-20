@@ -150,3 +150,6 @@ cmake-build-release/
 *.tmp
 *.bak
 *.pid
+
+# Large media files
+Reports/REAL-TIME DIRECTIONAL ANTENNA ALIGNMENT.mp4

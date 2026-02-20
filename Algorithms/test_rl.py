@@ -22,7 +22,7 @@ agent.epsilon = 0.0  # pure exploitation
 log_data, path = test_agent(
     agent,
     env_wrapper,
-    max_steps=200,
+    max_steps=300,
     samples=env_wrapper.samples,
 )
 print(log_data)
