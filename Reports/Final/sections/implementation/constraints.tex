@@ -1,0 +1,79 @@
+\subsection{Implementation Constraints and Practical Issues}
+
+This section discusses the key practical limitations encountered during the implementation of the antenna alignment system and the mitigation strategies adopted in software and firmware. The focus is on observed constraints
+during simulation and hardware-oriented design.
+
+\subsubsection{RSSI Measurement Noise}
+
+RSSI measurements are inherently noisy due to multipath effects, receiver sensitivity variations, and thermal noise. In both the simulated environment and real RF systems, successive RSSI readings at the same antenna orientation can differ significantly.
+
+\textbf{Observed issue:}
+\begin{itemize}
+\item Single RSSI samples caused unstable reward signals.
+\item Small random fluctuations triggered unnecessary action changes in the RL agent.
+\end{itemize}
+
+\textbf{Implemented mitigation:}
+\begin{itemize}
+\item RSSI values are averaged over a fixed sampling window.
+\item State transitions depend on the \emph{sign} of RSSI change (increase / stable / decrease), rather than raw magnitude.
+\end{itemize}
+
+This reduced sensitivity to high-frequency noise without increasing computational complexity.
+
+
+% \subsubsection{Mechanical Backlash and Actuator Imprecision}
+
+% Stepper motor-driven pan-tilt mechanisms exhibit mechanical backlash and finite positioning accuracy, especially when reversing direction.
+
+% \textbf{Observed issue:}
+% \begin{itemize}
+% \item Small corrective movements often failed to produce measurable RSSI improvement.
+% \item Frequent direction changes increased settling time without benefit.
+% \end{itemize}
+
+% \textbf{Implemented mitigation:}
+% \begin{itemize}
+% \item Antenna orientation was discretized into fixed angular steps.
+% \item Minor RSSI changes below a threshold were treated as ``no improvement''.
+% \item A \texttt{STAY} action was included to allow the system to hold position.
+% \end{itemize}
+
+
+\subsubsection{Quantization and Discretization Errors}
+
+The continuous pan, tilt, and RSSI domains were discretized to enable tabular Q-learning.
+
+\textbf{Observed issue:}
+\begin{itemize}
+\item Fine angular variations could not be represented.
+\item The true optimal orientation may lie between discrete states.
+\end{itemize}
+
+\textbf{Implemented mitigation:}
+\begin{itemize}
+\item Discretization step size was selected to balance resolution and table size.
+\item RL was used only for \emph{local refinement} after coarse scanning.
+\end{itemize}
+
+This ensured acceptable alignment accuracy without excessive memory usage.
+
+
+\subsubsection{Memory Constraints on Embedded Hardware}
+
+The ESP32 has limited SRAM and flash memory, making dynamic or high-dimensional models impractical.
+
+\textbf{Observed issue:}
+\begin{itemize}
+\item Neural network-based policies were unsuitable for on-device inference.
+\item Online Q-table updates would increase memory and runtime complexity.
+\end{itemize}
+
+\textbf{Implemented mitigation:}
+\begin{itemize}
+\item Q-learning was performed offline on a PC
+\item Only the trained Q-table was deployed to the ESP32-S3
+\item No learning or parameter updates occur during deployment.
+\end{itemize}
+
+This resulted in deterministic execution and predictable memory usage.

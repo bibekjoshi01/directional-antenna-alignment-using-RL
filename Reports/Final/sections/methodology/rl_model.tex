@@ -1,0 +1,127 @@
+\subsection{Reinforcement Learning Model}
+
+The core of the autonomous antenna alignment system is a lightweight reinforcement learning (RL) agent that adapts the receiver antenna orientation to maximize the received signal strength. Unlike conventional control methods, RL enables the system to learn optimal alignment policies through experience without relying on explicit channel models.
+
+
+\subsubsection{RL Framework Overview}
+
+RL is a learning paradigm concerned with how an autonomous agent can learn to make sequential decisions through interaction with an environment in order to maximize a cumulative reward. Unlike supervised learning, where correct input-output pairs are provided, RL relies on evaluative feedback in the form of scalar rewards, which indicate the desirability of the agent’s actions rather than prescribing optimal behaviour directly. This framework is particularly suited to control and optimization problems where explicit models of the environment are unavailable or impractical to obtain ~\cite{ref19}.
+\begin{figure}[H]
+    \vspace{1em} 
+    \centering
+    \includegraphics[width=1\textwidth]{images/rl_flow.png}
+    \caption{Reinforcement Learning Process Flow}
+    \label{fig:rl_flow}
+\end{figure}
+Model-free reinforcement learning methods, such as Q-Learning, estimate the expected long-term return associated with state-action pairs without requiring an explicit model of the environment. These methods are computationally lightweight and well suited to embedded systems with limited processing and memory resources. By learning directly from observed rewards, model-free RL can adapt to uncertain, noisy, and dynamically changing environments, making it applicable to real-time control problems such as antenna alignment based on received signal strength measurements.
+
+
+The problem is formulated as a Markov Decision Process (MDP) comprising:
+\begin{itemize}
+    \item \textbf{States ($s_t$):} Each state represents the current antenna orientation in azimuth and tilt, together with the recent RSSI trend (increasing, stable, decreasing). This low-dimensional representation ensures feasibility for real-time embedded implementation.
+    \item \textbf{Actions ($a_t$):} Discrete antenna adjustments, including rotate clockwise, rotate counter-clockwise, or hold current orientation. Separate steps are applied for azimuth and tilt axes.
+    \item \textbf{Reward ($r_t$):} Scalar feedback representing the change in RSSI after taking an action. Positive rewards are given when RSSI increases, and negative rewards for decreases. A motion penalty term discourages unnecessary movements, balancing alignment performance with mechanical efficiency.
+    \item \textbf{Policy:} $\pi(s)$ defines the action selection strategy. An $\epsilon$-greedy policy is employed, balancing exploration of untested orientations and exploitation of high-performing actions.
+\end{itemize}
+
+
+\subsubsection{State Space Design}
+The state space represents the information available to the RL agent at each decision step. To maintain a compact representation suitable for the ESP32-S3:
+\begin{itemize}
+    \item Azimuth angle is discretized into $N_\theta$ steps (e.g., 0°–360° with 10° resolution)  
+    \item Tilt angle is discretized into $N_\phi$ steps (e.g., 60°–120° with 5° resolution)
+    \item RSSI trend over recent measurements is encoded as a discrete value: increasing, stable, or decreasing 
+\end{itemize}
+The final state vector is a combination of azimuth index, tilt index, and RSSI trend index. This yields a total of $N_\theta \times N_\phi \times N_r \times 3$ possible states, which is small enough to store in the ESP32-S3’s RAM.
+
+\subsubsection{Q-Table Size and Memory Footprint}
+
+The Q-table size depends on the number of discrete states and actions. Let the pan (azimuth) and tilt (elevation) angles be discretized into $N_\theta$ and $N_\phi$ positions respectively, the RSSI trend take $N_r$ discrete values, and let there be $N_a$ possible actions. Then, the total Q-table size is given by:
+
+\begin{equation}
+\left|Q\right| = N_\theta \times N_\phi \times N_r \times N_a \dotfill
+\end{equation}
+
+For our design:  
+\begin{itemize}
+    \item Pan (azimuth) coarse positions: $N_\theta = 36$ (10° resolution over 360°)  
+    \item Tilt (elevation) positions: $N_\phi = 13$ (60° to 120° with 5° step)  
+    \item RSSI trend: $N_r = 3$ (increasing, stable, decreasing)  
+    \item Actions: $N_a = 3$ (rotate left, rotate right, hold)  
+\end{itemize}
+
+The total number of Q-values for the coarse table is:
+
+\begin{equation}
+\left|Q_\text{coarse}\right| = 36 \times 13 \times 3 \times 3 = 4,212 \dotfill
+\end{equation}
+
+For fine adjustment around the best coarse angle, we consider $\pm 10^\circ$ with 2° step resolution, yielding $N_\theta^\text{fine} = 11$ positions. The fine table requires:
+
+\begin{equation}
+\left|Q_\text{fine}\right| = 11 \times 13 \times 3 \times 3 = 1,287 \dotfill
+\end{equation}
+
+Hence, the total Q-table size including coarse and fine discretization is:
+
+\begin{equation}
+\left|Q_\text{total}\right| = 4,212 + 1,287 = 5,499 \text{ Q-values} \dotfill
+\end{equation}
+
+Assuming each Q-value is stored as a 32-bit floating-point number (4 bytes), the total memory requirement is approximately:
+
+\begin{equation}
+5,499 \times 4~\text{bytes} \approx 21.5~\text{kB} \dotfill
+\end{equation}
+
+This is negligible relative to the available RAM on the ESP32-S3 (520 kB), confirming the feasibility of the embedded implementation.
+
+\subsubsection{Action Space Design}
+The action space defines the set of possible antenna movements available to the RL agent. Actions are discrete and correspond to simple mechanical adjustments of the antenna. The defined actions include:
+
+\begin{itemize}
+    \item \textbf{Azimuth:} rotate left, rotate right, hold
+    \item \textbf{Tilt:} rotate up, rotate down, hold
+\end{itemize}
+Actions are executed via the MCU sending commands to the motor driver, which rotates the stepper motors in discrete steps corresponding to the state discretization. This discrete action space allows fast computation and ensures repeatable movements.
+
+\subsubsection{Reward Function}
+The reward function provides evaluative feedback to the reinforcement learning agent by quantifying the impact of each antenna movement on link quality. The primary objective is to maximize the received signal strength while simultaneously discouraging unnecessary mechanical motion that may lead to oscillatory behaviour, increased wear, or slow convergence.
+
+The instantaneous reward at time step t is defined as:
+\begin{equation}
+r_t = \Delta RSSI_t - \gamma \Delta \theta_t
+\end{equation}
+where:
+\begin{itemize}
+    \item $\Delta RSSI_t$ is the change in filtered RSSI after executing the action
+    \item $\Delta \theta_t$ is the angular displacement commanded to the motor
+    \item $\gamma$ is a weighting factor that penalizes excessive movement
+\end{itemize}
+
+A positive reward is obtained when an action results in an improvement in RSSI, encouraging movements that align the antenna more closely with the transmitter. Conversely, actions that degrade RSSI yield negative rewards, guiding the agent away from suboptimal orientations. The motion penalty term discourages excessive or unnecessary antenna movements, promoting stable convergence and reducing oscillations around local maxima.
+
+The parameter $\gamma$ is selected empirically to ensure that the reward remains dominated by RSSI improvements while still penalizing inefficient actuation. This formulation enables the agent to learn an alignment policy that balances communication performance with mechanical efficiency under real-time and embedded system constraints.
+\subsubsection{Learning and Action Selection}
+
+The reinforcement learning agent operates on a pre-trained Q-table stored on the MCU. The Q-table is generated offline through controlled experiments, where the agent learns optimal antenna alignment policies under various RSSI scenarios. During deployment, no further Q-value updates are performed; the system performs inference only.
+
+\textbf{Action Selection:} 
+The agent selects actions using the learned Q-values:
+\begin{equation}
+a_t = \arg\max_{a} Q(s_t, a)
+\end{equation}
+where $s_t$ is the current state, composed of the antenna orientation and recent RSSI trend.  
+
+No exploration ($\epsilon$-greedy) is applied during deployment to ensure deterministic and stable alignment.
+
+\subsubsection{Implementation Considerations on ESP32-S3}
+
+\begin{itemize}
+    \item \textbf{Memory footprint:} The Q-table occupies $\approx 21.5$ KB, which is negligible relative to the ESP32 RAM (520 kB)
+    \item \textbf{Computation:} Selecting the action requires only simple table lookup and arithmetic, allowing real-time operation
+    \item \textbf{Real-time operation:} The ESP32-S3 continuously measures RSSI, encodes the state, looks up the best action in the Q-table, and commands the stepper motors
+    \item \textbf{Stability:} Since no online learning occurs, the system avoids oscillations caused by transient RSSI fluctuations and exploratio
+\end{itemize}
+
+This design ensures that the antenna alignment system is fully autonomous, responsive to changing signal conditions, and feasible for embedded deployment without the overhead of online training.

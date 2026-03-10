@@ -1,0 +1,154 @@
+\subsection{Hardware Tools}
+
+\subsubsection{ESP32-S3 DevKit Microcontroller}
+
+The ESP32-S3 DevKit is a versatile, low-cost microcontroller (MCU) from Espressif Systems, widely used for embedded and IoT applications. 
+It features a dual-core Xtensa 32-bit LX6 processor, Wi-Fi and Bluetooth connectivity, and multiple peripherals such as ADC, DAC, I2C, SPI, UART, PWM, and general-purpose GPIO pins. 
+These capabilities make it suitable for real-time signal processing, motor control, and lightweight reinforcement learning.
+
+In this project, the ESP32-S3 DevKit serves as the primary controller, performing tasks such as real-time RSSI acquisition, servo motor control for directional antenna alignment, and execution of the reinforcement learning algorithm. 
+The firmware is developed using the Arduino IDE for rapid prototyping.
+
+\begin{figure}[h]
+    \vspace{1em} 
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/esp32_block_diagram.png} 
+    \vspace{0.2em}
+    \caption[ESP32-S3 Block Diagram]{ESP32-S3 Block Diagram}
+    \label{fig:esp32_block_diagram}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: ESP32 Series Datasheet, Espressif Systems)\par}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/esp32_gpio_diagram.png} 
+    \vspace{0.2em}
+    \caption[ESP32-S3 Components Description]{ESP32-S3 Components Description}
+    \label{fig:esp32_gpio}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: ESP32 Series Datasheet, Espressif Systems)\par}
+\end{figure}
+
+
+\subsubsection{Stepper Motor}
+The NEMA 17 stepper motor typically has a full-step angle of 1.8°, providing 200 steps per revolution. With microstepping via the A4988 motor driver, effective step resolutions of 0.9°, 0.45°, or lower can be achieved, enabling fine-grained control necessary for directional antenna alignment.
+
+\begin{figure}[h]
+    \vspace{1em}
+    \centering
+    \includegraphics[width=1\textwidth]{images/motor.png} 
+    \vspace{0.2em} 
+    \caption[Nema 17 Stepper Motor Specification]{Nema 17 Stepper Motor Specification}
+    \label{fig:stepper_motor}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: ATO Nema 17 Stepper Motor Specs)\par}
+\end{figure}
+
+Stepper motors can be directly interfaced with the ESP32 via a step/direction driver like the A4988. This allows precise control of angular displacement through simple pulse sequences, eliminating the need for feedback sensors such as encoders.
+
+The selected NEMA 17 operates at 12-24 V with a rated current of 1-2 A per phase. A regulated DC power supply ensures stable operation without introducing voltage fluctuations that could affect sensitive RSSI measurements. Stepper motors inherently provide repeatable positioning without feedback due to the discrete nature of step motion. This is critical for aligning the antenna to precise orientations corresponding to RSSI peaks.
+
+\subsubsection{Servo Motor}
+The TowerPro MG90S micro servo was selected to control the elevation (tilt) angle of the antenna. This servo provides approximately 180° of rotation with a standard positional resolution of 1° per control pulse, which is sufficient for fine-grained tilt adjustments in conjunction with the stepper-controlled azimuth.
+
+\begin{figure}[h]
+    \vspace{1em}
+    \centering
+    \includegraphics[width=1\textwidth]{images/mg90s_servo.png} 
+    \vspace{0.2em} 
+    \caption[TowerPro MG90S Micro Servo]{TowerPro MG90S Micro Servo}
+    \label{fig:mg90s_servo}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: TowerPro MG90S Datasheet)\par}
+\end{figure}
+
+The MG90S operates on a 4.8-6 V DC supply and draws a stall current of up to 650 mA. Control is achieved via standard PWM pulses from the ESP32-S3, which allows direct positioning without additional drivers. A decoupling capacitor of 100 nF is placed across the power lines to filter inductive noise and prevent transient voltage spikes from affecting the microcontroller logic.
+
+The servo provides reliable, repeatable angular positioning necessary for maintaining precise antenna tilt angles. Its lightweight construction minimizes additional mechanical load on the rotating turret, while the integrated metal gears ensure long-term durability under continuous operation.
+
+
+\subsubsection{Motor Driver}
+The A4988 is a complete microstepping driver designed for bipolar stepper motors, providing precise and easy-to-implement motion control. It supports full, half, quarter, eighth, and sixteenth-step modes, with an output drive capacity up to 35 V and 2 A, making it suitable for controlling NEMA 17 stepper motors in embedded systems. The A4988 simplifies motor control each pulse on the STEP input moves the motor by one microstep, eliminating the need for complex phase sequencing or additional control logic.
+
+\begin{figure}[h]
+    \vspace{1em}
+    \centering
+    \includegraphics[width=1\textwidth]{images/motor_driver.png} 
+    \vspace{0.2em} 
+    \caption[A4988 Motor Driver Module Application Diagram]{A4988 Motor Driver Module Application Diagram}
+    \label{fig:stepper_motor_driver}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: Allegro Microsystems product documentation)\par}
+\end{figure}
+
+The A4988 receives step commands from the ESP32-S3 according to the RL-based alignment algorithm, precisely rotating the stepper motors to orient the directional antenna. Its microstepping capability ensures smooth and repeatable movements, which is essential for stable and accurate RSSI-based alignment.
+
+
+\subsubsection{Directional Antenna}
+A 2.4 GHz directional PCB panel yagi antenna with typical gain 8 -- 12 dBi is selected. The antenna operates in the 2.35 -- 2.55 GHz ISM band, providing:
+\begin{itemize}
+\item Well-defined main radiation lobe
+\item Half-power beamwidth of approximately 30° -- 60°
+\item Smooth RSSI variation with respect to orientation
+\end{itemize}
+These characteristics are ideal for RSSI-driven control and reinforcement learning, as they produce predictable signal gradients and reduce learning instability. The antenna's low mass ($\\approx$19--40~g) allows reliable mounting on small stepper actuators with minimal mechanical inertia.
+
+\begin{figure}[h]
+    \vspace{1em}
+    \centering
+    \includegraphics[width=1\textwidth]{images/antenna.png} 
+    \vspace{0.2em} 
+    \caption[High Gain 2.45GHz Directional Antenna]{High Gain 2.45GHz Directional Antenna}
+    \label{fig:pcb_antenna}
+    \vspace{0.3em} 
+    {\centering \small\itshape (Source: Yagi Antenna Datasheet, ANTOSIYA)\par}
+\end{figure}
+
+\subsubsection{RF Interfacing}
+
+The directional antenna is interfaced to the receiver MCU through a short coaxial RF connection to ensure minimal insertion loss and impedance mismatch. The ESP32-S3 development module exposes a u.FL (IPEX) RF connector, which is connected to the antenna via a u.FL-to-SMA pigtail cable. A short-length RG174 coaxial cable with SMA connectors is used between the pigtail and the antenna feed point to preserve signal integrity while allowing mechanical rotation of the antenna assembly.
+
+All RF connections maintain a characteristic impedance of 50~$\Omega$, which is standard for 2.4~GHz wireless systems, thereby minimizing reflections and standing-wave losses. The use of short, flexible coaxial cabling also prevents mechanical stress on the ESP32-S3 RF connector during antenna motion.
+
+\subsubsection{Power Supply and Management}
+
+Reliable power delivery is critical for the stable operation of the proposed antenna alignment system, particularly due to the coexistence of high-current electromechanical loads and noise-sensitive RF and digital circuitry. To address this, a dual-rail power architecture is adopted, separating the logic supply domain from the motor actuation domain.
+
+The ESP32-S3 microcontroller and associated low-power peripherals operate from a regulated 5V supply, while the stepper motor is powered from a higher-voltage rail to meet torque and current requirements. Electrical isolation between these domains minimizes the coupling of motor-induced current transients and switching noise into the microcontroller and RF front end, thereby preventing spurious resets and RSSI measurement corruption.
+
+{\setlength{\LTpre}{18pt}
+ \setlength{\LTpost}{5pt}
+
+\begin{longtable}{|
+    >{\raggedright\arraybackslash}p{4.4cm} |
+    >{\raggedright\arraybackslash}p{4.4cm} |
+    >{\raggedright\arraybackslash}p{4.4cm} |}
+
+\caption{Power Requirements of Major System Components}
+\label{tab:power-management}\\
+\hline
+\textbf{Component} & \textbf{Operating Voltage} & \textbf{Typical Current} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Component} & \textbf{Operating Voltage} & \textbf{Typical Current} \\
+\hline
+\endhead
+
+ESP32-S3 Microcontroller & 5~V (regulated) & $\leq$ 500~mA \\
+\hline
+A4988 Motor Driver & 5~V & $\leq$ 50~mA \\
+\hline
+NEMA 17 Stepper Motor & 12~V & $\leq$ 1.2~A per phase \\
+\hline
+MG90S Servo Motor & 5~V (regulated) & $\leq$ 250~mA \\
+\hline
+\end{longtable}
+}
+
+
+For bench-top testing, a regulated 12V / 3A DC power supply is used to power the stepper motor through the A4988 motor driver. A separate 5V regulated rail supplies the ESP32-S3, either via an onboard linear regulator or an external buck converter. This configuration ensures sufficient current headroom during motor acceleration and prevents voltage sag during rapid antenna movements.
+
+For mobile or untethered operation, a 3S LiPo battery (nominal 11.1~V) is used as the primary energy source. The battery supplies the motor driver directly, while a high-efficiency buck regulator steps down the voltage to a stable 5V for the ESP32. Adequate decoupling capacitors are placed near both the motor driver and the microcontroller to suppress transient voltage fluctuations.

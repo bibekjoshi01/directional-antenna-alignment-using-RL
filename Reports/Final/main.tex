@@ -1,0 +1,149 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{newtxtext,newtxmath}
+\usepackage{datetime}
+\usepackage{sectsty}
+\usepackage{titlesec}
+\usepackage[none]{hyphenat}  
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{tocloft}
+\usepackage{chngcntr}
+\usepackage{pgfgantt}
+\usepackage{pdflscape}  
+\usepackage{placeins} 
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{minted}
+
+% Figure
+% ---------------------------------------------------------------
+\counterwithin{figure}{section} 
+\renewcommand{\thefigure}{\thesection-\arabic{figure}}
+
+\counterwithin{table}{section} 
+\renewcommand{\thetable}{\thesection-\arabic{table}}
+
+
+% Layout
+% ---------------------------------------------------------------
+\geometry{left=1.25in,right=1in,top=1in,bottom=1in} % Page margin
+\setstretch{1.5} % line spacing
+\setlength{\parindent}{0pt} % No indentation
+\setlength{\parskip}{13pt} % Normal Paragraph spacing
+\allsectionsfont{\normalsize} % ??? 
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\sloppy
+
+
+% Section formatting
+% ---------------------------------------------------------------
+\titleformat{\section}          % command
+  {\normalsize\bfseries}        % font: 12pt bold
+  {\thesection.}                % section number with dot
+  {0.5em}                       % space between number and title
+  {}                            % before-code
+\titlespacing*{\section}        % spacing for section
+  {0pt}                         % left margin
+  {0pt}                         % space above
+  {0cm}                         % space below (after title)
+
+\titleformat{\subsection}
+{\normalsize\bfseries}
+{\thesubsection}
+{0.5em}
+{}
+\titlespacing*{\subsection}{0pt}{0pt}{-0.2cm}
+
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\subsubsection}{0pt}{0pt}{-0.3cm}
+
+% List formatting
+% ---------------------------------------------------------------
+\setlist[itemize]{
+  label={\large\textbf{\textbullet}},
+  itemsep=5pt, left=1.5em, labelsep=0.5em, topsep=-5pt, parsep=0pt, partopsep=0pt}
+  
+% Date formatting
+% ---------------------------------------------------------------
+\newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}
+
+% Document Starting
+% ---------------------------------------------------------------
+
+\begin{document}
+
+% --- Frontmatter ---
+\pagenumbering{roman}
+\input{frontmatter/cover}
+\input{frontmatter/cover2}
+\input{frontmatter/declaration}
+\input{frontmatter/certificate_of_approval}
+\input{frontmatter/copyright}
+\input{frontmatter/acknowledgement}
+\input{frontmatter/abstract}
+
+% ---- Chores ------
+\newpage
+\input{frontmatter/toc}
+\input{frontmatter/list_of_abbreviations}
+
+% --- Main content ---
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% % Introduction
+% \input{sections/introduction/index}
+% \input{sections/introduction/background}
+% \input{sections/introduction/motivation}
+% \input{sections/introduction/problem_definition}
+% \input{sections/introduction/objectives}
+% \input{sections/introduction/scope}
+% % Literature Review
+% \input{sections/literature_review}
+% % Requirements Analysis
+% \input{sections/requirements/index}
+% \input{sections/requirements/hardware_tools}
+% \input{sections/requirements/software_tools}
+% % Methodology and Architecture
+% \input{sections/methodology/index}
+% \input{sections/methodology/overview}
+% \input{sections/methodology/system_architecture}
+% \input{sections/methodology/source_receiver}
+% \input{sections/methodology/baseline_methods}
+% \input{sections/methodology/rssi_measurement}
+% \input{sections/methodology/rl_model}
+% \input{sections/methodology/experimental_setup}
+% % Implementation
+% \input{sections/implementation/overview}
+% \input{sections/implementation/hardware}
+% \input{sections/implementation/software}
+% \input{sections/implementation/rl_implementation}
+% \input{sections/implementation/simulation}
+% % \input{sections/implementation/constraints}
+% \input{sections/results_analysis/index}
+% \input{sections/remaining_tasks/index}
+
+% Appendices
+% \input{sections/appendices}
+% --- Backmatter ---
+\newpage
+\phantomsection
+\addcontentsline{toc}{section}{References}  
+\bibliographystyle{ieeetr}
+\nocite{*}  
+\bibliography{references}
+\end{document}

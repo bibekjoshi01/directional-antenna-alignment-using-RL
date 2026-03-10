@@ -1,0 +1,25 @@
+\subsection{Motivation}
+
+Despite the advantages of directional antennas, maintaining optimal alignment in
+real-world deployments remains challenging. Classical automatic alignment
+techniques, such as exhaustive angular scanning and RSSI based hill-climbing, are
+often used due to their simplicity. However, full-angle scanning incurs high latency
+and energy overhead, while hill-climbing methods are sensitive to RSSI noise and
+may converge to suboptimal orientations in multipath environments.
+
+Recent research has explored machine learning and reinforcement learning
+techniques for antenna alignment and beam selection, primarily in the context of
+high-frequency mmWave and phased-array systems ~\cite{ref1,ref2}. Although these
+approaches demonstrate promising performance, they typically depend on complex
+RF hardware, large training datasets, and substantial computational resources,
+making them impractical for low-cost, sub-6 GHz embedded platforms. Among
+reinforcement learning methods, Q-learning is particularly attractive for resource-
+constrained systems because it is model-free, computationally lightweight, and
+capable of learning effective control policies directly from interaction with the
+environment without requiring large datasets or explicit system models.
+
+This project is therefore motivated by the need to determine whether a lightweight
+\textbf{Q-learning} based antenna alignment strategy, using only RSSI measurements and
+simple mechanical steering, can deliver improved alignment performance over
+conventional methods while remaining feasible for practical deployment on low-
+cost embedded hardware.

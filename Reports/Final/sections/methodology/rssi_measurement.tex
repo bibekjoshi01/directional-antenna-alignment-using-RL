@@ -1,0 +1,43 @@
+\subsection{RSSI Measurement and Signal Conditioning}
+
+The performance of the autonomous antenna alignment system relies heavily on accurate measurement of the received signal strength. Received Signal Strength Indicator (RSSI) is a hardware-reported metric representing the power of incoming radio packets, typically expressed in dBm. Higher RSSI values correspond to stronger received signals, providing a direct indication of antenna alignment quality. 
+
+Due to inherent noise in wireless channels caused by multipath propagation, fading, and environmental interference, raw RSSI values must be conditioned before being used for control or reinforcement learning.
+
+\subsubsection{RSSI Sampling}
+
+RSSI is obtained from the ESP32's integrated WiFi radio, corresponding to the power of incoming packets received by the directional antenna. Each measurement is associated with a specific antenna orientation in both the azimuth and tilt planes. To capture sufficient temporal dynamics while avoiding MCU overload, a sampling rate of 5--20 Hz is employed. 
+
+\subsubsection{Noise Mitigation and Filtering}
+
+RSSI measurements are inherently volatile and can fluctuate significantly even when the antenna orientation remains fixed. To ensure robust control and learning, the following techniques are applied:
+\begin{itemize}
+    \item \textbf{Short-term averaging:} Multiple consecutive RSSI readings at the same orientation are averaged to reduce random noise
+    \item \textbf{Moving average filter:} A sliding window of recent RSSI samples is maintained to smooth out transient dips or spikes
+\end{itemize}
+
+These techniques ensure that the control algorithm and RL agent react to meaningful signal trends rather than instantaneous fluctuations.
+
+\subsubsection{State Feature Construction}
+
+The RL agent requires a compact representation of the environment in the form of a state vector. The state vector is constructed using:
+\begin{itemize}
+    \item \textbf{Antenna orientation:} Both azimuth and tilt angles are discretized into fixed steps to limit the size of the state space.
+    \item \textbf{RSSI trend:} The rate of change of filtered RSSI values is classified into three discrete states:
+        \begin{itemize}
+            \item \textbf{Increasing:} $\Delta RSSI > +1$ dB
+            \item \textbf{Stable:} $-1 \leq \Delta RSSI \leq +1$ dB
+            \item \textbf{Decreasing:} $\Delta RSSI < -1$ dB
+        \end{itemize}
+\end{itemize}
+
+The resulting state vector is expressed as:
+\begin{equation}
+\mathbf{s} = \left( i_{\text{az}},\, i_{\text{tilt}},\, \Delta \mathrm{RSSI} \right)
+\label{eq:state_vector}
+\end{equation}
+This representation captures both the current antenna orientation and short-term signal behavior, enabling the RL agent to make informed alignment decisions without requiring complex channel estimation.
+
+\subsubsection{Data Logging}
+
+For debugging, performance evaluation, or offline analysis, RSSI measurements along with corresponding timestamps and antenna orientations can be logged temporarily on the MCU or transmitted to a host system. This facilitates visualization of signal trends and aids in parameter tuning for the RL agent.

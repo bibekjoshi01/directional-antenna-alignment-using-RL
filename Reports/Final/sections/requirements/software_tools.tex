@@ -1,0 +1,40 @@
+\subsection{Software Tools}
+
+This project relies on a combination of development environments, libraries, and simulation tools to implement, test, and validate the autonomous directional antenna system. The software stack has been chosen for compatibility with the ESP32 microcontroller, real-time signal processing, and lightweight reinforcement learning algorithms.
+
+\subsubsection{Arduino IDE}
+
+The Arduino Integrated Development Environment (IDE) is used for programming and deploying firmware to the ESP32 DevKit microcontroller. It provides a user-friendly interface, built-in support for ESP32 libraries, and easy integration with peripherals such as PWM motors, ADC sensors, and Wi-Fi modules. 
+The IDE allows rapid prototyping and testing of algorithms, including RSSI acquisition and servo motor control. Additionally, it supports serial communication for debugging and real-time monitoring.
+
+
+\subsubsection{Programming Languages}
+
+\textbf{Python:} Python Programming Language is used for data analysis, simulation, and reinforcement learning experiments. Libraries such as NumPy, Matplotlib, and Pandas allow signal processing, visualization of RSSI data, and testing RL policies before deployment on the microcontroller. Python also facilitates post-processing of logged data to evaluate system performance under different environmental conditions.
+
+Custom Python-based simulation scripts are used to model antenna orientation, RSSI feedback, and reinforcement learning policies. Lightweight tabular reinforcement learning algorithms are evaluated offline before being translated into microcontroller-compatible logic.
+
+\textbf{C/C++:} The firmware running on the ESP32 microcontroller is implemented primarily in C/C++, using the Arduino framework and PlatformIO toolchain. These languages provide low-level hardware access, deterministic execution, and efficient memory usage, which are essential for real-time RSSI sampling, servo motor control, and on-device decision-making. The use of C/C++ ensures compatibility with embedded libraries and enables deployment of lightweight reinforcement learning logic within the constrained resources of the microcontroller.
+
+\subsubsection{PlatformIO}
+
+PlatformIO is used as an advanced firmware development environment for the ESP32. Built on top of Visual Studio Code, it provides robust dependency management, multi-environment builds, and improved debugging support compared to the Arduino IDE. PlatformIO enables structured project organization and simplifies integration of third-party libraries required for motor control, RSSI acquisition, and communication.
+
+\subsubsection{Version Control}
+
+Git and GitHub are used for version control of all source code, configuration files, and documentation. It ensures proper tracking of changes, collaboration among team members, and maintains a history of experimental setups for reproducibility.
+
+\subsubsection{Trello}
+
+Trello is used as a project management and collaboration tool. 
+It helps organize tasks, assign responsibilities, and track progress of individual modules and team milestones. 
+Using Trello boards, lists, and cards, the team can coordinate software and hardware development efficiently.
+
+\subsubsection{Draw.io}
+
+Draw.io (also known as diagrams.net) is employed for designing system diagrams, flowcharts, and hardware schematics. It provides a flexible, web-based interface for creating clear and structured visual representations of the project workflows.
+
+
+\subsubsection{KiCad}
+
+KiCad EDA was used for designing the schematic and PCB layouts of the system. It allowed precise placement of components, custom routing of power and signal lines, and integration of the slip-ring connections. KiCad’s 3D visualization tools were also employed to verify mechanical clearance and ensure proper alignment between the rotating and stationary sections.

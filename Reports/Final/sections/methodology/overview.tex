@@ -1,0 +1,30 @@
+
+\subsection{Overview of System Approach}
+
+The proposed system implements a closed-loop antenna alignment mechanism that autonomously adjusts the orientation of a directional antenna based on real-time Received Signal Strength Indicator (RSSI) feedback. The primary objective is to maximize received signal power at the receiver node by continuously adapting antenna orientation in response to observed wireless channel conditions.
+
+At a high level, the system operates as a feedback control loop comprising three core stages: signal measurement, decision making, and actuation. The receiver node periodically measures RSSI values from a fixed transmitter, processes this information using an alignment strategy, and issues motion commands to a stepper motor that rotates the directional antenna. The effect of each motion is observed through subsequent RSSI measurements, thereby closing the control loop.
+
+Unlike open-loop or manually configured antenna systems, the proposed approach does not rely on prior knowledge of transmitter direction or explicit channel models. Instead, alignment decisions are driven purely by measured signal feedback, enabling operation in environments where propagation conditions are unknown or subject to change.
+
+To evaluate the effectiveness of adaptive alignment, the system supports multiple antenna orientation strategies. These include conventional baseline methods as well as a reinforcement learning (RL) based approach.
+
+Baseline strategies include:
+\begin{itemize}
+    \item \textbf{Exhaustive angular scanning}, where the antenna performs a full rotation to identify the angle yielding maximum RSSI.
+    \item \textbf{RSSI-based hill-climbing}, where incremental antenna adjustments are made based on local RSSI gradients.
+\end{itemize}
+
+These methods provide reference points with varying trade-offs between alignment accuracy, response time, mechanical overhead, and robustness to noise. In particular, exhaustive scanning approximates optimal alignment under static conditions but incurs significant latency and energy cost, while hill-climbing offers lightweight adaptivity but may converge to local maxima.
+
+The reinforcement learning–based strategy is introduced as an adaptive decision-making mechanism that learns an effective alignment policy through interaction with the environment. Rather than performing repeated full scans, the RL agent incrementally refines antenna orientation using reward feedback derived from RSSI changes. This allows comparison between heuristic-based and learning-based control under identical experimental conditions.
+
+Several design decisions were made to ensure feasibility, reproducibility, and suitability for embedded implementation.
+
+The ESP32 microcontroller was selected as the processing platform due to its integrated WiFi radio, hardware-level RSSI reporting, sufficient computational capability, and wide availability. Its ability to perform wireless communication, signal measurement, and control tasks within a single low-cost device simplifies system integration and reduces external dependencies.
+
+A stepper motor was chosen for antenna actuation to provide deterministic angular control and repeatable positioning. Compared to servo motors, stepper motors allow precise incremental rotation without the need for additional feedback sensors, which simplifies mechanical design and control logic. Discrete angular steps also align naturally with the discrete action space required by lightweight reinforcement learning algorithms.
+
+The reinforcement learning formulation is intentionally restricted to a discrete state and action space. This design choice avoids the complexity and resource demands of continuous-state or deep learning approaches, which are impractical for real-time execution on constrained embedded hardware. Tabular learning methods allow predictable memory usage, transparent behavior, and stable operation under noisy RSSI measurements.
+
+Importantly, the learning component is treated as an adaptive control enhancement rather than a black-box optimizer. The system remains operational even without learning enabled, and all baseline methods can be executed independently. This modular approach ensures that performance gains attributed to learning can be isolated, measured, and critically evaluated.

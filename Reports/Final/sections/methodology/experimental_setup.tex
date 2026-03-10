@@ -1,0 +1,72 @@
+\subsection{Experimental Setup and Evaluation}
+
+This section describes the experimental setup used to evaluate the performance of the autonomous antenna alignment system, the metrics considered for assessment, and the protocol followed for comparison between the RL-based approach and baseline methods. The experiments are designed to demonstrate real-world feasibility and performance under controlled conditions.
+
+\subsubsection{Experimental Environment}
+
+The system is tested in two primary environments to assess behaviour under varying propagation conditions:
+
+\begin{itemize}
+    \item \textbf{Indoor environment:} Laboratory or corridor with reflective surfaces (walls, metallic objects). Multipath propagation and RSSI fluctuations are present, simulating realistic indoor deployments.
+    \item \textbf{Outdoor environment:} Open or semi-open area with a fixed transmitter and receiver separated by 10--100 m. Environments include line-of-sight and mildly obstructed scenarios to evaluate robustness to realistic channel variations.
+\end{itemize}
+
+\noindent Experiments are conducted under the following conditions:
+\begin{itemize}
+    \item Random initial misalignment of the receiver antenna in both azimuth and tilt axes.
+    \item Static environment: no human or object movement.
+    \item Mildly dynamic environment: occasional obstructions or minor disturbances in the signal path.
+    \item Multiple alignment cycles to observe consistency and repeatability of the learned policy.
+\end{itemize}
+
+\subsubsection{Evaluation Metrics}
+
+To enable quantitative and fair comparison of RL-based alignment against baseline methods, the following metrics are recorded:
+
+\textbf{Received Signal Strength Indicator (RSSI):} 
+The primary metric for assessing link quality. RSSI is sampled continuously at 5--20 Hz and filtered using a sliding window average to reduce short-term fluctuations.
+
+\textbf{Alignment Accuracy ($A_{acc}$):} 
+Measures how close the selected antenna orientation is to the optimal orientation obtained via offline exhaustive scanning:
+\begin{equation}
+A_{acc} = |\theta_{alg} - \theta_{opt}|
+\end{equation}
+where $\theta_{alg}$ is the angle selected by the algorithm and $\theta_{opt}$ is the angle corresponding to maximum observed RSSI.
+
+\textbf{Convergence Time ($T_{conv}$):} 
+Time required for the algorithm to reach a stable alignment such that:
+\begin{equation}
+|RSSI(t) - RSSI_{\text{max}}| \le \epsilon, \quad \forall t \ge T_{\text{conv}} \hfill
+\end{equation}
+where $\epsilon = 2$ dB is the tolerance threshold based on observed RSSI variability.
+
+\textbf{Link Stability ($S$):} 
+Variance of RSSI after convergence:
+\begin{equation}
+S = \text{Var}(RSSI(t)), \quad t \in [T_{conv}, T_{conv}+W]
+\end{equation}
+Lower variance indicates better stability and resistance to environmental noise.
+
+\textbf{Mechanical Efficiency and Energy Proxy ($E$):} 
+Indirect measure of mechanical wear and MCU activity:
+\begin{equation}
+E \approx k_1 \cdot N_{moves} + k_2 \cdot T_{active}
+\end{equation}
+where $N_{moves}$ is the number of motor commands, $T_{active}$ is active processing time, and $k_1$, $k_2$ are proportional constants. Lower $E$ indicates efficient alignment with reduced mechanical stress.
+
+\subsubsection{Experimental Protocol}
+
+All experiments follow the same protocol to ensure reproducibility:
+
+\begin{itemize}
+    \item Initialize the antenna at a random orientation in both azimuth and tilt.
+    \item Load the pre-trained RL Q-table onto the ESP32. No online exploration is performed during evaluation.
+    \item Activate the alignment algorithm and record RSSI, antenna angles, and timestamps.
+    \item Apply controlled disturbances (angular offsets or temporary signal obstructions) to observe recovery behaviour.
+    \item Repeat each experiment for at least 20 trials to ensure statistical significance.
+    \item Compare the RL-based method with baseline approaches: fixed orientation, exhaustive angular scan, and RSSI-based hill-climbing.
+\end{itemize}
+
+\subsubsection{Statistical Analysis}
+
+For each metric ($A_{acc}, T_{conv}, S, E$), the mean and standard deviation are computed across trials. RL performance is compared with baseline methods using paired statistical tests (e.g., paired t-test) to confirm significant improvements in alignment accuracy, convergence speed, and mechanical efficiency. This approach ensures a rigorous, quantitative evaluation of the proposed system under realistic operational conditions.

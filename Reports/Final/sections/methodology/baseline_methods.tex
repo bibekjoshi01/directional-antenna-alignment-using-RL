@@ -1,0 +1,15 @@
+\subsection{Baseline Methods for Comparison}
+
+To evaluate the effectiveness of the proposed adaptive antenna alignment approach, its performance is compared against baseline methods that represent commonly used or intuitive antenna orientation strategies. These baselines differ in terms of adaptivity, computational overhead, and convergence behavior.
+
+\subsubsection{Exhaustive Angular Scan}
+
+In the exhaustive angular scan baseline, the antenna systematically sweeps through a predefined set of discrete pan and tilt angles that span the operational angular range. At each orientation, RSSI measurements are collected for a fixed dwell duration, after which the antenna advances to the next angular position.
+
+After completing a full scan, the antenna is oriented toward the angle corresponding to the maximum observed RSSI. This method guarantees discovery of the best orientation within the sampled resolution but incurs high alignment latency and mechanical overhead.
+
+\subsubsection{RSSI-Based Hill-Climbing}
+
+The RSSI-based hill-climbing algorithm employs a local greedy optimization strategy. Starting from an initial antenna orientation, incremental adjustments are applied along the pan and tilt axes. If a perturbation results in an increase in RSSI, the new orientation is retained; otherwise, the system reverts or explores an alternative direction.
+
+This approach provides faster convergence than exhaustive scanning but is susceptible to local maxima and performance degradation under noisy RSSI measurements or dynamic channel conditions.

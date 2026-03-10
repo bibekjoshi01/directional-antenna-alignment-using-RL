@@ -1,0 +1,24 @@
+\subsection{Background}
+
+Directional antennas are widely used in wireless communication systems to achieve
+extended range, improved SNR, and reduced interference by concentrating radiated
+energy in a specific direction. Such antennas are commonly deployed in fixed
+wireless links, point-to-point backhaul, wireless sensor networks, and long-range
+IoT systems. However, the performance benefits of directional antennas are highly
+dependent on accurate antenna alignment between the transmitter and receiver.
+
+In practical scenarios, optimal antenna orientation is difficult to maintain due to
+environmental changes such as multipath propagation, moving obstacles, structural
+vibrations, and gradual displacement of antenna mounts. Even small angular
+misalignments can lead to significant degradation in received signal strength and
+link reliability. Traditionally, antenna alignment is performed manually during
+installation or through periodic maintenance, which is time-consuming, error-prone,
+and impractical for systems that require continuous or unattended operation.
+
+Existing automated alignment solutions often rely on expensive hardware, such as
+phased antenna arrays, angle-of-arrival estimation, or complex RF front-end
+processing. These approaches increase system cost, power consumption, and design
+complexity, making them unsuitable for low cost embedded platforms. As a result,
+there is growing interest in receiver side autonomous alignment techniques that rely
+on readily available signal quality indicators, such as RSSI, throughput, and simple
+mechanical steering mechanisms to achieve adaptive directional alignment.

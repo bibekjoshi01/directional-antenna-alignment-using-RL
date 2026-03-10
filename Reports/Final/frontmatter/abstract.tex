@@ -1,0 +1,14 @@
+\newpage
+\section*{ABSTRACT}  
+\phantomsection
+\addcontentsline{toc}{section}{ABSTRACT}
+
+Precise alignment of directional antennas is critical for maintaining reliable
+wireless communication links, particularly in low-cost and resource-constrained
+systems where phased arrays and complex beamforming hardware are impractical.
+This project presents the design and implementation of an autonomous antenna
+alignment system that uses a reinforcement learning-based policy to select optimal antenna orientations based on Received Signal Strength Indicator (RSSI) measurements. The system comprises a transmitter node and a receiver node equipped with an ESP32-S3 microcontroller, a high-gain 2.4 GHz directional antenna mounted on a dual-axis stepper motor platform for precise azimuth and tilt control. RSSI measurements are aggregated and mapped into a discrete state vector, which is used to query a pre-trained tabular Q-learning policy stored on the ESP32-S3. The selected actions command the stepper motors to adjust the antenna orientation in real time. System performance is evaluated against conventional baseline methods, including fixed orientation, exhaustive angular scanning, and RSSI-based hill-climbing. Evaluation metrics include convergence time, alignment accuracy, link stability, mechanical efficiency, and robustness to environmental disturbances. Results indicate that the RL-based policy achieves faster alignment and reduced mechanical actuation compared to baseline methods, while maintaining stable signal quality. This work demonstrates the practical feasibility of deploying a lightweight, policy-based reinforcement learning approach for autonomous antenna alignment on embedded hardware in low-cost wireless systems.
+
+\vspace{0.5cm}
+
+\textit{Keywords: Directional Antenna Alignment, Embedded Systems, Policy-based Control, Reinforcement Learning, RSSI-based Optimization, Wireless Communication}

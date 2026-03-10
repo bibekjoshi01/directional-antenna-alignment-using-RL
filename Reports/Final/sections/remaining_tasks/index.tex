@@ -1,0 +1,47 @@
+\newpage
+\section{REMAINING WORKS}
+
+While the reinforcement learning--based antenna alignment strategy has been
+successfully developed and validated in simulation, several implementation
+tasks remain before final system deployment. These tasks primarily involve
+hardware integration, embedded firmware deployment, and system-level
+validation.
+
+\subsection{Hardware Integration and Mechanical Refinement}
+
+The next phase of work will focus on finalizing the mechanical and electrical
+interfaces of the antenna positioning system. Planned improvements include
+minor refinements to the stator and slip-ring assembly to improve electrical
+contact reliability under rotation, as well as adjustments to mechanical
+clearances to increase tolerance to shaft misalignment and wear. These changes
+are intended to ensure stable long-term operation during continuous antenna
+motion.
+
+\subsection{Embedded Firmware Integration}
+
+A key remaining task is the integration of the trained reinforcement learning
+policy into the MCU firmware. This involves transferring the learned Q-table
+from the simulation environment to the embedded platform and implementing a
+deterministic inference loop for real-time action selection.
+
+Additional firmware-level enhancements will include:
+\begin{itemize}
+    \item Coordinated control of azimuth and tilt actuators
+    \item Non-blocking motor command execution and timing management
+    \item RSSI sampling synchronized with mechanical stabilization
+\end{itemize}
+
+These changes are required to ensure that control decisions are based on valid
+and repeatable signal measurements.
+
+\subsection{System Testing and Validation}
+
+Following hardware and firmware integration, the complete system will undergo
+experimental validation. This phase will evaluate alignment accuracy,
+convergence time, and stability under real wireless channel conditions. The
+results will be compared against baseline scanning strategies previously
+evaluated in simulation to assess the effectiveness of the reinforcement
+learning approach in practice.
+
+This final validation stage will confirm the feasibility of the proposed method
+for real-world directional antenna alignment.

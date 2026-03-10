@@ -1,0 +1,120 @@
+\newpage
+\section{LITERATURE REVIEW}
+
+Wireless communication has evolved significantly since the pioneering experiments of Marconi in the early 1900s, becoming a fundamental component of modern communication systems~\cite{ref3}. 
+Advancements in wireless networks have been driven by the increasing demand for mobility, higher data rates, and efficient spectrum utilization~\cite{ref4}. 
+Antennas remain one of the most critical components influencing communication range, throughput, and interference characteristics~\cite{ref5}. 
+Modern wireless systems employ a wide variety of technologies including WiFi (IEEE 802.11), Bluetooth, NFC, LTE, 5G, and LoRa, each optimized for different ranges, data rates, and energy requirements. 
+Despite these advances, reliable long-distance communication continues to face challenges due to signal attenuation, interference, and environmental dynamics.
+
+Antennas are broadly classified as omnidirectional and directional. 
+Omnidirectional antennas provide wide coverage but suffer from lower gain and higher susceptibility to interference. 
+In contrast, directional antennas concentrate energy in specific directions, offering higher gain, extended range, reduced interference, and improved energy efficiency~\cite{ref6}. 
+Directional antennas are therefore widely adopted in long-range networks such as Wireless Sensor Networks (WSNs), UAV communication systems, IoT deployments, and mobile ad-hoc networks. 
+However, their performance depends critically on accurate alignment between transmitter and receiver. 
+For directional antennas to function effectively, precise orientation is essential. 
+Traditional antenna alignment relies on GPS-based coordinate tracking methods or signal tracking control methods (TCM)~\cite{ref7,ref8}. 
+Other control-theoretic methods include imitation human intelligence control approaches, which attempt to mimic expert decision-making for antenna tracking~\cite{ref9}. 
+Servo tracking systems have also been designed to enable precise mechanical alignment of vehicle-mounted antennas, demonstrating early practical implementations of automated antenna control~\cite{ref10}. 
+These methods can improve performance over simple feedback-based systems but often require complex modelling. 
+They suffer from limitations including GPS instability, high hardware cost, and reduced reliability in dynamic environments. 
+In the absence of reliable position information, alignment must be performed using signal feedback, particularly the Received Signal Strength Indicator (RSSI). 
+RSSI-based alignment allows the antenna to adjust orientation to maximize signal strength without explicit knowledge of node positions~\cite{ref11,ref12}.
+
+Early RSSI-based approaches employed exhaustive scanning of antenna orientations to locate the direction that maximizes RSSI. 
+While simple, such methods are inefficient and unsuitable for real-time systems due to high latency and energy consumption~\cite{ref11,ref12}. 
+More advanced methods incorporate estimation and control techniques including Kalman filters, unscented Kalman filters, and fuzzy logic controllers, often fusing RSSI with partial GPS data~\cite{ref13}. 
+Autonomous antenna systems capable of self-orientation have also been explored to enhance wireless range and signal quality without human intervention~\cite{ref14}. 
+These approaches improve tracking accuracy but require additional sensors and accurate system models, making them impractical for low-cost embedded platforms. 
+A notable control-theoretic approach was introduced by Koru et al.~\cite{ref11}, who developed a nonlinear distributed RSSI feedback control law for GPS-free alignment of UAV-mounted directional antennas. 
+Their method achieves near-global convergence under specific assumptions but depends on accurate estimation of RSSI partial derivatives, which is difficult on low-cost hardware.
+
+Recent research has explored the application of machine learning (ML) to antenna alignment problems where analytical models are complex or unavailable. 
+Supervised learning approaches using MLP, CNN, and LSTM architectures have been shown to achieve high accuracy in predicting antenna alignment from S-parameter measurements~\cite{ref15}. 
+Also, studies have surveyed AI-based beamforming and management techniques for 5G and 6G systems, highlighting the potential of learning-based approaches for optimizing antenna orientation and beam alignment~\cite{ref16}. 
+However, these methods require large labelled datasets and controlled environments.
+Reinforcement Learning (RL) offers a model-free alternative, particularly suited for control problems involving unknown environments. 
+RL-based approaches have been applied to antenna orientation, channel selection, beam selection, and power control~\cite{ref17}. 
+Learning-based beam alignment methods for mmWave and 5G systems using DQN have demonstrated improved performance in highly dynamic environments~\cite{ref17}.
+
+Multi-agent RL frameworks have also been investigated for antenna tilt optimization in cellular networks, enabling cooperative learning among neighbouring cells~\cite{ref18}. 
+However, most existing RL-based methods target high-end systems with antenna arrays, beamforming, continuous state spaces, and substantial computational resources, making them unsuitable for low-cost embedded platforms. 
+
+While significant progress has been made in antenna alignment using RSSI-based control, filtering techniques, and learning-based methods, current solutions exhibit at least one of the following limitations:
+
+\begin{itemize}
+    \item Dependence on GPS or additional sensors
+    \item Requirement of accurate system models and derivative estimation
+    \item High computational complexity unsuitable for low-cost embedded devices
+    \item Focus on antenna arrays and beamforming rather than mechanically steerable single antennas
+\end{itemize}
+
+This creates a clear research gap for a low-cost, RSSI-driven, reinforcement learning-based antenna alignment system capable of real-time operation on resource-constrained hardware.
+
+\setlength{\LTpre}{1cm}   % no space before table
+\setlength{\LTpost}{1cm}  % no space after table
+\renewcommand{\arraystretch}{1.4}
+\setlength{\tabcolsep}{8pt}
+
+\begin{longtable}{|
+    >{\raggedright\arraybackslash}p{4.4cm} |
+    >{\raggedright\arraybackslash}p{4.4cm} |
+    >{\raggedright\arraybackslash}p{4.4cm} |}
+
+\caption{Summary of Literature Review}
+\label{tab:literature-review} \\
+\hline
+\multicolumn{1}{|c|}{\parbox[c][2em][c]{4cm}{\centering \textbf{Title}}} &
+\multicolumn{1}{c|}{\parbox[c][2em][c]{4.5cm}{\centering \textbf{Methodology}}} &
+\multicolumn{1}{c|}{\parbox[c][2em][c]{4.5cm}{\centering \textbf{Key Inferences}}} \\
+\hline
+
+\textit{RSSI-Based Distributed Control to Align Directional Antenna Pairs for UAV Communication} (2024) \newline
+Y. Wan et al.
+&
+Control-theoretic approach using nonlinear static state feedback. RSSI partial derivatives estimated via antenna motion.
+&
+Demonstrates GPS-free RSSI-based antenna alignment with provable convergence. Strong theory, but requires accurate derivative estimation, difficult on low-cost embedded hardware.
+\\ \hline
+
+\textit{Received Signal Strength Indicator-Based Decentralised Control for Robust Long-Range Aerial Networking Using Directional Antennas} (2017) \newline
+Yan et al.
+&
+Fusion of RSSI and GPS using Unscented Kalman Filter and fuzzy logic.
+&
+Improves robustness but depends on additional sensors and antenna models. Not suitable for minimal hardware systems.
+\\ \hline
+
+\textit{Self-Orientation of Directional Antennas Assisted by Mobile Robots} (2012) \newline
+Min et al.
+&
+Pattern-based RSSI scanning using pan-tilt antenna mounts.
+&
+Validates RSSI-only alignment, but exhaustive scanning is slow and unsuitable for real-time systems.
+\\ \hline
+
+\textit{SmartAntenna: Enhancing Wireless Range with Autonomous Orientation} (2024) \newline
+Swann et al.
+&
+Servo-mounted antenna using RSSI feedback and heuristic search.
+&
+Demonstrates low-cost feasibility, but performance degrades in noisy environments and lacks adaptive learning.
+\\ \hline
+
+\textit{Comparative Analysis of Machine Learning Algorithms for Antenna Alignments} (2024) \newline
+Shakya et al.
+&
+Supervised ML (MLP, CNN, LSTM) trained on S-parameters.
+&
+High accuracy in controlled environments, but requires large datasets and offline training.
+\\ \hline
+
+\textit{Learning-Based Beam Alignment for Uplink mmWave UAVs} (2023) \newline
+Susarla et al.
+&
+Deep Q-Network for beam alignment using antenna arrays.
+&
+Effective in mmWave systems, but unsuitable for single-antenna, low-cost embedded platforms.
+\\ \hline
+
+\end{longtable}

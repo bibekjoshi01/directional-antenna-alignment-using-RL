@@ -1,0 +1,36 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{RLEnvironment}\PYG{p}{(}\PYG{n}{RLEnvironmentBase}\PYG{p}{)}\PYG{p}{:}
+    \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{step}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{action\PYGZus{}id}\PYG{p}{)}\PYG{p}{:}
+        \PYG{n}{axis}\PYG{p}{,} \PYG{n}{direction} \PYG{o}{=} \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{ACTIONS}\PYG{p}{[}\PYG{n}{action\PYGZus{}id}\PYG{p}{]}
+
+        \PYG{c+c1}{\PYGZsh{} \PYGZhy{} apply action\PYGZhy{}\PYGZhy{}}
+        \PYG{k}{if} \PYG{n}{axis} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{PAN}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan} \PYG{o}{+}\PYG{o}{=} \PYG{n}{direction} \PYG{o}{*} \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{STEP\PYGZus{}DEG}
+        \PYG{k}{elif} \PYG{n}{axis} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{TILT}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt} \PYG{o}{+}\PYG{o}{=} \PYG{n}{direction} \PYG{o}{*} \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{STEP\PYGZus{}DEG}
+        \PYG{k}{elif} \PYG{n}{axis} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{STAY}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:}
+            \PYG{k}{pass}
+
+        \PYG{c+c1}{\PYGZsh{} enforce mechanical limits}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{clip}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan}\PYG{p}{,}
+        \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{PAN\PYGZus{}MIN}\PYG{p}{,} \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{PAN\PYGZus{}MAX}\PYG{p}{)}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt} \PYG{o}{=} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{clip}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt}\PYG{p}{,}
+        \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{TILT\PYGZus{}MIN}\PYG{p}{,} \PYG{n}{RLConfig}\PYG{o}{.}\PYG{n}{TILT\PYGZus{}MAX}\PYG{p}{)}\PYG{p}{)}
+
+        \PYG{c+c1}{\PYGZsh{} apply to system}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{env}\PYG{o}{.}\PYG{n}{set\PYGZus{}orientation}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan}\PYG{p}{,} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt}\PYG{p}{)}
+        \PYG{n}{rssi} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{env}\PYG{o}{.}\PYG{n}{measure\PYGZus{}rssi}\PYG{p}{(}\PYG{n}{samples}\PYG{o}{=}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{samples}\PYG{p}{)}
+
+        \PYG{c+c1}{\PYGZsh{} reward logic}
+        \PYG{n}{delta} \PYG{o}{=} \PYG{n}{rssi} \PYG{o}{\PYGZhy{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{prev\PYGZus{}rssi}
+        \PYG{n}{delta\PYGZus{}sign} \PYG{o}{=} \PYG{n}{delta\PYGZus{}rssi\PYGZus{}sign}\PYG{p}{(}\PYG{n}{delta}\PYG{p}{)}
+        \PYG{n}{reward} \PYG{o}{=} \PYG{n}{delta}
+
+        \PYG{n}{state} \PYG{o}{=} \PYG{n}{encode\PYGZus{}state}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan}\PYG{p}{,} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt}\PYG{p}{,} \PYG{n}{delta\PYGZus{}sign}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{prev\PYGZus{}rssi} \PYG{o}{=} \PYG{n}{rssi}
+        \PYG{n}{done} \PYG{o}{=} \PYG{k+kc}{False}
+        \PYG{k}{return} \PYG{n}{state}\PYG{p}{,} \PYG{n}{reward}\PYG{p}{,} \PYG{n}{done}
+
+    \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+\end{MintedVerbatim}

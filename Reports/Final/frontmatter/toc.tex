@@ -1,0 +1,40 @@
+% --- Frontmatter: TOC, LoF, LoT ---
+
+% --- Table of Contents ---
+\newpage
+\renewcommand{\contentsname}{\textbf{Table of Contents}} % Bold title 
+\renewcommand{\cfttoctitlefont}{\normalfont\bfseries\normalsize} % Bold 12pt title
+\renewcommand{\cftsecfont}{\bfseries}       % Top-level section bold in TOC
+\renewcommand{\cftsecpagefont}{\bfseries}  
+\renewcommand{\cftsubsecfont}{\normalfont}  % subsections normal
+\renewcommand{\cftsubsecpagefont}{\normalfont}  
+\renewcommand{\cftsubsubsecfont}{\normalfont}  
+\renewcommand{\cftsubsubsecpagefont}{\normalfont}  
+\renewcommand{\cftsecaftersnum}{.}         % dot after section number
+\setlength{\cftbeforesecskip}{0.5em}      % vertical gap
+\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}} % dotted lines
+\tableofcontents
+
+% --- List of Figures ---
+\newpage
+\renewcommand{\listfigurename}{\textbf{List of Figures}}
+\phantomsection
+\addcontentsline{toc}{section}{List of Figures}  % Include in TOC
+\renewcommand{\cftloftitlefont}{\normalfont\bfseries\normalsize} % Bold 12pt
+\setlength{\cftfigindent}{0pt}         % no indentation
+\renewcommand{\cftfigpresnum}{Figure~} % add "Figure" before number
+\renewcommand{\cftfigaftersnum}{:}     % colon after number
+\setlength{\cftfignumwidth}{5em}       % width reserved for number
+\listoffigures
+
+% --- List of Tables ---
+\newpage
+\renewcommand{\listtablename}{\textbf{List of Tables}}
+\phantomsection
+\addcontentsline{toc}{section}{List of Tables}  % Include in TOC
+\renewcommand{\cftlottitlefont}{\normalfont\bfseries\normalsize} % Bold 12pt
+\setlength{\cfttabindent}{0pt}         % no indentation
+\renewcommand{\cfttabpresnum}{Table~}  % add "Table" before number
+\renewcommand{\cfttabaftersnum}{:}     % colon after number
+\setlength{\cfttabnumwidth}{5em}       % width reserved for number
+\listoftables

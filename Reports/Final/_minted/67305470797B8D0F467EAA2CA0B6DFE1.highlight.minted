@@ -1,0 +1,58 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{QLearningTrainer}\PYG{p}{(}\PYG{n}{RLAgentBase}\PYG{p}{)}\PYG{p}{:}
+    \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+    \PYG{c+c1}{\PYGZsh{} Internal safety}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{\PYGZus{}check\PYGZus{}state}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{s}\PYG{p}{:} \PYG{n}{Tuple}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{]}\PYG{p}{)}\PYG{p}{:}
+        \PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d} \PYG{o}{=} \PYG{n}{s}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{p}{(}\PYG{l+m+mi}{0} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{n}{p} \PYG{o}{\PYGZlt{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{pan\PYGZus{}states}\PYG{p}{)}\PYG{p}{:}
+            \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Pan index out of range: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{p}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{p}{(}\PYG{l+m+mi}{0} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{n}{t} \PYG{o}{\PYGZlt{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{tilt\PYGZus{}states}\PYG{p}{)}\PYG{p}{:}
+            \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Tilt index out of range: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{t}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+        \PYG{k}{if} \PYG{o+ow}{not} \PYG{p}{(}\PYG{l+m+mi}{0} \PYG{o}{\PYGZlt{}}\PYG{o}{=} \PYG{n}{d} \PYG{o}{\PYGZlt{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{delta\PYGZus{}states}\PYG{p}{)}\PYG{p}{:}
+            \PYG{k}{raise} \PYG{n+ne}{ValueError}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Delta index out of range: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{d}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Action selection (ε\PYGZhy{}greedy with tie\PYGZhy{}breaking)}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{select\PYGZus{}action}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{state}\PYG{p}{:} \PYG{n}{Tuple}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{]}\PYG{p}{)} \PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}} \PYG{n+nb}{int}\PYG{p}{:}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}check\PYGZus{}state}\PYG{p}{(}\PYG{n}{state}\PYG{p}{)}
+        \PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d} \PYG{o}{=} \PYG{n}{state}
+
+        \PYG{c+c1}{\PYGZsh{} exploration}
+        \PYG{k}{if} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{rand}\PYG{p}{(}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{epsilon}\PYG{p}{:}
+            \PYG{k}{return} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{n\PYGZus{}actions}\PYG{p}{)}
+
+        \PYG{c+c1}{\PYGZsh{} greedy with random tie\PYGZhy{}breaking}
+        \PYG{n}{q} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d}\PYG{p}{]}
+        \PYG{n}{max\PYGZus{}q} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n}{q}\PYG{p}{)}
+        \PYG{n}{best\PYGZus{}actions} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{flatnonzero}\PYG{p}{(}\PYG{n}{q} \PYG{o}{==} \PYG{n}{max\PYGZus{}q}\PYG{p}{)}
+
+        \PYG{k}{return} \PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{best\PYGZus{}actions}\PYG{p}{)}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Q\PYGZhy{}learning update}
+    \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{update}\PYG{p}{(}
+        \PYG{n+nb+bp}{self}\PYG{p}{,}
+        \PYG{n}{state}\PYG{p}{:} \PYG{n}{Tuple}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{]}\PYG{p}{,}
+        \PYG{n}{action}\PYG{p}{:} \PYG{n+nb}{int}\PYG{p}{,}
+        \PYG{n}{reward}\PYG{p}{:} \PYG{n+nb}{float}\PYG{p}{,}
+        \PYG{n}{next\PYGZus{}state}\PYG{p}{:} \PYG{n}{Tuple}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{,} \PYG{n+nb}{int}\PYG{p}{]}\PYG{p}{,}
+    \PYG{p}{)}\PYG{p}{:}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}check\PYGZus{}state}\PYG{p}{(}\PYG{n}{state}\PYG{p}{)}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{\PYGZus{}check\PYGZus{}state}\PYG{p}{(}\PYG{n}{next\PYGZus{}state}\PYG{p}{)}
+
+        \PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d} \PYG{o}{=} \PYG{n}{state}
+        \PYG{n}{pn}\PYG{p}{,} \PYG{n}{tn}\PYG{p}{,} \PYG{n}{dn} \PYG{o}{=} \PYG{n}{next\PYGZus{}state}
+
+        \PYG{n}{best\PYGZus{}next} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{max}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{pn}\PYG{p}{,} \PYG{n}{tn}\PYG{p}{,} \PYG{n}{dn}\PYG{p}{]}\PYG{p}{)}
+        \PYG{n}{td\PYGZus{}target} \PYG{o}{=} \PYG{n}{reward} \PYG{o}{+} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{gamma} \PYG{o}{*} \PYG{n}{best\PYGZus{}next}
+        \PYG{n}{td\PYGZus{}error} \PYG{o}{=} \PYG{n}{td\PYGZus{}target} \PYG{o}{\PYGZhy{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{action}\PYG{p}{]}
+
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{action}\PYG{p}{]} \PYG{o}{+}\PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha} \PYG{o}{*} \PYG{n}{td\PYGZus{}error}
+
+        \PYG{c+c1}{\PYGZsh{} clip for numerical stability}
+        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{action}\PYG{p}{]} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{clip}\PYG{p}{(}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{Q}\PYG{p}{[}\PYG{n}{p}\PYG{p}{,} \PYG{n}{t}\PYG{p}{,} \PYG{n}{d}\PYG{p}{,} \PYG{n}{action}\PYG{p}{]}\PYG{p}{,}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{q\PYGZus{}clip}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]}\PYG{p}{,}
+            \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{q\PYGZus{}clip}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{p}{,}
+        \PYG{p}{)}
+    \PYG{o}{.}\PYG{o}{.}\PYG{o}{.}
+
+\end{MintedVerbatim}

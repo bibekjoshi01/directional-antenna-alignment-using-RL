@@ -1,0 +1,13 @@
+\subsection{Source and Receiver Node Configuration}
+
+To ensure a controlled and repeatable experimental setup, the system is implemented using two distinct embedded nodes: a fixed transmitter node and an autonomous receiver node equipped with a mechanically steerable directional antenna. The functional roles of the two nodes are clearly separated to isolate the effects of antenna orientation on received signal strength.
+
+\subsubsection{Transmitter Node}
+The transmitter node consists of an ESP32-S3 development board equipped with a directional antenna operating in the 2.4~GHz ISM band. The transmitter antenna orientation is fixed throughout all experiments. This creates a static but non-uniform radiation pattern in space, resulting in an RSSI distribution at the receiver that depends jointly on the transmitter radiation pattern and the receiver antenna orientation. This setup more accurately represents practical point-to-point wireless links, where both ends employ directional antennas for improved link budget and interference mitigation.
+
+The transmitter continuously broadcasts packets at a constant transmit power and predefined packet rate. No adaptive control or beam steering is performed at the transmitter, ensuring that all observed RSSI variations at the receiver are caused by antenna misalignment, propagation effects, and receiver-side control actions.
+
+\subsubsection{Receiver Node}
+The receiver node consists of an ESP32-S3 microcontroller interfaced with a mechanically steerable high-gain directional antenna mounted on a pan--tilt actuation platform. The antenna orientation is adjustable along two independent degrees of freedom: azimuth (horizontal rotation) and elevation (vertical tilt), enabling fine-grained spatial alignment toward the transmitter. The ESP32-S3 extracts RSSI values from incoming wireless packets and uses them as feedback for antenna alignment. To reduce the influence of short-term fading and measurement noise, RSSI samples are optionally smoothed using lightweight averaging or filtering techniques prior to decision-making.
+
+All alignment decisions are computed locally on the receiver node. Based on the selected control action, the ESP32-S3 generates motion commands for the pan and tilt actuators, which are transmitted unidirectionally to the corresponding motor drivers. No feedback is received from the motor drivers; antenna orientation is internally tracked based on commanded step increments and known actuator resolution.
