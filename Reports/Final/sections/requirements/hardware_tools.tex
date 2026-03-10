@@ -92,7 +92,8 @@ A 2.4 GHz directional PCB panel yagi antenna with typical gain 8 -- 12 dBi is se
 \item Half-power beamwidth of approximately 30° -- 60°
 \item Smooth RSSI variation with respect to orientation
 \end{itemize}
-These characteristics are ideal for RSSI-driven control and reinforcement learning, as they produce predictable signal gradients and reduce learning instability. The antenna's low mass ($\\approx$19--40~g) allows reliable mounting on small stepper actuators with minimal mechanical inertia.
+These characteristics are ideal for RSSI-driven control and reinforcement learning, as they produce predictable signal gradients and reduce learning instability. 
+The antenna's~low~mass ($\approx$19--40~g) allows reliable mounting on small stepper actuators with minimal mechanical inertia.
 
 \begin{figure}[h]
     \vspace{1em}
@@ -149,6 +150,6 @@ MG90S Servo Motor & 5~V (regulated) & $\leq$ 250~mA \\
 }
 
 
-For bench-top testing, a regulated 12V / 3A DC power supply is used to power the stepper motor through the A4988 motor driver. A separate 5V regulated rail supplies the ESP32-S3, either via an onboard linear regulator or an external buck converter. This configuration ensures sufficient current headroom during motor acceleration and prevents voltage sag during rapid antenna movements.
+For bench-top testing, a regulated 12V / 3A DC power supply is used to power the stepper motor through the A4988 motor driver. A separate 5V regulated rail supplies the ESP32-S3, either via an onboard linear regulator or an external buck converter. 
 
 For mobile or untethered operation, a 3S LiPo battery (nominal 11.1~V) is used as the primary energy source. The battery supplies the motor driver directly, while a high-efficiency buck regulator steps down the voltage to a stable 5V for the ESP32. Adequate decoupling capacitors are placed near both the motor driver and the microcontroller to suppress transient voltage fluctuations.
