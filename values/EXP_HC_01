@@ -1,0 +1,4 @@
+------ FULL SCAN DATA ------
+step,time_ms,pan,tilt,rssi
+------ FINAL BEST VALUES ------
+Pan: 122, Tilt: 67, RSSI: -32
