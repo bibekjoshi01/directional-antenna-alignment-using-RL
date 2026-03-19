@@ -42,7 +42,7 @@ would converge reliably without overfitting to a single start angle.
 \caption{Q-Learning Training Configuration}
 \label{tab:q_learning_parameters}
 \renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|p{5cm}|c|p{5.2cm}|}
+\begin{tabular}{|p{5.2cm}|c|p{5.2cm}|}
 \hline
 \textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\
 \hline
@@ -113,8 +113,8 @@ command until convergence.
 
 The trial was considered converged when either of the following conditions was met:
 \begin{itemize}
-\item the absolute RSSI improvement remained below 0.8~dB for four consecutive control cycles, or
-\item the algorithm reached the maximum allowed number of decision steps.
+\item The absolute RSSI improvement remained below 0.8~dB for four consecutive control cycles, or
+\item The algorithm reached the maximum allowed number of decision steps
 \end{itemize}
 
 This stopping rule reduced unnecessary movement near the optimum and produced consistent

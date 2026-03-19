@@ -10,44 +10,17 @@ and actuation as sequential software blocks executed in a fixed order.
 
 Each control cycle performs the following operations:
 \begin{itemize}
-\item acquisition of a batch of RSSI samples from the received packets,
-\item averaging and filtering of the sampled RSSI values,
-\item encoding of the current pan angle, tilt angle, and RSSI trend,
-\item selection of the next action from the active alignment algorithm,
-\item execution of stepper and servo commands, and
-\item logging of the experiment state for post-processing.
+\item Acquisition of a batch of RSSI samples from the received packets
+\item Averaging and filtering of the sampled RSSI values
+\item Encoding of the current pan angle, tilt angle, and RSSI trend
+\item Selection of the next action from the active alignment algorithm
+\item Execution of stepper and servo commands
+\item Logging of the experiment state for post-processing
 \end{itemize}
 
 This execution order ensured that every alignment method operated on the same measured
 feedback and experienced the same settling delay between consecutive movements.
 
-\subsubsection{Firmware Modules}
-
-The final firmware was organized into modular functions so that the exhaustive scan,
-hill-climbing method, and RL-based policy could share common sensing and actuation
-primitives. This reduced implementation bias during algorithm comparison.
-
-\begin{table}[H]
-\centering
-\caption{Embedded Firmware Modules}
-\label{tab:firmware_modules}
-\renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|p{3.2cm}|p{3.5cm}|p{6.4cm}|}
-\hline
-\textbf{Module} & \textbf{Implemented On} & \textbf{Function} \\
-\hline
-RSSI acquisition & ESP32 Wi-Fi interface & Captures packet RSSI values and stores a short measurement window for averaging \\
-\hline
-Motion control & GPIO and MCPWM peripherals & Generates STEP/DIR pulses for pan motion and PWM pulses for tilt adjustment \\
-\hline
-State encoder & Application layer firmware & Maps continuous angles and RSSI trend to discrete state indices \\
-\hline
-Policy executor & Application layer firmware & Runs exhaustive scan, hill-climbing, or greedy Q-table inference \\
-\hline
-Data logger & UART serial output & Records trial identifier, angles, RSSI, elapsed time, and convergence status \\
-\hline
-\end{tabular}
-\end{table}
 
 \subsubsection{RSSI Processing and State Encoding}
 
@@ -55,18 +28,14 @@ RSSI measurements are inherently noisy due to multipath propagation, short-term 
 and packet-to-packet fluctuations. To reduce this variability, a small batch of samples
 is collected at each orientation and averaged before the decision block is executed.
 The averaged RSSI at control step $k$ is given by:
-
 \begin{equation}
 \overline{\text{RSSI}}_k = \frac{1}{N} \sum_{i=1}^{N} \text{RSSI}_{k,i}
 \end{equation}
-
 where $N$ denotes the number of samples collected at the current orientation.
 The short-term RSSI trend is then estimated as:
-
 \begin{equation}
 \Delta \text{RSSI}_k = \overline{\text{RSSI}}_k - \overline{\text{RSSI}}_{k-1}
 \end{equation}
-
 The trend variable is quantized into increasing, stable, and decreasing classes using
 a small dead-band threshold $\epsilon$ to suppress noise-driven state changes.
 
@@ -77,6 +46,39 @@ s_k = \left( i_{\text{pan}},\; i_{\text{tilt}},\; \text{trend}_k \right)
 where $i_{\text{pan}}$ and $i_{\text{tilt}}$ are discrete orientation indices derived from
 fixed angular step sizes.
 
+\subsubsection{Firmware Modules}
+
+The final firmware was organized into modular functions so that the exhaustive scan,
+hill-climbing method, and RL-based policy could share common sensing and actuation
+primitives. This reduced implementation bias during algorithm comparison.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Embedded Firmware Modules}
+\label{tab:firmware_modules}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{4.2cm}|
+>{\raggedright\arraybackslash}p{6.2cm}|
+}
+\hline
+\textbf{Module} & \textbf{Implemented On} & \textbf{Function} \\
+\hline
+RSSI Acquisition & ESP32 Wi-Fi interface & Captures packet RSSI values and stores a short measurement window for averaging \\
+\hline
+Motion Control & GPIO and MCPWM peripherals & Generates STEP/DIR pulses for pan motion and PWM pulses for tilt adjustment \\
+\hline
+State Encoder & Application layer firmware & Maps continuous angles and RSSI trend to discrete state indices \\
+\hline
+Policy Executor & Application layer firmware & Runs exhaustive scan, hill-climbing, or greedy Q-table inference \\
+\hline
+Data Logger & UART serial output & Records trial identifier, angles, RSSI, elapsed time, and convergence status \\
+\hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Control Timing and Runtime Parameters}
 
 A consistent timing configuration was maintained across all algorithms to ensure fair
@@ -84,12 +86,17 @@ comparison during practical evaluation. After every commanded movement, the firm
 waited for mechanical settling before the next RSSI batch was sampled. This prevented
 measurement corruption caused by vibration and transient misalignment.
 
+\vspace{0.5cm}
 \begin{table}[H]
 \centering
 \caption{Key Runtime Parameters Used in Practical Experiments}
 \label{tab:runtime_parameters}
 \renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|p{5cm}|c|p{5.4cm}|}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{7.2cm}|
+}
 \hline
 \textbf{Parameter} & \textbf{Value} & \textbf{Remarks} \\
 \hline
@@ -119,12 +126,16 @@ header describing the environment and scan parameters. The recorded format follo
 same field layout throughout the project, which made the generated data compatible with
 spreadsheet-based analysis and script-based aggregation.
 
+\vspace{0.5cm}
 \begin{table}[H]
 \centering
 \caption{Practical Experiment Log Header}
 \label{tab:experiment_log_header}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|p{3.2cm}|p{8.8cm}|}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.8cm}|
+>{\raggedright\arraybackslash}p{10.2cm}|
+}
 \hline
 \textbf{Field} & \textbf{Description} \\
 \hline
