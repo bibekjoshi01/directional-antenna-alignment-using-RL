@@ -1,0 +1,55 @@
+\newpage
+\section{FUTURE ENHANCEMENTS}
+
+Although the final prototype successfully demonstrates the feasibility of RL-based
+antenna alignment, several technical improvements can further enhance system accuracy,
+robustness, and deployability.
+
+\subsection{Mechanical and Hardware Improvements}
+
+The current prototype performs well for proof-of-concept validation, but future hardware
+revisions can improve long-term stability and measurement repeatability. In particular,
+mechanical backlash in the pan axis and minor vibration after step movement can be reduced
+through a tighter coupling mechanism, higher-quality bearings, and a more rigid antenna
+mount. Similarly, the custom slip-ring assembly can be refined using improved contact
+pressure control and better conductive surface finishing to reduce intermittent contact
+noise during long-duration rotation.
+
+A higher-gain directional antenna and a calibrated RSSI front-end may also improve the
+signal-to-noise ratio of the measurements. This would be especially useful in indoor and
+obstructed conditions where the system must discriminate between several nearby local RSSI
+peaks.
+
+\subsection{Algorithmic Improvements}
+
+The present work uses a compact Q-learning controller because it is simple, interpretable,
+and easy to deploy on a low-cost microcontroller. However, future work can explore more
+advanced learning strategies to improve adaptation under dynamic channel conditions.
+Possible improvements include:
+\begin{itemize}
+    \item \textbf{Online policy adaptation:} Allow limited on-device updating of selected Q-values or policy parameters when the propagation environment changes significantly.
+    \item \textbf{Function approximation:} Replace the tabular policy with a lightweight neural approximation or compressed value model to support finer angular resolution without a large memory increase.
+    \item \textbf{Hybrid search strategy:} Combine a rapid coarse scan with RL-based refinement to further reduce convergence time in weak-signal conditions.
+    \item \textbf{Temporal state features:} Include short RSSI history, packet loss rate, or moving-average slope so that the agent can better distinguish between stable improvement and temporary fading.
+\end{itemize}
+
+\subsection{Embedded Software Enhancements}
+
+The firmware currently uses a deterministic blocking control loop, which was appropriate
+for experimental validation. In future versions, the software can be improved by adopting
+interrupt-assisted sampling or an RTOS-based scheduling model. This would enable parallel
+handling of RSSI acquisition, telemetry logging, and actuator control, thereby improving
+responsiveness without compromising measurement integrity.
+
+Additional software enhancements may include automatic experiment logging to onboard
+storage, wireless transfer of recorded trial data, remote parameter tuning, and a simple
+user interface for selecting alignment modes and calibration routines.
+
+\subsection{System-Level Extensions}
+
+The proposed system can be extended beyond the present laboratory-scale implementation.
+A multi-node version could coordinate several receivers or repeaters simultaneously,
+allowing distributed beam steering in wireless mesh or relay networks. The alignment logic
+could also be integrated with link-layer performance indicators such as throughput, packet
+error rate, or signal-to-noise ratio, thereby enabling the controller to optimize overall
+communication quality rather than RSSI alone.
