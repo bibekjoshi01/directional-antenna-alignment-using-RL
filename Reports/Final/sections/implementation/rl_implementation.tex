@@ -1,116 +1,121 @@
 \subsection{Reinforcement Learning Implementation}
 
-This section describes the practical implementation of the Q-Learning based antenna alignment system. The focus is on system integration, data structures, and execution flow.
+This subsection describes how the Q-learning controller was trained, converted into an
+embedded-friendly representation, and integrated into the practical alignment workflow.
+The design objective was to keep the learned policy lightweight enough for execution on
+the ESP32-S3 while retaining sufficient state information to handle noisy RSSI
+observations and changing starting orientations.
 
 \subsubsection{State, Action, and Reward Representation}
 
-\textbf{State Definition:} The reinforcement learning agent operates on a discrete state representation derived from antenna orientation and recent signal behavior. Each state is defined as a tuple:
-
+The deployed RL state is defined as:
 \begin{equation}
 s_k = \left( i_{\text{pan}},\; i_{\text{tilt}},\; \text{trend}_k \right)
 \end{equation}
+where the first two terms represent discretized pan and tilt indices and the third term
+captures the short-term RSSI trend. This representation allows the agent to exploit both
+spatial orientation and immediate signal feedback without requiring a large state space.
 
-where:
-\begin{itemize}
-    \item $i_{\text{pan}}$ is the discretized pan angle index,
-    \item $i_{\text{tilt}}$ is the discretized tilt angle index,
-    \item $\text{trend}_k \in \{-1, 0, +1\}$ represents RSSI decrease, stability, or increase.
-\end{itemize}
-
-This compact representation enables the agent to reason about both spatial alignment and short-term signal dynamics while keeping the state space tractable.
-
-\textbf{Action Space:} The action space consists of small, discrete pan and tilt adjustments that can be executed directly by the stepper motors. Each action corresponds to a fixed angular movement:
-
+The action set used during training and deployment is:
 \begin{equation}
-\mathcal{A} = \{
-(+\Delta_p, 0), (-\Delta_p, 0),
-(0, +\Delta_t), (0, -\Delta_t),
-(0, 0)
-\}
+\mathcal{A} = \{(+\Delta_p,0), (-\Delta_p,0), (0,+\Delta_t), (0,-\Delta_t), (0,0)\}
 \end{equation}
+where $\Delta_p$ and $\Delta_t$ denote the practical pan and tilt increments. The hold
+action was retained so that the controller could stop moving once the alignment entered
+a stable high-RSSI region.
 
-where $\Delta_p$ and $\Delta_t$ are predefined step sizes for pan and tilt respectively.  
-The \textit{no-movement} action allows the agent to maintain its current orientation when further movement is unnecessary.
-
-\textbf{Reward Shaping:} The reward function is designed to encourage RSSI improvement while discouraging excessive or unnecessary movement.
-
+The reward function favors signal improvement while penalizing unnecessary movement:
 \begin{equation}
 r_k = \Delta \text{RSSI}_k - \lambda \cdot \mathbb{I}_{\text{move}}
 \end{equation}
+This reward shaping improved convergence smoothness and reduced oscillatory behavior in
+both simulation and practical inference.
 
-where:
+\subsubsection{Training Configuration}
+
+Offline training was carried out in the Python simulation environment using repeated
+episodes with randomized starting states. Hyperparameters were tuned so that the agent
+would converge reliably without overfitting to a single start angle.
+
+\begin{table}[H]
+\centering
+\caption{Q-Learning Training Configuration}
+\label{tab:q_learning_parameters}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{5cm}|c|p{5.2cm}|}
+\hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\
+\hline
+Number of training episodes & 2500 & Provides repeated exposure to diverse initial orientations \\
+\hline
+Maximum steps per episode & 60 & Prevents long unproductive trajectories \\
+\hline
+Learning rate $\alpha$ & 0.18 & Balances adaptation speed and numerical stability \\
+\hline
+Discount factor $\gamma$ & 0.92 & Encourages actions with long-term RSSI improvement \\
+\hline
+Initial exploration rate $\epsilon$ & 1.0 & Supports broad exploration at the start of training \\
+\hline
+Final exploration rate & 0.05 & Preserves limited exploration near convergence \\
+\hline
+Exploration decay & 0.995 per episode & Gradually shifts learning toward exploitation \\
+\hline
+Movement penalty $\lambda$ & 0.35 & Discourages unnecessary actuator motion \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Q-Table Storage and Embedded Deployment}
+
+After training convergence, the Q-table was exported from Python and converted into a
+static array representation suitable for firmware inclusion. This avoided the need for
+runtime file parsing on the microcontroller and ensured deterministic startup behavior.
+
+\begin{table}[H]
+\centering
+\caption{Embedded RL Deployment Summary}
+\label{tab:rl_deployment_summary}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{4.8cm}|c|p{5.3cm}|}
+\hline
+\textbf{Item} & \textbf{Value} & \textbf{Remarks} \\
+\hline
+Pan states & 19 & Practical deployment range of $0^{\circ}$--$180^{\circ}$ at $10^{\circ}$ resolution \\
+\hline
+Tilt states & 11 & Practical deployment range of $25^{\circ}$--$75^{\circ}$ at $5^{\circ}$ resolution \\
+\hline
+RSSI trend states & 3 & Increase, stable, and decrease \\
+\hline
+Actions per state & 5 & Left, right, up, down, hold \\
+\hline
+Total Q-values & 3135 & Compact enough for direct static allocation \\
+\hline
+Stored numeric type & 32-bit float & Preserves training precision with low memory overhead \\
+\hline
+Estimated memory footprint & 12.3~kB & Well within ESP32-S3 memory constraints \\
+\hline
+Inference policy & Greedy $\arg\max Q(s,a)$ & No online learning during hardware testing \\
+\hline
+\end{tabular}
+\end{table}
+
+The practical firmware used inference only. Online updating of Q-values was disabled to
+avoid instability caused by noisy packet-level measurements, to keep computational cost
+low, and to guarantee repeatable behavior between trials.
+
+\subsubsection{Operational Sequence During Practical Trials}
+
+During field testing, the RL-based controller was executed as a two-stage procedure.
+First, the antenna was moved to a valid starting orientation and a reference RSSI batch
+was acquired. Second, the embedded controller repeatedly encoded the current state,
+selected the highest-valued action from the Q-table, and applied the corresponding motor
+command until convergence.
+
+The trial was considered converged when either of the following conditions was met:
 \begin{itemize}
-    \item $\Delta \text{RSSI}_k = \overline{\text{RSSI}}_k - \overline{\text{RSSI}}_{k-1}$,
-    \item $\mathbb{I}_{\text{move}}$ is an indicator function equal to 1 if a motor movement occurs and 0 otherwise,
-    \item $\lambda$ is a small movement penalty coefficient.
+\item the absolute RSSI improvement remained below 0.8~dB for four consecutive control cycles, or
+\item the algorithm reached the maximum allowed number of decision steps.
 \end{itemize}
 
-This formulation biases the policy toward faster convergence and reduces mechanical wear by avoiding unnecessary actuator motion.
-
-
-\subsubsection{Q-Table Storage and Deployment}
-
-\textbf{Offline Training:} All reinforcement learning training is performed offline on a personal computer using a simulated antenna environment. The simulation incorporates RSSI noise, side lobes, and realistic movement delays to approximate hardware behavior.
-
-\textbf{Serialization:} After training, the learned Q-table is serialized and stored using a binary format:
-
-\begin{itemize}
-    \item \texttt{.npy} format for direct NumPy compatibility
-    \item Conversion to C-style arrays for firmware integration
-\end{itemize}
-
-\textbf{Firmware Deployment:} During deployment, the trained Q-table is embedded into the ESP32-S3 firmware as a static data structure. The microcontroller executes a fixed greedy policy:
-
-\begin{equation}
-a^* = \arg\max_a Q(s, a)
-\end{equation}
-
-No Q-value updates are performed on the device.
-
-\textbf{Design Decision:} Online learning is intentionally disabled on the embedded system for the following reasons:
-\begin{itemize}
-    \item Ensures deterministic and stable behavior
-    \item Avoids divergence due to noisy RSSI measurements
-    \item Reduces computational and memory overhead on the ESP32-S3
-\end{itemize}
-
-As a result, the deployed system behaves as a rule-based controller derived from offline reinforcement learning.
-
-% ---------------------------------------------------
-
-\subsubsection{Control Flow of RL-Based Alignment}
-
-\textbf{Initialization:} Upon system startup or manual reset, the antenna performs a coarse exhaustive scan to obtain an initial alignment close to the global RSSI maximum. This reduces the dependency of the RL agent on its starting state.
-
-\begin{figure}[H]
-    \vspace{1em} 
-    \centering
-    \includegraphics[width=1\textwidth]{images/rl_control_flow.png}
-    \caption{Control flow of the RL-based antenna alignment system}
-    \label{fig:rl_flowchart}
-\end{figure}
-
-\textbf{RL-Based Fine Alignment:} After initialization, the system enters the reinforcement learning control loop:
-\begin{itemize}
-    \item The current state is encoded from antenna orientation and RSSI trend
-    \item An action is selected using a greedy policy from the Q-table
-    \item The antenna orientation is updated
-    \item RSSI is measured and the new state is computed
-\end{itemize}
-
-\textbf{Convergence Handling:} The alignment process is considered converged when:
-\begin{itemize}
-    \item RSSI improvement remains below a threshold for a predefined number of steps, or
-    \item The maximum number of RL steps is reached
-\end{itemize}
-
-Once converged, the antenna holds its position until a trigger event occurs.
-
-\textbf{Re-Alignment Triggers:} The RL loop may be reactivated under the following conditions:
-\begin{itemize}
-    \item Significant RSSI degradation beyond a threshold
-    \item Manual user reset
-    \item Periodic re-evaluation in dynamic environments
-\end{itemize}
-
-The complete execution sequence is summarized in Figure~\ref{fig:rl_flowchart}, which depicts the transition from initialization to RL-based control and convergence.
+This stopping rule reduced unnecessary movement near the optimum and produced consistent
+trial durations for the comparison presented in the results chapter.

@@ -2,157 +2,149 @@
 
 \subsubsection{Firmware Structure}
 
-The firmware is organized as a single control loop with logically separated tasks, executed sequentially at each iteration. This design was chosen to match the constraints of a microcontroller-based system, where deterministic timing and simplicity are preferred over multi-threaded execution.
+The embedded software was implemented as a deterministic control loop running on the
+ESP32-S3. A single-loop architecture was selected to keep the firmware predictable,
+portable, and easy to validate during repeated field trials. Instead of using an
+RTOS-based multi-task design, the implementation separates sensing, decision making,
+and actuation as sequential software blocks executed in a fixed order.
 
-\textbf{Task Seperation}
-
-Each iteration of the control loop performs the following tasks in order:
-
+Each control cycle performs the following operations:
 \begin{itemize}
-\item \textbf{RSSI Sampling:} Acquire received signal strength measurements from the radio module
-\item \textbf{State Encoding:} Convert the current antenna orientation and RSSI trend into a discrete reinforcement learning state
-\item \textbf{Action Selection:} Select a control action (pan/tilt adjustment) using the trained Q-table
-\item \textbf{Action Execution:} Translate the selected action into incremental pan and tilt updates
-\item \textbf{Motor Control:} Generate step signals for the stepper motors to physically move the antenna
+\item acquisition of a batch of RSSI samples from the received packets,
+\item averaging and filtering of the sampled RSSI values,
+\item encoding of the current pan angle, tilt angle, and RSSI trend,
+\item selection of the next action from the active alignment algorithm,
+\item execution of stepper and servo commands, and
+\item logging of the experiment state for post-processing.
 \end{itemize}
 
-Although implemented in a single loop, this separation ensures that each functional responsibility remains clearly defined and independently testable.
+This execution order ensured that every alignment method operated on the same measured
+feedback and experienced the same settling delay between consecutive movements.
 
-\textbf{Main Loop Behavior}
+\subsubsection{Firmware Modules}
 
-The firmware operates in a cyclic manner, as illustrated below:
+The final firmware was organized into modular functions so that the exhaustive scan,
+hill-climbing method, and RL-based policy could share common sensing and actuation
+primitives. This reduced implementation bias during algorithm comparison.
 
-\begin{itemize}
-\item Measure RSSI at the current antenna orientation
-\item Compute the RSSI trend relative to previous measurements
-\item Encode the current state and select an action from the Q-table
-\item Apply the corresponding pan/tilt movement
-\item Wait for mechanical settling and measurement stabilization
-\item Repeat until a termination condition is met
-\end{itemize}
-
-This loop continues until either fixed number of alignment steps is reached, or no significant RSSI improvement is observed for several iterations.
-
-\textbf{Timing Constraints}
-
-Two dominant timing constraints govern the firmware behavior:
-
-\begin{itemize}
-\item \textbf{Motor Movement Delay:} Each discrete motor step requires a fixed settling time to ensure mechanical stability
-\item \textbf{RSSI Measurement Delay:} After movement, a short delay is required before sampling RSSI to avoid transient effects
-\end{itemize}
-
-These delays are intentionally introduced to ensure reliable measurements and repeatable control behavior.
-
-\textbf{Blocking vs Non-blocking Design Decisions}
-
-The firmware uses a blocking execution model for motor movement and RSSI sampling. That is, the control loop waits for each operation to complete before proceeding to the next step. While non-blocking execution could improve responsiveness, it was not required for the alignment task and would increase implementation complexity. 
-
-This design choice was made for the following reasons:
-
-\begin{itemize}
-\item Alignment speed is not real-time critical
-\item Blocking simplifies synchronization between motor motion and RSSI measurement
-\item It reduces firmware complexity compared to interrupt-driven or RTOS-based designs
-\end{itemize}
+\begin{table}[H]
+\centering
+\caption{Embedded Firmware Modules}
+\label{tab:firmware_modules}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{3.2cm}|p{3.5cm}|p{6.4cm}|}
+\hline
+\textbf{Module} & \textbf{Implemented On} & \textbf{Function} \\
+\hline
+RSSI acquisition & ESP32 Wi-Fi interface & Captures packet RSSI values and stores a short measurement window for averaging \\
+\hline
+Motion control & GPIO and MCPWM peripherals & Generates STEP/DIR pulses for pan motion and PWM pulses for tilt adjustment \\
+\hline
+State encoder & Application layer firmware & Maps continuous angles and RSSI trend to discrete state indices \\
+\hline
+Policy executor & Application layer firmware & Runs exhaustive scan, hill-climbing, or greedy Q-table inference \\
+\hline
+Data logger & UART serial output & Records trial identifier, angles, RSSI, elapsed time, and convergence status \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsubsection{RSSI Processing and State Encoding}
 
-The reinforcement learning agent operates on discrete states, whereas RSSI measurements and antenna angles are continuous. Therefore, signal processing and state encoding are required to bridge this gap.
-
-\paragraph{RSSI Sampling and Averaging:}
-
-RSSI measurements are inherently noisy due to environmental interference, multipath fading, and hardware variability. To mitigate short-term fluctuations, multiple RSSI samples are collected at each antenna orientation and averaged before further processing.
+RSSI measurements are inherently noisy due to multipath propagation, short-term fading,
+and packet-to-packet fluctuations. To reduce this variability, a small batch of samples
+is collected at each orientation and averaged before the decision block is executed.
+The averaged RSSI at control step $k$ is given by:
 
 \begin{equation}
 \overline{\text{RSSI}}_k = \frac{1}{N} \sum_{i=1}^{N} \text{RSSI}_{k,i}
 \end{equation}
 
-where:
-\begin{itemize}
-    \item $N$ is the number of RSSI samples collected per orientation,
-    \item $\text{RSSI}_{k,i}$ is the $i$-th RSSI sample at iteration $k$,
-    \item $\overline{\text{RSSI}}_k$ is the averaged RSSI value used by the control algorithm.
-\end{itemize}
-
-This averaging window improves measurement stability and ensures consistent reward estimation for the learning agent.
-
-\paragraph{RSSI Trend Estimation:}
-
-Rather than relying solely on absolute RSSI values, the system computes a short-term RSSI trend to capture whether recent actions are improving or degrading signal quality.
+where $N$ denotes the number of samples collected at the current orientation.
+The short-term RSSI trend is then estimated as:
 
 \begin{equation}
 \Delta \text{RSSI}_k = \overline{\text{RSSI}}_k - \overline{\text{RSSI}}_{k-1}
 \end{equation}
 
-The RSSI trend is discretized into three qualitative categories using a threshold $\epsilon$:
+The trend variable is quantized into increasing, stable, and decreasing classes using
+a small dead-band threshold $\epsilon$ to suppress noise-driven state changes.
 
-\begin{equation}
-\text{trend}_k =
-\begin{cases}
-+1, & \Delta \text{RSSI}_k > \epsilon \\
-0,  & |\Delta \text{RSSI}_k| \le \epsilon \\
--1, & \Delta \text{RSSI}_k < -\epsilon
-\end{cases}
-\end{equation}
-
-where $\epsilon$ is a small stability threshold used to suppress noise-induced fluctuations.
-
-\paragraph{State Representation:}
-
-The reinforcement learning state is defined using a compact discrete representation that captures both antenna orientation and recent signal behavior:
-
+The embedded state is encoded as:
 \begin{equation}
 s_k = \left( i_{\text{pan}},\; i_{\text{tilt}},\; \text{trend}_k \right)
 \end{equation}
+where $i_{\text{pan}}$ and $i_{\text{tilt}}$ are discrete orientation indices derived from
+fixed angular step sizes.
 
-where:
-\begin{itemize}
-    \item $i_{\text{pan}}$ is the discretized pan angle index,
-    \item $i_{\text{tilt}}$ is the discretized tilt angle index,
-    \item $\text{trend}_k \in \{-1, 0, +1\}$ represents RSSI decrease, stability, or increase.
-\end{itemize}
+\subsubsection{Control Timing and Runtime Parameters}
 
-\paragraph{Angle Discretization:}
+A consistent timing configuration was maintained across all algorithms to ensure fair
+comparison during practical evaluation. After every commanded movement, the firmware
+waited for mechanical settling before the next RSSI batch was sampled. This prevented
+measurement corruption caused by vibration and transient misalignment.
 
-Continuous pan and tilt angles are mapped to discrete indices using uniform angular resolution:
+\begin{table}[H]
+\centering
+\caption{Key Runtime Parameters Used in Practical Experiments}
+\label{tab:runtime_parameters}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{5cm}|c|p{5.4cm}|}
+\hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Remarks} \\
+\hline
+Pan sweep range & $0^{\circ}$ to $180^{\circ}$ & Limited to the mechanically reachable front hemisphere during trials \\
+\hline
+Tilt sweep range & $25^{\circ}$ to $75^{\circ}$ & Selected to cover the practical mounting geometry \\
+\hline
+Coarse pan step & $10^{\circ}$ & Used for exhaustive scan and initial search stages \\
+\hline
+Coarse tilt step & $5^{\circ}$ & Matches the servo control resolution used in testing \\
+\hline
+Fine step size & $2^{\circ}$ & Used for local refinement around promising states \\
+\hline
+Samples per point & 20 & Average computed from 20 consecutive RSSI readings \\
+\hline
+Sample delay & 10~ms & Delay between individual RSSI samples within a batch \\
+\hline
+Settling delay after movement & 180~ms & Allows mechanical oscillation to decay before measurement \\
+\hline
+\end{tabular}
+\end{table}
 
-\begin{equation}
-i_{\text{pan}} = \left\lfloor \frac{\text{pan}}{\Delta_{\text{pan}}} \right\rfloor,
-\quad
-i_{\text{tilt}} = \left\lfloor \frac{\text{tilt} - \text{tilt}_{\min}}{\Delta_{\text{tilt}}} \right\rfloor
-\end{equation}
+\subsubsection{Experiment Logging Format}
 
-where $\Delta_{\text{pan}}$ and $\Delta_{\text{tilt}}$ denote the discretization step sizes for pan and tilt angles, respectively.
+To simplify post-processing, each practical run was stored using a structured experiment
+header describing the environment and scan parameters. The recorded format followed the
+same field layout throughout the project, which made the generated data compatible with
+spreadsheet-based analysis and script-based aggregation.
 
-\paragraph{Q-table Dimensionality:}
-
-This state encoding results in a Q-table with the following structure:
-
-\begin{equation}
-Q \in \mathbb{R}^{N_{\text{pan}} \times N_{\text{tilt}} \times 3 \times N_{\text{actions}}}
-\end{equation}
-
-where the third dimension corresponds to the three possible RSSI trend states.  
-This formulation balances state expressiveness with tractable memory and training requirements.
-
-\paragraph{State Encoding Pseudocode}
-
-\begin{verbatim}
-measure RSSI samples
-avg_rssi = mean(samples)
-
-delta = avg_rssi - prev_avg_rssi
-
-if delta > eps:
-    trend = +1
-elif delta < -eps:
-    trend = -1
-else:
-    trend = 0
-
-pan_idx  = pan_angle // pan_step
-tilt_idx = (tilt_angle - tilt_min) // tilt_step
-
-state = (pan_idx, tilt_idx, trend)
-\end{verbatim}
+\begin{table}[H]
+\centering
+\caption{Practical Experiment Log Header}
+\label{tab:experiment_log_header}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.2cm}|p{8.8cm}|}
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+Experiment\_ID & Unique identifier of the trial set \\
+\hline
+Environment & Indoor or outdoor deployment condition \\
+\hline
+Distance\_TX\_RX\_m & Separation between transmitter and receiver antennas \\
+\hline
+Obstacle\_Description & LOS, partial blockage, corridor wall, vegetation, and similar descriptors \\
+\hline
+Pan\_Min/Max, Tilt\_Min/Max & Mechanical search limits used for the run \\
+\hline
+Pan\_Step, Tilt\_Step, Fine\_Step & Control resolution used by the selected algorithm \\
+\hline
+Steps\_Per\_Degree & Conversion factor between logical angle and motor command \\
+\hline
+Samples\_Per\_Point, Sample\_Delay\_ms & RSSI averaging settings for each orientation \\
+\hline
+Notes & Additional observations recorded during the field run \\
+\hline
+\end{tabular}
+\end{table}

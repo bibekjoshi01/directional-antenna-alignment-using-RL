@@ -1,2 +1,42 @@
 \newpage
 \section{IMPLEMENTATION DETAILS}
+
+The final implementation of the proposed autonomous antenna alignment system combines
+mechanical actuation, embedded RSSI acquisition, offline reinforcement learning, and
+field validation within a single end-to-end workflow. The implementation was carried
+out in four tightly connected stages: hardware fabrication, firmware development,
+offline model training, and practical experimentation.
+
+At the hardware level, a two-axis positioning mechanism was developed to rotate the
+receiving directional antenna in pan and tilt while preserving stable power and signal
+routing across the rotating interface. At the embedded level, the ESP32-S3 was used
+as the central controller for packet reception, RSSI extraction, servo and stepper
+actuation, and policy execution.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Implementation Stages of the Proposed System}
+\label{tab:implementation_stages}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{4.2cm}|
+>{\raggedright\arraybackslash}p{6.2cm}|
+}
+\hline
+\textbf{Stage} & \textbf{Primary Output} & \textbf{Purpose} \\
+\hline
+Mechanical and Electronic Circuit Implementation & Two-axis antenna platform, slip-ring interface, regulated power distribution & To realize stable pan--tilt motion and support practical RSSI measurements \\
+\hline
+Firmware Implementation & ESP32-S3 control loop, RSSI averaging, motor actuation, experiment logging & To execute the alignment algorithms under embedded constraints \\
+\hline
+Offline RL Training & Trained Q-table and tuned hyperparameters & To learn a compact policy that can be deployed without online training \\
+\hline
+Practical Validation & Indoor and outdoor trial records at 10~m to 30~m & To verify that the deployed RL controller improves convergence and final RSSI \\
+\hline
+\end{tabular}
+\end{table}
+
+The implementation details in the following subsections describe how these stages were
+realized and how the final prototype was prepared for experimental evaluation.

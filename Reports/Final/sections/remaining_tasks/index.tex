@@ -1,47 +1,111 @@
 \newpage
-\section{REMAINING WORKS}
+\section{FUTURE ENHANCEMENTS AND CONCLUSION}
 
-While the reinforcement learning--based antenna alignment strategy has been
-successfully developed and validated in simulation, several implementation
-tasks remain before final system deployment. These tasks primarily involve
-hardware integration, embedded firmware deployment, and system-level
-validation.
+\subsection{Future Enhancements}
 
-\subsection{Hardware Integration and Mechanical Refinement}
+Although the final prototype successfully demonstrates the feasibility of RL-based
+antenna alignment, several technical improvements can further enhance system accuracy,
+robustness, and deployability.
 
-The next phase of work will focus on finalizing the mechanical and electrical
-interfaces of the antenna positioning system. Planned improvements include
-minor refinements to the stator and slip-ring assembly to improve electrical
-contact reliability under rotation, as well as adjustments to mechanical
-clearances to increase tolerance to shaft misalignment and wear. These changes
-are intended to ensure stable long-term operation during continuous antenna
-motion.
+\subsubsection{Mechanical and Hardware Improvements}
 
-\subsection{Embedded Firmware Integration}
+The current prototype performs well for proof-of-concept validation, but future hardware
+revisions can improve long-term stability and measurement repeatability. In particular,
+mechanical backlash in the pan axis and minor vibration after step movement can be reduced
+through a tighter coupling mechanism, higher-quality bearings, and a more rigid antenna
+mount. Similarly, the custom slip-ring assembly can be refined using improved contact
+pressure control and better conductive surface finishing to reduce intermittent contact
+noise during long-duration rotation.
 
-A key remaining task is the integration of the trained reinforcement learning
-policy into the MCU firmware. This involves transferring the learned Q-table
-from the simulation environment to the embedded platform and implementing a
-deterministic inference loop for real-time action selection.
+A higher-gain directional antenna and a calibrated RSSI front-end may also improve the
+signal-to-noise ratio of the measurements. This would be especially useful in indoor and
+obstructed conditions where the system must discriminate between several nearby local RSSI
+peaks.
 
-Additional firmware-level enhancements will include:
+\subsubsection{Algorithmic Improvements}
+
+The present work uses a compact Q-learning controller because it is simple, interpretable,
+and easy to deploy on a low-cost microcontroller. However, future work can explore more
+advanced learning strategies to improve adaptation under dynamic channel conditions.
+Possible improvements include:
 \begin{itemize}
-    \item Coordinated control of azimuth and tilt actuators
-    \item Non-blocking motor command execution and timing management
-    \item RSSI sampling synchronized with mechanical stabilization
+    \item \textbf{Online policy adaptation:} Allow limited on-device updating of selected Q-values or policy parameters when the propagation environment changes significantly.
+    \item \textbf{Function approximation:} Replace the tabular policy with a lightweight neural approximation or compressed value model to support finer angular resolution without a large memory increase.
+    \item \textbf{Hybrid search strategy:} Combine a rapid coarse scan with RL-based refinement to further reduce convergence time in weak-signal conditions.
+    \item \textbf{Temporal state features:} Include short RSSI history, packet loss rate, or moving-average slope so that the agent can better distinguish between stable improvement and temporary fading.
 \end{itemize}
 
-These changes are required to ensure that control decisions are based on valid
-and repeatable signal measurements.
+These improvements would allow the controller to respond more effectively to non-stationary
+channels, moving users, and changing obstruction patterns.
 
-\subsection{System Testing and Validation}
+\subsubsection{Embedded Software Enhancements}
 
-Following hardware and firmware integration, the complete system will undergo
-experimental validation. This phase will evaluate alignment accuracy,
-convergence time, and stability under real wireless channel conditions. The
-results will be compared against baseline scanning strategies previously
-evaluated in simulation to assess the effectiveness of the reinforcement
-learning approach in practice.
+The firmware currently uses a deterministic blocking control loop, which was appropriate
+for experimental validation. In future versions, the software can be improved by adopting
+interrupt-assisted sampling or an RTOS-based scheduling model. This would enable parallel
+handling of RSSI acquisition, telemetry logging, and actuator control, thereby improving
+responsiveness without compromising measurement integrity.
 
-This final validation stage will confirm the feasibility of the proposed method
-for real-world directional antenna alignment.
+Additional software enhancements may include automatic experiment logging to onboard
+storage, wireless transfer of recorded trial data, remote parameter tuning, and a simple
+user interface for selecting alignment modes and calibration routines.
+
+\subsubsection{System-Level Extensions}
+
+The proposed system can be extended beyond the present laboratory-scale implementation.
+A multi-node version could coordinate several receivers or repeaters simultaneously,
+allowing distributed beam steering in wireless mesh or relay networks. The alignment logic
+could also be integrated with link-layer performance indicators such as throughput, packet
+error rate, or signal-to-noise ratio, thereby enabling the controller to optimize overall
+communication quality rather than RSSI alone.
+
+\begin{table}[H]
+\centering
+\caption{Recommended Future Technical Enhancements}
+\label{tab:future_enhancements}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{3.7cm}|p{4.2cm}|p{4.2cm}|}
+\hline
+\textbf{Enhancement Area} & \textbf{Proposed Improvement} & \textbf{Expected Benefit} \\
+\hline
+Mechanical design & Reduce backlash, improve bearing support, refine slip-ring contact & More accurate positioning and lower measurement disturbance \\
+\hline
+RF sensing & Use higher-gain antenna and calibrated RSSI acquisition & Improved resolution between candidate directions \\
+\hline
+Learning algorithm & Introduce hybrid RL or lightweight function approximation & Better generalization and finer control resolution \\
+\hline
+Firmware architecture & Move toward event-driven or RTOS-assisted execution & Faster sensing-actuation coordination and improved scalability \\
+\hline
+System integration & Add telemetry, remote tuning, and persistent experiment logging & Easier deployment, monitoring, and maintenance \\
+\hline
+Network-level intelligence & Optimize with throughput or SNR in addition to RSSI & Better end-to-end communication performance \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Conclusion}
+
+This project developed and validated an autonomous directional antenna alignment system
+based on reinforcement learning and low-cost embedded hardware. The work combined a custom
+mechanical platform, ESP32-S3-based sensing and actuation, offline Q-learning, and both
+simulation and practical evaluation into a complete end-to-end prototype.
+
+The final results show that the proposed RL-based controller outperformed the selected
+baseline methods in the most important practical metrics. Compared with exhaustive
+scanning, the RL controller achieved substantially lower convergence time while also
+producing stronger final RSSI in the tested scenarios. Compared with hill-climbing, the
+RL method showed superior robustness, better convergence reliability, and greater immunity
+to local maxima, particularly in multipath-rich indoor trials and partially obstructed
+outdoor trials.
+
+The practical experiments at 10~m and 20~m, in both indoor and outdoor environments,
+confirm that the RL-based approach is not only theoretically promising but also feasible
+for real embedded implementation. The trained Q-table remained compact enough for direct
+microcontroller deployment, and the resulting control loop was computationally lightweight
+while still delivering a measurable performance gain.
+
+Overall, the project demonstrates that reinforcement learning can provide an effective and
+practical solution for autonomous antenna alignment in low-cost wireless systems. The
+prototype and results presented in this report establish a strong foundation for future
+work on adaptive beam steering, intelligent wireless links, and embedded RL-driven control
+systems.

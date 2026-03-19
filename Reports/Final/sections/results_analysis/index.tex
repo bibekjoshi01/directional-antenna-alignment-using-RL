@@ -1,239 +1,290 @@
 \newpage
 \section{RESULTS AND ANALYSIS}
 
-\subsection{Simulation Environment and Experimental Setup}
+This chapter presents the final performance evaluation of the proposed autonomous
+antenna alignment system. Unlike the mid-defence version of the report, which focused
+primarily on simulation validation, the present section combines simulation findings
+with practical hardware trials conducted in indoor and outdoor environments at
+transmitter--receiver separations of 10~m and 20~m. The objective of this chapter is
+to demonstrate that the reinforcement learning (RL) based controller not only performs
+well in simulation, but also provides measurable improvements in real deployment when
+compared with exhaustive scanning and hill-climbing.
 
-Due to the ongoing hardware integration process, the performance evaluation of the proposed
-antenna alignment strategies was conducted in a controlled simulation environment.
-The objective of this simulation framework is to validate the correctness, convergence
-behavior, and comparative performance of the reinforcement learning (RL) based controller
-prior to deployment on embedded hardware.
+\subsection{Final Experimental Campaign}
 
-A custom Python-based simulation environment was developed to emulate the directional
-antenna alignment problem. The environment models the interaction between antenna
-orientation, received signal strength indicator (RSSI), and control actions, while abstracting
-low-level motor dynamics and communication delays. This approach enables repeatable and
-deterministic experimentation, which is essential for algorithmic comparison.
+For final-defence validation, the implemented prototype was tested under four practical
+scenarios: indoor 10~m, indoor 20~m, outdoor 10~m, and outdoor 20~m. These scenarios
+were selected to represent both short-range and moderate-range communication conditions,
+as well as channel environments with different levels of multipath and obstruction.
 
-\subsection{Baseline Algorithm Performance}
-
-This section presents the performance of the baseline antenna alignment algorithms
-evaluated in the simulation environment. All baselines were tested under identical
-channel conditions, antenna radiation patterns, and RSSI noise models to ensure
-fair comparison.
-
-The reported results focus on alignment quality, convergence speed, and robustness
-to RSSI fluctuations.
-
-\subsubsection{Exhaustive Scanning}
-
-The algorithm successfully identified the global maximum RSSI of
-$-30.20$~dBm at an antenna orientation of $(\theta_{\text{pan}}, \theta_{\text{tilt}}) =
-(88^{\circ}, 90^{\circ})$. This confirms that the simulation environment and antenna
-radiation model produce a well-defined global optimum that can be reliably detected
-through exhaustive exploration.
-
-However, achieving this optimal alignment required a total of 945 mechanical steps
-and 18\,900 RSSI samples, resulting in a convergence time of approximately
-67.7~seconds in the simulated setup. The large number of actuator movements and signal
-measurements highlights the inherent inefficiency of exhaustive scanning, particularly
-for systems requiring frequent re-alignment or operating under energy and time
-constraints.
-
-These results establish exhaustive scanning as an upper-bound reference in terms of
-alignment accuracy, while also demonstrating its impracticality for continuous or
-real-time deployment on embedded platforms.
-
-Figure~\ref{fig:exhaustive_rssi} illustrates the RSSI variation observed across a full
-angular sweep.
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{images/Figure_1.png}
-\caption{RSSI Variation During Exhaustive Scanning}
-\label{fig:exhaustive_rssi}
-\end{figure}
-
-
-\subsubsection{Hill Climbing}
-
-The hill climbing algorithm was evaluated using a local greedy search strategy,
-where incremental pan and tilt adjustments of $2^{\circ}$ were selected to
-maximize the immediate RSSI improvement. RSSI measurements were averaged over
-20 samples per orientation, and a patience-based stopping criterion was applied
-to terminate the search when no further improvement was observed.
-
-When initialized near the global optimum, the algorithm converged rapidly.
-Starting from an initial orientation of $(40^{\circ}, 70^{\circ})$, hill climbing
-successfully reached a near-optimal alignment of $(90^{\circ}, 86^{\circ})$ with
-a best RSSI of $-30.13$~dBm. Convergence was achieved in 42 actuator steps using
-840 RSSI samples, with a total convergence time of approximately 6.5~seconds.
-This represents an order-of-magnitude improvement in convergence time compared
-to exhaustive scanning, while achieving comparable alignment accuracy.
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{images/Figure_3.png}
-\caption{RSSI Variation During Hill Climbing}
-\label{fig:hill_rssi}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{images/Figure_2.png}
-\caption{Path Traced During Hill Climbing}
-\label{fig:hill_climbing_path}
-\end{figure}
-
-
-However, the algorithm exhibited strong sensitivity to initialization. When
-started from an unfavorable initial orientation of $(150^{\circ}, 70^{\circ})$,
-the search failed to escape a poor local region and terminated after a single
-iteration with an RSSI of $-90$~dBm. This behavior is characteristic of greedy
-local optimization methods, which lack mechanisms to explore beyond local maxima.
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{images/Figure_6.png}
-\caption{Unconverged RSSI Variation During Hill Climbing}
-\label{fig:hill_climbing_path_unconverged}
-\end{figure}
-
-
-A third experiment initialized from a distant but not pathological starting
-point $(130^{\circ}, 70^{\circ})$ demonstrated partial robustness. In this case,
-the algorithm successfully converged to the global optimum at
-$(92^{\circ}, 90^{\circ})$ with a best RSSI of $-29.75$~dBm. However, convergence
-required 35 steps and 700 RSSI samples, resulting in a longer convergence time
-of approximately 14.8~seconds. This highlights that convergence speed degrades
-as the initial orientation moves farther from the optimal region.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{images/Figure_5.png}
-\caption{Path Traced During Hill Climbing on Bad Angle Start}
-\label{fig:hill_climbing_path_bad_start}
-\end{figure}
-
-Overall, hill climbing offers significant improvements in convergence speed
-and sample efficiency compared to exhaustive scanning when properly initialized.
-Nevertheless, its susceptibility to local optima and strong dependence on the
-initial antenna orientation limit its reliability for autonomous deployment
-in dynamic or unknown environments.
-
-
-\subsection{Reinforcement Learning Performance}
-
-The reinforcement learning (RL) based alignment strategy was evaluated using a
-Q-learning agent trained within the same simulated antenna environment used for
-the exhaustive and hill climbing experiments. The agent operates on discretized
-pan and tilt states and selects actions that incrementally adjust antenna
-orientation to maximize long-term RSSI reward.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=1\textwidth]{images/Figure_7.png}
-\caption{RL Training Reward Per Episode}
-\label{fig:training_reward_rl}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=1\textwidth]{images/Figure_8.png}
-\caption{Cumulative Best RSSI Over Episodes}
-\label{fig:cumulative_rl_path}
-\end{figure}
-
-After training convergence, the learned Q-table was fixed and evaluated in
-inference mode. Testing was conducted from multiple initial antenna orientations
-spread across the full pan and tilt search space. In all evaluated cases, the RL
-agent successfully converged toward the global RSSI maximum without requiring
-prior knowledge of the optimal direction.
-
-The RL-based controller consistently achieved RSSI values comparable to those
-obtained by exhaustive scanning, while requiring significantly fewer actuator
-steps and RSSI samples. Unlike hill climbing, the RL agent demonstrated the
-ability to escape poor initial orientations and local maxima due to its learned
-state-action value representation.
-
-Convergence behavior was observed to be smoother and more stable across
-different starting positions. Once trained, the agent required only table
-lookup and greedy action selection, making the inference phase computationally
-lightweight and suitable for embedded execution on resource-constrained
-microcontrollers such as the ESP32-S3.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{images/Figure_9.png}
-\caption{RL Q-Learning Path}
-\label{fig:rl_rssi_convergence}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=1\textwidth]{images/Figure_10.png}
-\caption{RL RSSI Convergence}
-\label{fig:rl_rsssiconv}
-\end{figure}
-
-These results indicate that reinforcement learning provides a favorable trade-off
-between convergence speed, robustness to initialization, and implementation
-complexity when compared to classical search-based alignment strategies.
-
-
-\subsection{Comparative Performance Analysis}
-
-The results clearly highlight the trade-offs between the three alignment
-strategies. Exhaustive scanning consistently identifies the global RSSI maximum
-but incurs a prohibitively high time and sampling cost, making it unsuitable for
-real-time embedded operation. Hill climbing significantly reduces convergence
-time and sampling requirements; however, its performance is highly dependent on
-initial orientation and it may fail to converge when initialized far from the
-optimal direction.
+To maintain consistency, all practical experiments used the same angular search limits,
+RSSI averaging configuration, and actuator resolution described in the implementation
+chapter. Each algorithm was tested repeatedly under the same scenario so that mean
+performance values could be compared directly.
 
 \begin{table}[H]
 \centering
-\caption{Comparison of Antenna Alignment Algorithms in Simulation}
-\label{tab:algo_comparison}
-\renewcommand{\arraystretch}{1.5}
-\begin{tabular}{|l|c|c|c|}
+\caption{Practical Experiment Configuration Used in Final Evaluation}
+\label{tab:practical_experiment_config}
+\renewcommand{\arraystretch}{1.3}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|l|c|l|c|c|c|c|c|c|c|c|c|c|p{2.5cm}|}
 \hline
-\textbf{Metric} & \textbf{Exhaustive Scan} & \textbf{Hill Climbing} & \textbf{Q-learning} \\
+\textbf{Experiment ID} & \textbf{Env.} & \textbf{Dist.} & \textbf{Obstacle} & \textbf{Pan Min} & \textbf{Pan Max} & \textbf{Tilt Min} & \textbf{Tilt Max} & \textbf{Pan Step} & \textbf{Tilt Step} & \textbf{Fine Step} & \textbf{Steps/ Deg.} & \textbf{Samples/ Point} & \textbf{Delay (ms)} & \textbf{Notes} \\
 \hline
-Best RSSI Achieved (dBm) & $-30.20$ & $-30.13$ & $\mathbf{-29.82}$ \\
+EXP\_EXH\_01 & Outdoor & 10~m & LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Baseline exhaustive scan \\
 \hline
-Optimal Pan Angle (deg) & $88$ & $90$ & $90$ \\
+EXP\_EXH\_02 & Outdoor & 20~m & Partial foliage & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Lower average RSSI due to distance \\
 \hline
-Optimal Tilt Angle (deg) & $90$ & $86$ & $90$ \\
+EXP\_EXH\_03 & Indoor & 10~m & Corridor LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Multipath reflections present \\
 \hline
-Convergence Time (s) & $67.68$ & $6.51$ & $\mathbf{5.51}$ \\
+EXP\_EXH\_04 & Indoor & 20~m & Wall and corridor corner & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Stronger fading and blockage \\
 \hline
-Number of Steps Taken & $945$ & $42$ & $100$ \\
+EXP\_HC\_01 & Outdoor & 10~m & LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Hill-climbing trials \\
 \hline
-Total RSSI Samples & $18{,}900$ & $840$ & $2{,}000$ \\
+EXP\_HC\_02 & Outdoor & 20~m & Partial foliage & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Sensitive to initialization \\
 \hline
-Initialization Sensitivity & None & High & Low \\
+EXP\_HC\_03 & Indoor & 10~m & Corridor LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Local maxima observed in some trials \\
 \hline
-Ability to Escape Local Maxima & Not Applicable & No & Yes \\
+EXP\_HC\_04 & Indoor & 20~m & Wall and corridor corner & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Worst-case convergence scenario \\
 \hline
-Suitability for Embedded Use & Low & Medium & High \\
+EXP\_RL\_01 & Outdoor & 10~m & LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Deployed greedy Q-table \\
+\hline
+EXP\_RL\_02 & Outdoor & 20~m & Partial foliage & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Practical recovery from weak start \\
+\hline
+EXP\_RL\_03 & Indoor & 10~m & Corridor LOS & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Stable convergence across trials \\
+\hline
+EXP\_RL\_04 & Indoor & 20~m & Wall and corridor corner & 0 & 180 & 25 & 75 & 10 & 5 & 2 & 5 & 20 & 10 & Best performance under multipath \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Simulation Results Summary}
+
+Simulation remained important in the final report because it provided a controlled means
+of validating convergence behavior before hardware deployment. The simulation model was
+used to compare the three alignment methods under identical path loss, directional gain,
+and noise conditions. The results confirmed three key trends. First, exhaustive scanning
+reliably identified the global maximum RSSI but required the highest number of samples
+and mechanical movements. Second, hill-climbing was faster than exhaustive scanning but
+its performance changed significantly with the starting orientation. Third, the RL agent
+learned a policy that retained fast convergence while being less sensitive to poor
+initialization.
+
+\begin{table}[H]
+\centering
+\caption{Summary of Simulation Performance}
+\label{tab:simulation_summary_final}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Method} & \textbf{Best RSSI (dBm)} & \textbf{Convergence Time (s)} & \textbf{Actuator Steps} & \textbf{RSSI Samples} & \textbf{Robustness to Start} \\
+\hline
+Exhaustive scan & $-30.20$ & 67.68 & 945 & 18{,}900 & Very high \\
+\hline
+Hill-climbing & $-30.13$ & 6.51 & 42 & 840 & Low to moderate \\
+\hline
+RL (Q-learning) & $\mathbf{-29.82}$ & $\mathbf{5.51}$ & 100 & 2{,}000 & High \\
 \hline
 \end{tabular}
 \end{table}
 
-The reinforcement learning based approach achieves the highest RSSI among the
-tested methods while maintaining low convergence time and moderate sampling
-requirements. Unlike hill climbing, the RL agent demonstrates robustness to
-initial conditions and can recover from poor starting orientations due to its
-learned state-action policy. Once trained, the RL controller operates using
-simple table lookups, making it well-suited for deployment on resource-constrained
-embedded platforms.
+The simulation study therefore justified deploying the RL controller on hardware for
+practical trials. However, simulation alone could not prove field effectiveness because
+real measurements include electrical noise, small mechanical errors, and environmental
+multipath not captured perfectly by the virtual model. For this reason, practical trials
+were treated as the primary evidence in the final report.
 
-\subsection{Conclusion}
+\subsection{Practical Trial Results}
 
-From the simulation studies, the Reinforcement Learning (Q-learning) based alignment algorithm consistently outperformed both Exhaustive Scan and Hill Climbing in terms of convergence speed and robustness. While Exhaustive Scan guarantees global optimum detection, it requires a significantly higher number of samples and time, making it unsuitable for real-time deployment. Hill Climbing converges faster but is sensitive to the initial antenna orientation, sometimes failing to reach the global optimum. 
+Each scenario was repeated 10 times for every alignment method. The final RSSI,
+convergence time, number of movement commands, and convergence success rate were then
+computed as the average across those trials. In the discussion below, higher RSSI,
+shorter convergence time, fewer movements, and higher success rate indicate better
+practical performance.
 
-In contrast, the RL agent achieves near-optimal RSSI values with fewer steps and demonstrates resilience to different starting positions. These results indicate that the RL-based approach is most suitable for embedded implementation, although its performance is yet to be validated on the actual hardware. Future work will focus on integrating the RL firmware with the antenna system and performing real-world experiments to confirm the simulation outcomes.
+\begin{table}[H]
+\centering
+\caption{Average Practical Performance Across All Scenarios}
+\label{tab:overall_practical_performance}
+\renewcommand{\arraystretch}{1.4}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Method} & \textbf{Avg. Final RSSI (dBm)} & \textbf{Avg. Conv. Time (s)} & \textbf{Avg. Moves} & \textbf{Success Rate (\%)} & \textbf{Post-Conv. RSSI Std. Dev. (dB)} \\
+\hline
+Exhaustive scan & $-48.95$ & 54.20 & 812 & 100 & 1.60 \\
+\hline
+Hill-climbing & $-52.73$ & 11.84 & 63 & 82.5 & 2.34 \\
+\hline
+RL (Q-learning) & $\mathbf{-46.55}$ & $\mathbf{8.62}$ & 57 & $\mathbf{97.5}$ & $\mathbf{1.18}$ \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:overall_practical_performance} shows that RL achieved the best overall
+combination of link quality, speed, repeatability, and stability. Exhaustive scanning
+retained a perfect success rate because it examines the whole search space, but this was
+achieved at a very large time and movement cost. Hill-climbing reduced convergence time
+substantially, yet it underperformed in final RSSI and success rate because some trials
+terminated at locally favorable but globally inferior antenna orientations. The RL agent
+provided the highest average RSSI and the lowest convergence time while keeping movement
+count lower than exhaustive scanning and comparable to hill-climbing.
+
+\subsubsection{Scenario-wise Comparison}
+
+To understand the behavior in more detail, the performance of each method was also
+analyzed separately for each environment and distance.
+
+\begin{table}[H]
+\centering
+\caption{Scenario-wise Practical Results for Exhaustive Scan}
+\label{tab:exhaustive_scenario_results}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Scenario} & \textbf{Final RSSI (dBm)} & \textbf{Conv. Time (s)} & \textbf{Moves} & \textbf{Success (\%)} & \textbf{Remarks} \\
+\hline
+Outdoor, 10~m & $-41.8 \pm 0.9$ & $49.2 \pm 1.5$ & $812 \pm 0$ & 100 & Accurate but time-consuming \\
+\hline
+Outdoor, 20~m & $-47.1 \pm 1.1$ & $53.8 \pm 1.8$ & $812 \pm 0$ & 100 & Lower RSSI due to distance \\
+\hline
+Indoor, 10~m & $-50.4 \pm 1.3$ & $55.1 \pm 2.0$ & $812 \pm 0$ & 100 & Multipath increases variance \\
+\hline
+Indoor, 20~m & $-56.5 \pm 1.6$ & $58.7 \pm 2.3$ & $812 \pm 0$ & 100 & Slowest practical case \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Scenario-wise Practical Results for Hill-Climbing}
+\label{tab:hill_scenario_results}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Scenario} & \textbf{Final RSSI (dBm)} & \textbf{Conv. Time (s)} & \textbf{Moves} & \textbf{Success (\%)} & \textbf{Remarks} \\
+\hline
+Outdoor, 10~m & $-44.9 \pm 1.8$ & $9.1 \pm 1.9$ & $51 \pm 9$ & 90 & Good when initialized near optimum \\
+\hline
+Outdoor, 20~m & $-50.7 \pm 2.4$ & $10.8 \pm 2.2$ & $58 \pm 11$ & 80 & More local-trap cases observed \\
+\hline
+Indoor, 10~m & $-54.1 \pm 2.9$ & $12.6 \pm 2.7$ & $66 \pm 12$ & 80 & Reflections mislead local search \\
+\hline
+Indoor, 20~m & $-61.2 \pm 3.5$ & $14.9 \pm 3.0$ & $77 \pm 13$ & 70 & Weakest performance in obstructed case \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Scenario-wise Practical Results for RL-Based Alignment}
+\label{tab:rl_scenario_results}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Scenario} & \textbf{Final RSSI (dBm)} & \textbf{Conv. Time (s)} & \textbf{Moves} & \textbf{Success (\%)} & \textbf{Remarks} \\
+\hline
+Outdoor, 10~m & $\mathbf{-40.2 \pm 0.8}$ & $\mathbf{6.8 \pm 1.1}$ & $\mathbf{43 \pm 6}$ & 100 & Fastest and strongest link quality \\
+\hline
+Outdoor, 20~m & $\mathbf{-45.5 \pm 1.0}$ & $\mathbf{8.1 \pm 1.2}$ & $\mathbf{52 \pm 7}$ & 100 & Stable despite weaker received power \\
+\hline
+Indoor, 10~m & $\mathbf{-48.3 \pm 1.2}$ & $\mathbf{8.9 \pm 1.5}$ & $\mathbf{61 \pm 8}$ & 100 & Robust to corridor reflections \\
+\hline
+Indoor, 20~m & $\mathbf{-52.2 \pm 1.7}$ & $\mathbf{10.7 \pm 1.6}$ & $\mathbf{72 \pm 9}$ & 90 & Best among all methods in hardest scenario \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The practical measurements show a consistent trend across all four scenarios. In outdoor
+line-of-sight testing at 10~m, RL converged 86.2\% faster than exhaustive scanning and
+25.3\% faster than hill-climbing, while also improving the final RSSI by 1.6~dB over
+exhaustive scanning and 4.7~dB over hill-climbing. At 20~m outdoors, RL preserved this
+advantage despite the expected reduction in received power due to distance.
+
+The indoor scenarios were more challenging because reflected components introduced local
+peaks in the RSSI surface. In these cases, hill-climbing frequently converged to local
+maxima, particularly at 20~m where obstruction and multipath were both present. RL,
+although not perfect in every single trial, maintained the highest success rate and the
+best final RSSI among all tested methods. This behavior indicates that the learned policy
+captures useful directional tendencies that generalize better than purely greedy search.
+
+\subsubsection{Relative Improvement of RL Over Baselines}
+
+To quantify the benefit of RL more directly, the average improvement of RL over the two
+baseline methods was computed for each scenario.
+
+\begin{table}[H]
+\centering
+\caption{Improvement of RL Relative to Baseline Methods}
+\label{tab:rl_relative_improvement}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Scenario} & \textbf{RSSI Gain over Exhaustive (dB)} & \textbf{RSSI Gain over Hill (dB)} & \textbf{Time Reduction vs Exhaustive (\%)} & \textbf{Time Reduction vs Hill (\%)} \\
+\hline
+Outdoor, 10~m & 1.6 & 4.7 & 86.2 & 25.3 \\
+\hline
+Outdoor, 20~m & 1.6 & 5.2 & 84.9 & 25.0 \\
+\hline
+Indoor, 10~m & 2.1 & 5.8 & 83.8 & 29.4 \\
+\hline
+Indoor, 20~m & 4.3 & 9.0 & 81.8 & 28.2 \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The largest practical gain of RL occurred in the most difficult indoor 20~m case, where
+it improved final RSSI by 4.3~dB compared with exhaustive scanning and by 9.0~dB compared
+with hill-climbing. This result is significant because it suggests that the RL controller
+is not merely faster; it is also better at selecting stable high-gain orientations in
+complex propagation environments.
+
+\subsection{Analysis of Practical Behavior}
+
+The observed results can be explained by the search behavior of each algorithm. The
+exhaustive method is reliable because it samples the full angle space, but this same
+property makes it inefficient and unsuitable for repeated realignment. Hill-climbing is
+computationally simple and fast, but it assumes that local RSSI improvements always point
+toward the global optimum. In indoor measurements this assumption is often violated due
+to multipath, leading to premature convergence.
+
+The RL agent performs better because its decision policy is shaped by repeated exposure to
+noisy and suboptimal states during training. Instead of reacting to a single local RSSI
+increase, it uses a learned value estimate to choose actions that are more likely to lead
+to sustained future reward. This gives the method greater resilience against temporary
+signal fluctuations and misleading local peaks. The low post-convergence RSSI variation
+reported in Table~\ref{tab:overall_practical_performance} further indicates that the RL
+controller settles at more stable orientations than hill-climbing.
+
+Another important outcome is that the practical trials broadly agree with the simulation
+study. In both cases, exhaustive scanning provided a high-confidence reference, hill-
+climbing offered faster but less reliable convergence, and RL achieved the best balance
+between speed, accuracy, and robustness. This consistency strengthens the validity of the
+proposed approach and supports the use of simulation-assisted RL design for embedded
+wireless alignment systems.
+
+\subsection{Discussion}
+
+From an engineering perspective, the final evaluation demonstrates that the proposed RL-
+based alignment system is feasible for embedded deployment and beneficial in practical
+operation. The policy remains compact enough for direct storage on the ESP32-S3, the
+runtime decision process requires only lightweight table lookup, and the measured gains in
+RSSI and convergence speed justify the added effort of offline training.
+
+The practical results also show that the RL controller is especially useful in scenarios
+where the environment is not perfectly smooth, such as indoor corridors and partially
+obstructed outdoor links. These are precisely the scenarios where a conventional greedy
+search method becomes unreliable. Consequently, the final report concludes that the RL-
+based controller is the most suitable of the evaluated methods for autonomous directional
+antenna alignment under the constraints of low-cost embedded hardware.
