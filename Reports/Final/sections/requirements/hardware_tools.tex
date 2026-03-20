@@ -63,7 +63,11 @@ The TowerPro MG90S micro servo was selected to control the elevation (tilt) angl
     {\centering \small\itshape (Source: TowerPro MG90S Datasheet)\par}
 \end{figure}
 
-The MG90S operates on a 4.8-6 V DC supply and draws a stall current of up to 650 mA. Control is achieved via standard PWM pulses from the ESP32-S3, which allows direct positioning without additional drivers. A decoupling capacitor of 100 nF is placed across the power lines to filter inductive noise and prevent transient voltage spikes from affecting the microcontroller logic.
+The MG90S operates on a 4.8-6 V DC supply and draws a stall current of up to 650 mA. 
+Control is achieved via standard PWM pulses from the ESP32-S3, which allows direct 
+positioning without additional drivers. Two decoupling capacitors of 100 nF is placed 
+across the power lines to filter inductive noise and prevent transient voltage spikes 
+from affecting the microcontroller logic.
 
 The servo provides reliable, repeatable angular positioning necessary for maintaining precise antenna tilt angles. Its lightweight construction minimizes additional mechanical load on the rotating turret, while the integrated metal gears ensure long-term durability under continuous operation.
 

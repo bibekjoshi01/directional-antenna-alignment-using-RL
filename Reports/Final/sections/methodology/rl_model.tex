@@ -121,7 +121,7 @@ No exploration ($\epsilon$-greedy) is applied during deployment to ensure determ
     \item \textbf{Memory footprint:} The Q-table occupies $\approx 21.5$ KB, which is negligible relative to the ESP32 RAM (520 kB)
     \item \textbf{Computation:} Selecting the action requires only simple table lookup and arithmetic, allowing real-time operation
     \item \textbf{Real-time operation:} The ESP32-S3 continuously measures RSSI, encodes the state, looks up the best action in the Q-table, and commands the stepper motors
-    \item \textbf{Stability:} Since no online learning occurs, the system avoids oscillations caused by transient RSSI fluctuations and exploratio
+    \item \textbf{Stability:} Since no online learning occurs, the system avoids oscillations caused by transient RSSI fluctuations and exploration
 \end{itemize}
 
 This design ensures that the antenna alignment system is fully autonomous, responsive to changing signal conditions, and feasible for embedded deployment without the overhead of online training.
