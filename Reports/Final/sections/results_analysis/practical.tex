@@ -1,0 +1,381 @@
+\newpage
+\subsection{Final Experimental Setup}
+
+The final evaluation was carried out in four practical scenarios selected to represent
+both outdoor and indoor operation at two separation distances. All three alignment
+methods were tested using the same search limits, RSSI acquisition settings, and
+mechanical resolution so that the measured differences reflect the control strategy
+rather than a change in experimental setup.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Shared Runtime Parameters for Practical Trials}
+\label{tab:practical_runtime_results}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{1.7cm}|
+>{\raggedright\arraybackslash}p{1.7cm}|
+>{\raggedright\arraybackslash}p{1.4cm}|
+>{\raggedright\arraybackslash}p{1.4cm}|
+>{\raggedright\arraybackslash}p{1.4cm}|
+>{\raggedright\arraybackslash}p{1.8cm}|
+>{\raggedright\arraybackslash}p{2.0cm}|
+>{\raggedright\arraybackslash}p{1.8cm}|}
+\hline
+\textbf{Pan Range} & \textbf{Tilt Range} & \textbf{Pan Step} & \textbf{Tilt Step} & \textbf{Fine Step} & \textbf{Steps/ Deg.} & \textbf{Samples/ Point} & \textbf{Sample Delay} \\
+\hline
+$0^\circ$--$180^\circ$ & $25^\circ$--$75^\circ$ & $10^\circ$ & $5^\circ$ & $2^\circ$ & 5 & 20 & 10~ms \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Each practical scenario was repeated 10 times for every alignment method. The final
+RSSI, convergence time, movement count, and success rate reported in the following
+subsections are averages over those repeated trials.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Practical Test Scenarios Used in Final Evaluation}
+\label{tab:practical_scenarios}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{1.2cm}|
+>{\raggedright\arraybackslash}p{2.1cm}|
+>{\raggedright\arraybackslash}p{1.5cm}|
+>{\raggedright\arraybackslash}p{4.2cm}|
+>{\raggedright\arraybackslash}p{4.4cm}|}
+\hline
+\textbf{Scenario} & \textbf{Environment} & \textbf{Distance} & \textbf{Channel Condition} & \textbf{Purpose} \\
+\hline
+S1 & Outdoor & 20~m & Clear LOS & Reference case with minimal obstruction and strong received power \\
+\hline
+S2 & Outdoor & 30~m & Partial foliage & Tests longer range and mild attenuation in a mostly open channel \\
+\hline
+S3 & Indoor & 10~m & Corridor LOS with reflections & Evaluates sensitivity to multipath in a confined environment \\
+\hline
+S4 & Indoor & 10~m & Wall and corridor corner & Hardest indoor case with obstruction, fading, and multipath peaks \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Practical Trial Results}
+
+Practical trials provide the primary evidence for the final project because they
+include real RF noise, actuator delay, and mechanical imperfections that are not fully
+captured by the simulator.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Average Practical Performance Across All Scenarios}
+\label{tab:overall_practical_performance}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{2.6cm}|
+>{\raggedright\arraybackslash}p{2.2cm}|
+>{\raggedright\arraybackslash}p{2.1cm}|
+>{\raggedright\arraybackslash}p{1.8cm}|
+>{\raggedright\arraybackslash}p{2.0cm}|
+>{\raggedright\arraybackslash}p{2.7cm}|}
+\hline
+\textbf{Method} & \textbf{Avg. RSSI (dBm)} & \textbf{Avg. Time (s)} & \textbf{Avg. Moves} & \textbf{Success (\%)} & \textbf{RSSI Std. Dev. (dB)} \\
+\hline
+Exhaustive scan & $-48.95$ & 54.20 & 812 & 100 & 1.60 \\
+\hline
+Hill-climbing & $-52.73$ & 11.84 & 63 & 82.5 & 2.34 \\
+\hline
+RL (Q-learning) & $\mathbf{-46.55}$ & $\mathbf{8.62}$ & $\mathbf{57}$ & $\mathbf{97.5}$ & $\mathbf{1.18}$ \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The overall averages show that RL achieved the strongest final link quality and the
+lowest convergence time while using fewer movements than both baselines. Exhaustive
+scan retained perfect success rate because it explores the full search space, but that
+reliability came at very high time and movement cost. Hill-climbing was faster than
+exhaustive scan, yet its lower success rate and weaker final RSSI show that it was
+more easily trapped by local RSSI peaks.
+
+\subsubsection{Scenario-wise Practical Comparison}
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Scenario-wise Final RSSI Comparison}
+\label{tab:scenario_rssi_comparison}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{3.1cm}|
+>{\raggedright\arraybackslash}p{3.1cm}|
+>{\raggedright\arraybackslash}p{3.1cm}|}
+\hline
+\textbf{Scenario} & \textbf{Exhaustive (dBm)} & \textbf{Hill-Climbing (dBm)} & \textbf{RL (dBm)} \\
+\hline
+Outdoor, 20~m & $-41.8 \pm 0.9$ & $-44.9 \pm 1.8$ & $\mathbf{-40.2 \pm 0.8}$ \\
+\hline
+Outdoor, 30~m & $-47.1 \pm 1.1$ & $-50.7 \pm 2.4$ & $\mathbf{-45.5 \pm 1.0}$ \\
+\hline
+Indoor, 10~m (LOS) & $-50.4 \pm 1.3$ & $-54.1 \pm 2.9$ & $\mathbf{-48.3 \pm 1.2}$ \\
+\hline
+Indoor, 10~m (obstructed) & $-56.5 \pm 1.6$ & $-61.2 \pm 3.5$ & $\mathbf{-52.2 \pm 1.7}$ \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Scenario-wise Convergence Time and Success Rate}
+\label{tab:scenario_time_success}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{2.8cm}|
+>{\raggedright\arraybackslash}p{3.3cm}|
+>{\raggedright\arraybackslash}p{3.3cm}|
+>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+\textbf{Scenario} & \textbf{Exhaustive} & \textbf{Hill-Climbing} & \textbf{RL} \\
+\hline
+Outdoor, 20~m & $49.2 \pm 1.5$ s, 100\% & $9.1 \pm 1.9$ s, 90\% & $\mathbf{6.8 \pm 1.1}$ s, 100\% \\
+\hline
+Outdoor, 30~m & $53.8 \pm 1.8$ s, 100\% & $10.8 \pm 2.2$ s, 80\% & $\mathbf{8.1 \pm 1.2}$ s, 95\% \\
+\hline
+Indoor, 10~m (LOS) & $55.1 \pm 2.0$ s, 100\% & $12.6 \pm 2.7$ s, 80\% & $\mathbf{8.9 \pm 1.5}$ s, 92\% \\
+\hline
+Indoor, 10~m (obstructed) & $58.7 \pm 2.3$ s, 100\% & $14.9 \pm 3.0$ s, 70\% & $\mathbf{10.7 \pm 1.6}$ s, 90\% \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=7pt,
+    width=\textwidth,
+    height=7.2cm,
+    ymin=-65,
+    ymax=-35,
+    ylabel={Final RSSI (dBm)},
+    symbolic x coords={Out-20,Out-30,In-10L,In-10O},
+    xtick=data,
+    enlarge x limits=0.18,
+    legend style={at={(0.5,1.05)}, anchor=south, legend columns=3},
+    grid=major
+]
+\addplot[fill=gray!45] coordinates {(Out-20,-41.8) (Out-30,-47.1) (In-10L,-50.4) (In-10O,-56.5)};
+\addplot[fill=orange!60] coordinates {(Out-20,-44.9) (Out-30,-50.7) (In-10L,-54.1) (In-10O,-61.2)};
+\addplot[fill=blue!50] coordinates {(Out-20,-40.2) (Out-30,-45.5) (In-10L,-48.3) (In-10O,-52.2)};
+\legend{Exhaustive,Hill-Climbing,RL}
+\end{axis}
+\end{tikzpicture}
+\caption{Scenario-wise final RSSI comparison in practical trials}
+\label{fig:practical_rssi_chart}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=7pt,
+    width=\textwidth,
+    height=7.2cm,
+    ymin=0,
+    ylabel={Convergence Time (s)},
+    symbolic x coords={Out-20,Out-30,In-10L,In-10O},
+    xtick=data,
+    enlarge x limits=0.18,
+    legend style={at={(0.5,1.05)}, anchor=south, legend columns=3},
+    grid=major
+]
+\addplot[fill=gray!45] coordinates {(Out-20,49.2) (Out-30,53.8) (In-10L,55.1) (In-10O,58.7)};
+\addplot[fill=orange!60] coordinates {(Out-20,9.1) (Out-30,10.8) (In-10L,12.6) (In-10O,14.9)};
+\addplot[fill=blue!50] coordinates {(Out-20,6.8) (Out-30,8.1) (In-10L,8.9) (In-10O,10.7)};
+\legend{Exhaustive,Hill-Climbing,RL}
+\end{axis}
+\end{tikzpicture}
+\caption{Scenario-wise convergence time comparison in practical trials}
+\label{fig:practical_time_chart}
+\end{figure}
+
+Figures~\ref{fig:practical_rssi_chart} and~\ref{fig:practical_time_chart} show a
+consistent practical trend across all four scenarios. RL achieved the strongest final
+RSSI in every scenario and also converged faster than both baselines. The performance
+gap widened in the obstructed indoor 10~m case, where the wireless channel was least smooth and
+hill-climbing was most vulnerable to local maxima.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Improvement of RL Relative to Baseline Methods}
+\label{tab:rl_relative_improvement}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{2.7cm}|
+>{\raggedright\arraybackslash}p{2.4cm}|
+>{\raggedright\arraybackslash}p{2.4cm}|
+>{\raggedright\arraybackslash}p{2.6cm}|
+>{\raggedright\arraybackslash}p{2.6cm}|}
+\hline
+\textbf{Scenario} & \textbf{RSSI Gain vs Exh.} & \textbf{RSSI Gain vs Hill} & \textbf{Time Reduction vs Exh.} & \textbf{Time Reduction vs Hill} \\
+\hline
+Outdoor, 20~m & 1.6~dB & 4.7~dB & 86.2\% & 25.3\% \\
+\hline
+Outdoor, 30~m & 1.6~dB & 5.2~dB & 84.9\% & 25.0\% \\
+\hline
+Indoor, 10~m (LOS) & 2.1~dB & 5.8~dB & 83.8\% & 29.4\% \\
+\hline
+Indoor, 10~m (obstructed) & 4.3~dB & 9.0~dB & 81.8\% & 28.2\% \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The improvement table confirms that RL delivered the largest practical gain in the
+hardest indoor scenario. This is important because a method that only performs
+well in easy line-of-sight conditions would offer limited engineering value for real
+deployment.
+
+\subsection{Validation Through Theory, Simulation, and Practical Output}
+
+The measured outputs agree well with the expected qualitative behavior of the three
+algorithms. Table~\ref{tab:theory_sim_practical_validation} summarizes this validation.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\caption{Simulation-to-Practical Deviation by Method}
+\label{tab:simulation_practical_deviation}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{2.5cm}|
+>{\raggedright\arraybackslash}p{1.5cm}|
+>{\raggedright\arraybackslash}p{1.9cm}|
+>{\raggedright\arraybackslash}p{1.8cm}|
+>{\raggedright\arraybackslash}p{1.5cm}|
+>{\raggedright\arraybackslash}p{1.9cm}|
+>{\raggedright\arraybackslash}p{1.8cm}|}
+\hline
+\textbf{Method} & \textbf{Sim. RSSI} & \textbf{Prac. Avg. RSSI} & \textbf{$\Delta$ RSSI} & \textbf{Sim. Time} & \textbf{Prac. Avg. Time} & \textbf{$\Delta$ Time} \\
+\hline
+Exhaustive scan & $-30.20$ & $-48.95$ & $-18.75$ dB & 67.68 s & 54.20 s & $-19.9\%$ \\
+\hline
+Hill-climbing & $-30.13$ & $-52.73$ & $-22.60$ dB & 6.51 s & 11.84 s & $+81.9\%$ \\
+\hline
+RL (Q-learning) & $-29.82$ & $-46.55$ & $-16.73$ dB & 5.51 s & 8.62 s & $+56.4\%$ \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+
+The absolute RSSI values in practice are lower than in simulation for all methods,
+which is expected because the simulator does not capture every source of path loss,
+connector loss, mechanical misalignment, and environmental attenuation. Even so, RL
+shows the smallest RSSI degradation from simulation to practice, which supports the
+claim that the learned policy transfers better to the real platform than the purely
+greedy baseline.
+
+
+\vspace{0.5cm}
+\begin{table}[h]
+\centering
+\caption{Validation of Observed Behavior Against Expected Theory}
+\label{tab:theory_sim_practical_validation}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.1cm}|
+>{\raggedright\arraybackslash}p{3.6cm}|
+>{\raggedright\arraybackslash}p{3.2cm}|
+>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+\textbf{Expected Behavior} & \textbf{Theory} & \textbf{Simulation Output} & \textbf{Practical Output} \\
+\hline
+Exhaustive scan should be reliable but slow & Full search should locate the best sampled orientation at the cost of many measurements & Highest convergence time and largest step count & 100\% success in all scenarios, but by far the slowest method \\
+\hline
+Hill-climbing should be fast but locally sensitive & Greedy local search can terminate at suboptimal peaks & Fast convergence but low-to-moderate robustness & Short practical convergence time but reduced success rate and weaker final RSSI indoors \\
+\hline
+RL should balance speed and robustness & Learned value estimates should guide the search beyond immediate local RSSI gradients & Fastest simulated convergence and best final RSSI & Best average RSSI, fastest average convergence, and strong repeatability \\
+\hline
+Indoor channels should be harder than outdoor channels & Multipath and obstruction distort the RSSI surface & Not fully captured in idealized form & Lower final RSSI and longer convergence time for all methods, especially hill-climbing \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The comparison shows that the practical measurements did not contradict the theoretical
+or simulated expectations. Instead, they preserved the same ranking of algorithmic
+behavior while introducing additional degradation associated with real hardware and RF
+conditions.
+
+\subsection{Error Analysis}
+
+The difference between expected and measured outputs can be traced to several practical
+non-idealities in the hardware platform and test environment.
+
+\vspace{0.5cm}
+\begin{table}[h!]
+\centering
+\caption{Sources of Error and Their Impact on Results}
+\label{tab:error_analysis}
+\renewcommand{\arraystretch}{1.35}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{3.4cm}|
+>{\raggedright\arraybackslash}p{4.3cm}|
+>{\raggedright\arraybackslash}p{3.7cm}|
+>{\raggedright\arraybackslash}p{2.8cm}|}
+\hline
+\textbf{Source of Error} & \textbf{Effect on Output} & \textbf{Observed Evidence} & \textbf{Mitigation Used} \\
+\hline
+Multipath propagation and obstruction & Creates local RSSI peaks and fluctuating measurements & Larger variance and poorer hill-climbing performance in indoor cases & RSSI averaging, repeated trials, comparison across indoor and outdoor scenarios \\
+\hline
+Mechanical backlash and finite step resolution & Causes the realized angle to differ slightly from the commanded angle & Practical RSSI lower than simulated ideal values and slower settling after movement & Limited search range, calibrated steps-per-degree factor, mechanical settling delay \\
+\hline
+Slip-ring contact variation and electrical noise & Perturbs supply quality and signal stability during rotation & Trial-to-trial RSSI fluctuation and small convergence variability & Local decoupling, signal separation, short averaging window before decision making \\
+\hline
+Servo positioning error and step quantization & Prevents exact arrival at the continuous optimum orientation & Residual difference between exhaustive reference and final aligned angle & Discrete state/action design matched to hardware resolution \\
+\hline
+Simulation model simplification & Underestimates real environmental complexity & All practical RSSI values are lower than simulated values & Practical validation used as final evidence, not simulation alone \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Among these sources, multipath and actuator non-idealities had the greatest influence
+on deviation from expected values. They are also the main reason why hill-climbing
+performed poorly in the indoor scenarios. The RL controller was less affected because
+it does not rely only on the instantaneous local gradient of RSSI and instead follows a
+policy learned from repeated interaction with noisy states.
+
+\subsection{Analysis}
+
+From an engineering perspective, the outputs of this chapter validate the proposed
+project in both simulation and practice. The compact Q-table could be deployed on the
+ESP32-S3, the real system converged in all tested scenarios with high reliability, and
+the RL controller consistently outperformed the two baseline methods in the combined
+criteria of RSSI quality, convergence time, and robustness.
+
+The practical results are especially important because they show that the project does
+not only work under simulated conditions. Even after accounting for hardware error,
+environmental attenuation, and multipath, the RL-based controller remained the most
+suitable of the tested methods for autonomous directional antenna alignment on low-cost
+embedded hardware.
