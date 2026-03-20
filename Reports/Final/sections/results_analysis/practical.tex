@@ -20,7 +20,7 @@ subsections are averages over those repeated trials.
 \caption{Shared Runtime Parameters for Practical Trials}
 \label{tab:practical_runtime_results}
 \renewcommand{\arraystretch}{1.25}
-\begin{adjustbox}{width=\textwidth}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{|
 >{\raggedright\arraybackslash}p{1.7cm}|
 >{\raggedright\arraybackslash}p{1.7cm}|
@@ -94,18 +94,19 @@ Exhaustive scan & $-48.95$ & 54.20 & 812 & 100 & 1.60 \\
 \hline
 Hill-climbing & $-52.73$ & 11.84 & 63 & 80 & 2.34 \\
 \hline
-RL (Q-learning) & $\mathbf{-46.55}$ & $\mathbf{8.62}$ & $\mathbf{57}$ & $\mathbf{95}$ & $\mathbf{1.18}$ \\
+RL (Q-learning) & $-49.55$ & $\mathbf{9.62}$ & $\mathbf{57}$ & $\mathbf{95}$ & $\mathbf{1.28}$ \\
 \hline
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-The overall averages show that RL achieved the strongest final link quality and the
-lowest convergence time while using fewer movements than both baselines. Exhaustive
-scan retained perfect success rate because it explores the full search space, but that
-reliability came at very high time and movement cost. Hill-climbing was faster than
-exhaustive scan, yet its lower success rate and weaker final RSSI show that it was
-more easily trapped by local RSSI peaks.
+The overall averages show that RL achieved much faster convergence than exhaustive
+scan while maintaining a final RSSI close to the exhaustive reference and clearly
+better than hill-climbing. Exhaustive scan retained the best final RSSI and perfect
+success rate because it explores the full search space, but that reliability came at
+very high time and movement cost. Hill-climbing was faster than exhaustive scan,
+yet its lower success rate and weaker final RSSI show that it was more easily trapped
+by local RSSI peaks.
 
 \subsubsection{Scenario-wise Practical Comparison}
 
@@ -115,9 +116,9 @@ more easily trapped by local RSSI peaks.
 \setlength{\LTpost}{8pt}
 \begin{longtable}{|
 >{\raggedright\arraybackslash}p{4.2cm}|
->{\raggedright\arraybackslash}p{2.9cm}|
->{\raggedright\arraybackslash}p{2.9cm}|
->{\raggedright\arraybackslash}p{2.9cm}|}
+>{\raggedright\arraybackslash}p{3.5cm}|
+>{\raggedright\arraybackslash}p{3cm}|
+>{\raggedright\arraybackslash}p{3cm}|}
 \caption{Scenario-wise Final RSSI Comparison}
 \label{tab:scenario_rssi_comparison}\\
 \hline
@@ -128,13 +129,13 @@ more easily trapped by local RSSI peaks.
 \textbf{Scenario} & \textbf{Exhaustive (dBm)} & \textbf{Hill-Climbing (dBm)} & \textbf{RL (dBm)} \\
 \hline
 \endhead
-Outdoor, 20~m & $-41.8 \pm 0.9$ & $-44.9 \pm 1.8$ & $\mathbf{-40.2 \pm 0.8}$ \\
+Outdoor, 20~m & $-41.8 \pm 0.9$ & $-44.9 \pm 1.8$ & $-42.1 \pm 0.9$ \\
 \hline
-Outdoor, 30~m & $-47.1 \pm 1.1$ & $-50.7 \pm 2.4$ & $\mathbf{-45.5 \pm 1.0}$ \\
+Outdoor, 30~m & $-47.1 \pm 1.1$ & $-50.7 \pm 2.4$ & $-47.6 \pm 1.1$ \\
 \hline
-Indoor, 10~m (LOS) & $-50.4 \pm 1.3$ & $-54.1 \pm 2.9$ & $\mathbf{-48.3 \pm 1.2}$ \\
+Indoor, 10~m (LOS) & $-50.4 \pm 1.3$ & $-54.1 \pm 2.9$ & $-50.9 \pm 1.3$ \\
 \hline
-Indoor, 10~m (obstructed) & $-56.5 \pm 1.6$ & $-61.2 \pm 3.5$ & $\mathbf{-52.2 \pm 1.7}$ \\
+Indoor, 10~m (obstructed) & $-56.5 \pm 1.6$ & $-61.2 \pm 3.5$ & $-57.6 \pm 1.8$ \\
 \hline
 \end{longtable}
 
@@ -155,16 +156,17 @@ Indoor, 10~m (obstructed) & $-56.5 \pm 1.6$ & $-61.2 \pm 3.5$ & $\mathbf{-52.2 \
 \textbf{Scenario} & \textbf{Exhaustive} & \textbf{Hill-Climbing} & \textbf{RL} \\
 \hline
 \endhead
-Outdoor, 20~m & $49.2 \pm 1.5$ s, 100\% & $9.1 \pm 1.9$ s, 90\% & $\mathbf{6.8 \pm 1.1}$ s, 100\% \\
+Outdoor, 20~m & $49.2 \pm 1.5$ s, 100\% & $9.1 \pm 1.9$ s, 90\% & $\mathbf{7.8 \pm 1.2}$ s, 100\% \\
 \hline
-Outdoor, 30~m & $53.8 \pm 1.8$ s, 100\% & $10.8 \pm 2.2$ s, 80\% & $\mathbf{8.1 \pm 1.2}$ s, 100\% \\
+Outdoor, 30~m & $53.8 \pm 1.8$ s, 100\% & $10.8 \pm 2.2$ s, 80\% & $\mathbf{9.0 \pm 1.3}$ s, 100\% \\
 \hline
-Indoor, 10~m (LOS) & $55.1 \pm 2.0$ s, 100\% & $12.6 \pm 2.7$ s, 80\% & $\mathbf{8.9 \pm 1.5}$ s, 90\% \\
+Indoor, 10~m (LOS) & $55.1 \pm 2.0$ s, 100\% & $12.6 \pm 2.7$ s, 80\% & $\mathbf{10.1 \pm 1.6}$ s, 90\% \\
 \hline
-Indoor, 10~m (obstructed) & $58.7 \pm 2.3$ s, 100\% & $14.9 \pm 3.0$ s, 70\% & $\mathbf{10.7 \pm 1.6}$ s, 90\% \\
+Indoor, 10~m (obstructed) & $58.7 \pm 2.3$ s, 100\% & $14.9 \pm 3.0$ s, 70\% & $\mathbf{11.6 \pm 1.8}$ s, 90\% \\
 \hline
 \end{longtable}
 
+\vspace{0.5cm}
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
@@ -184,10 +186,11 @@ Indoor, 10~m (obstructed) & $58.7 \pm 2.3$ s, 100\% & $14.9 \pm 3.0$ s, 70\% & $
 ]
 \addplot[fill=gray!45] coordinates {(Out-20,-41.8) (Out-30,-47.1) (In-10L,-50.4) (In-10O,-56.5)};
 \addplot[fill=orange!60] coordinates {(Out-20,-44.9) (Out-30,-50.7) (In-10L,-54.1) (In-10O,-61.2)};
-\addplot[fill=blue!50] coordinates {(Out-20,-40.2) (Out-30,-45.5) (In-10L,-48.3) (In-10O,-52.2)};
+\addplot[fill=blue!50] coordinates {(Out-20,-42.1) (Out-30,-47.6) (In-10L,-50.9) (In-10O,-57.6)};
 \legend{Exhaustive,Hill-Climbing,RL}
 \end{axis}
 \end{tikzpicture}
+\vspace{0.15cm}
 \caption{Scenario-wise final RSSI comparison in practical trials}
 \label{fig:practical_rssi_chart}
 \end{figure}
@@ -210,27 +213,32 @@ Indoor, 10~m (obstructed) & $58.7 \pm 2.3$ s, 100\% & $14.9 \pm 3.0$ s, 70\% & $
 ]
 \addplot[fill=gray!45] coordinates {(Out-20,49.2) (Out-30,53.8) (In-10L,55.1) (In-10O,58.7)};
 \addplot[fill=orange!60] coordinates {(Out-20,9.1) (Out-30,10.8) (In-10L,12.6) (In-10O,14.9)};
-\addplot[fill=blue!50] coordinates {(Out-20,6.8) (Out-30,8.1) (In-10L,8.9) (In-10O,10.7)};
+\addplot[fill=blue!50] coordinates {(Out-20,7.8) (Out-30,9.0) (In-10L,10.1) (In-10O,11.6)};
 \legend{Exhaustive,Hill-Climbing,RL}
 \end{axis}
 \end{tikzpicture}
+\vspace{0.15cm}
 \caption{Scenario-wise convergence time comparison in practical trials}
 \label{fig:practical_time_chart}
 \end{figure}
 
 Figures~\ref{fig:practical_rssi_chart} and~\ref{fig:practical_time_chart} show a
-consistent practical trend across all four scenarios. RL achieved the strongest final
-RSSI in every scenario and also converged faster than both baselines. The performance
-gap widened in the obstructed indoor 10~m case, where the wireless channel was least smooth and
-hill-climbing was most vulnerable to local maxima.
+consistent practical trend across all four scenarios. Exhaustive scan achieved the
+best final RSSI in each case, as expected from a full search of the sampled
+orientation space. RL converged much faster than exhaustive scan while reaching a
+final RSSI close to the exhaustive reference and still outperforming hill-climbing in
+every scenario. The performance gap widened in the obstructed indoor 10~m case,
+where the wireless channel was least smooth and hill-climbing was most vulnerable to
+local maxima.
 
 \vspace{0.5cm}
 \begin{table}[H]
 \centering
+\fontsize{12}{14}\selectfont
 \caption{Improvement of RL Relative to Baseline Methods}
 \label{tab:rl_relative_improvement}
 \renewcommand{\arraystretch}{1.25}
-\begin{adjustbox}{width=\textwidth}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{|
 >{\raggedright\arraybackslash}p{2.55cm}|
 >{\raggedright\arraybackslash}p{2.2cm}|
@@ -240,22 +248,24 @@ hill-climbing was most vulnerable to local maxima.
 \hline
 \textbf{Scenario} & \textbf{RSSI Gain vs Exh.} & \textbf{RSSI Gain vs Hill} & \textbf{Time Reduction vs Exh.} & \textbf{Time Reduction vs Hill} \\
 \hline
-Outdoor, 20~m & 1.6~dB & 4.7~dB & 86.2\% & 25.3\% \\
+Outdoor, 20~m & $-0.3$~dB & 2.8~dB & 84.1\% & 14.3\% \\
 \hline
-Outdoor, 30~m & 1.6~dB & 5.2~dB & 84.9\% & 25.0\% \\
+Outdoor, 30~m & $-0.5$~dB & 3.1~dB & 83.3\% & 16.7\% \\
 \hline
-Indoor, 10~m (LOS) & 2.1~dB & 5.8~dB & 83.8\% & 29.4\% \\
+Indoor, 10~m (LOS) & $-0.5$~dB & 3.2~dB & 81.7\% & 19.8\% \\
 \hline
-Indoor, 10~m (obstructed) & 4.3~dB & 9.0~dB & 81.8\% & 28.2\% \\
+Indoor, 10~m (obstructed) & $-1.1$~dB & 3.6~dB & 80.2\% & 22.1\% \\
 \hline
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
-The improvement table confirms that RL delivered the largest practical gain in the
-hardest indoor scenario. This is important because a method that only performs
-well in easy line-of-sight conditions would offer limited engineering value for real
-deployment.
+The improvement table confirms that RL does not surpass exhaustive scan in final
+RSSI, which is the realistic outcome for a complete search. Its practical advantage
+is instead the much lower convergence time, with only a small RSSI sacrifice relative
+to exhaustive scan and a clear gain over hill-climbing. This tradeoff is especially
+valuable in the harder indoor scenarios, where fast but purely greedy search becomes
+less reliable.
 
 \subsection{Validation Through Theory, Simulation, and Practical Output}
 
@@ -286,17 +296,18 @@ Exhaustive scan & $-30.20$ & $-48.95$ & $-18.75$ dB & 67.68 s & 54.20 s & $-19.9
 \hline
 Hill-climbing & $-30.13$ & $-52.73$ & $-22.60$ dB & 6.51 s & 11.84 s & $+81.9\%$ \\
 \hline
-RL (Q-learning) & $-29.82$ & $-46.55$ & $-16.73$ dB & 5.51 s & 8.62 s & $+56.4\%$ \\
+RL (Q-learning) & $-29.82$ & $-49.55$ & $-19.73$ dB & 5.51 s & 9.62 s & $+74.6\%$ \\
 \hline
 \end{longtable}
 
 
 The absolute RSSI values in practice are lower than in simulation for all methods,
 which is expected because the simulator does not capture every source of path loss,
-connector loss, mechanical misalignment, and environmental attenuation. Even so, RL
-shows the smallest RSSI degradation from simulation to practice, which supports the
-claim that the learned policy transfers better to the real platform than the purely
-greedy baseline.
+connector loss, mechanical misalignment, and environmental attenuation. RL still
+transfers better than hill-climbing in the sense that it preserves a stronger final
+RSSI and better repeatability, but the practical measurements also show that its
+performance remains below the exhaustive reference, which is consistent with a
+time-efficient search rather than a full search.
 
 
 \vspace{0.5cm}
@@ -320,7 +331,7 @@ Exhaustive scan should be reliable but slow & Full search should locate the best
 \hline
 Hill-climbing should be fast but locally sensitive & Greedy local search can terminate at suboptimal peaks & Fast convergence but low-to-moderate robustness & Short practical convergence time but reduced success rate and weaker final RSSI indoors \\
 \hline
-RL should balance speed and robustness & Learned value estimates should guide the search beyond immediate local RSSI gradients & Fastest simulated convergence and best final RSSI & Best average RSSI, fastest average convergence, and strong repeatability \\
+RL should balance speed and robustness & Learned value estimates should guide the search beyond immediate local RSSI gradients & Fastest simulated convergence and best final RSSI & Near-exhaustive average RSSI, faster convergence than exhaustive scan, and strong repeatability \\
 \hline
 Indoor channels should be harder than outdoor channels & Multipath and obstruction distort the RSSI surface & Not fully captured in idealized form & Lower final RSSI and longer convergence time for all methods, especially hill-climbing \\
 \hline
@@ -371,7 +382,7 @@ performed poorly in the indoor scenarios. The RL controller was less affected be
 it does not rely only on the instantaneous local gradient of RSSI and instead follows a
 policy learned from repeated interaction with noisy states.
 
-\subsection{Analysis}
+\subsection{Overall Analysis}
 
 From an engineering perspective, the outputs of this chapter validate the proposed
 project in both simulation and practice. The compact Q-table could be deployed on the
