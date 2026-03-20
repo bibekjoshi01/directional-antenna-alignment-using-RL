@@ -86,6 +86,13 @@ comparison during practical evaluation. After every commanded movement, the firm
 waited for mechanical settling before the next RSSI batch was sampled. This prevented
 measurement corruption caused by vibration and transient misalignment.
 
+The chosen runtime parameters reflect practical observations from the prototype. The
+pan range was restricted to the forward hemisphere visible to the transmitter during
+testing, the tilt range was chosen from the mechanical geometry of the mounting
+bracket, and the 180~ms settling delay was sufficient to let the platform stop
+oscillating before sampling. Likewise, 20 RSSI samples per orientation provided a good
+balance between noise reduction and total trial duration.
+
 \vspace{0.5cm}
 \begin{table}[H]
 \centering

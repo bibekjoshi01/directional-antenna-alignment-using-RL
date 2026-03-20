@@ -1,5 +1,21 @@
 \subsection{Problem Definition}
 
-The problem addressed in this project is the design of a receiver-side control mechanism that determines and continuously updates the orientation of a mechanically steerable directional antenna using only Received Signal Strength Indicator (RSSI) measurements. The system must operate in real time under dynamic and noisy wireless conditions while satisfying the computational, memory, and power constraints of low-cost embedded hardware
+The problem addressed in this project is the design of a receiver-side control
+mechanism that determines and continuously updates the orientation of a mechanically
+steerable directional antenna using only Received Signal Strength Indicator (RSSI)
+measurements. The input available to the controller is therefore limited to packet-level
+RSSI observations and the internally tracked antenna orientation, while the output is a
+discrete motion command applied to the azimuth or tilt actuator.
 
-This project investigates whether tabular reinforcement learning can provide superior convergence speed and alignment stability under noisy conditions compared to conventional heuristic RSSI-based methods, such as exhaustive scanning and hill-climbing. Establishing this capability is critical for enabling reliable, low-cost, and autonomous antenna alignment on resource-constrained embedded platforms without reliance on advanced RF hardware or precise environmental models
+The system must operate in real time under noisy wireless conditions while satisfying
+the computational, memory, and power constraints of low-cost embedded hardware. It
+must also remain practical to implement using simple actuators and a single
+microcontroller, without requiring phased arrays, angle-of-arrival estimation, precise
+location information, or detailed propagation models.
+
+Accordingly, this project investigates whether tabular reinforcement learning can serve
+as a lightweight decision mechanism for antenna alignment and whether it can offer a
+useful improvement in convergence behavior and alignment quality over conventional
+RSSI-based heuristics such as exhaustive scanning and hill-climbing. Establishing this
+capability is important for enabling reliable, low-cost, and autonomous antenna
+alignment on resource-constrained embedded platforms.

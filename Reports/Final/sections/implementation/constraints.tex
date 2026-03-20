@@ -34,7 +34,7 @@ The continuous pan, tilt, and RSSI domains were discretized to enable tabular Q-
 \textbf{Implemented mitigation:}
 \begin{itemize}
 \item Discretization step size was selected to balance resolution and table size
-\item RL was used only for local refinement after coarse scanning
+\item The deployed controller was limited to the practical search region used during hardware testing so that the state space remained compact and physically meaningful
 \end{itemize}
 
 This ensured acceptable alignment accuracy without excessive memory usage.

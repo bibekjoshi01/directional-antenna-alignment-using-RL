@@ -12,18 +12,36 @@ The overall system architecture is designed as a tightly coupled hardware-softwa
 \end{figure}
 
 \subsubsection{High-Level Hardware Architecture}
-The hardware architecture of the proposed system is illustrated in Figure~\ref{fig:system_block}. The ESP32 microcontroller forms the central processing unit and coordinates all sensing, control, and communication tasks.
+The hardware architecture of the proposed system is illustrated in
+Figure~\ref{fig:system_block}. The ESP32-S3 microcontroller forms the central
+processing unit and coordinates all sensing, control, and communication tasks.
 
 The major hardware components are:
 \begin{itemize}
-    \item \textbf{ESP32 Microcontroller}: Acts as the central controller, responsible for RSSI acquisition, control logic execution, and motor command generation
-    \item \textbf{Directional Antenna}: Mounted on a mechanical platform and connected to the ESP32 radio subsystem. It receives wireless packets from the transmitter, from which RSSI values are extracted
-    \item \textbf{Stepper Motor}: Provides controlled rotational motion of the directional antenna in the azimuth plan and tilt plane
-    \item \textbf{Motor Driver (A4988)}: Interfaces between the ESP32 and the stepper motor, translating low-power digital control signals into the high-current waveforms required to drive the motor coils
-    \item \textbf{Power Supply Unit}: Provides regulated power to the ESP32 and a separate higher-current supply rail for the stepper motor to prevent electrical noise from affecting RF measurements
+    \item \textbf{ESP32-S3 Microcontroller}: Acts as the central controller,
+    responsible for RSSI acquisition, control logic execution, experiment logging,
+    and actuator command generation
+    \item \textbf{Directional Antenna}: Mounted on a pan--tilt platform and
+    connected to the ESP32-S3 radio subsystem to receive packets from the fixed
+    transmitter
+    \item \textbf{Azimuth Actuator}: A NEMA 17 stepper motor that rotates the
+    antenna platform in the horizontal plane
+    \item \textbf{Tilt Actuator}: An MG90S servo motor that adjusts the vertical
+    tilt angle of the antenna
+    \item \textbf{Motor Driver (A4988)}: Interfaces between the ESP32-S3 and the
+    azimuth stepper motor, translating low-power digital control signals into the
+    current waveforms required by the motor coils
+    \item \textbf{Power Supply Unit}: Provides regulated power to the ESP32-S3 and
+    servo, and a separate higher-current rail for the stepper motor to reduce
+    coupling between motor switching noise and RF measurements
 \end{itemize}
 
-The ESP32 communicates with the motor driver using digital GPIO signals (STEP, DIRECTION, and ENABLE). The motor driver operates as a unidirectional actuator interface; no feedback or sensing signals are returned from the motor driver to the ESP32. All motion-related state is maintained internally by the controller.
+In the implemented prototype, azimuth and tilt are actuated differently. The stepper
+motor and A4988 driver are used only for azimuth rotation, while the tilt axis is
+driven directly by the servo through a PWM control signal. The ESP32-S3 communicates
+with the stepper driver using digital GPIO signals (STEP, DIR, and ENABLE), and no
+feedback is returned from either actuator. All motion-related state is therefore
+tracked internally by the controller using commanded increments and calibrated limits.
 
 \subsubsection{High-Level Software Architecture}
 The software architecture mirrors the hardware modularity and is structured into four primary functional blocks executed on the ESP32:
@@ -54,12 +72,18 @@ These modules are executed sequentially within a timed control loop, ensuring de
 Figure~\ref{fig:control_flow} represents the primary data and control flow of the system. The flow proceeds as follows:
 
 \begin{itemize}
-    \item The MCU receives wireless packets via the directional antenna and extracts the corresponding RSSI values
-    \item Filtered RSSI measurements are passed to the state encoding block along with the current antenna orientation
-    \item The decision module evaluates the current state and selects an action according to the active alignment strategy
-    \item The antenna control module issues step and direction commands to the motor driver
-    \item The stepper motor rotates the antenna, and the system waits for mechanical stabilization
-    \item The updated antenna orientation affects subsequent RSSI measurements, closing the control loop
+    \item The MCU receives wireless packets via the directional antenna and extracts
+    the corresponding RSSI values
+    \item Filtered RSSI measurements are passed to the state encoding block together
+    with the current azimuth and tilt indices
+    \item The decision module evaluates the current state and selects an action
+    according to the active alignment strategy
+    \item The antenna control module issues either a stepper command for azimuth or a
+    servo update for tilt
+    \item The antenna is allowed to settle mechanically before the next RSSI batch is
+    acquired
+    \item The updated antenna orientation affects subsequent RSSI measurements,
+    thereby closing the control loop
 \end{itemize}
 
 This closed-loop operation continues until convergence criteria are met or the system is manually terminated.

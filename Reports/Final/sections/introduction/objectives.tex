@@ -2,6 +2,8 @@
 
 The objectives of this project are:
 \begin{itemize}
-    \item To design and implement a low-cost embedded system capable of measuring RSSI in real time and mechanically steering a directional antenna
-    \item To develop and evaluate lightweight reinforcement learning-based alignment strategies, comparing their performance against baseline methods
+    \item To design and fabricate a low-cost receiver platform capable of measuring RSSI in real time and mechanically steering a directional antenna in azimuth and tilt
+    \item To develop embedded firmware that performs RSSI acquisition, signal conditioning, state encoding, actuator control, and experiment logging on the ESP32-S3
+    \item To formulate and deploy a lightweight tabular Q-learning policy that can execute on the embedded platform without online training
+    \item To compare the deployed reinforcement learning approach against baseline alignment methods, namely fixed orientation, exhaustive scanning, and RSSI-based hill-climbing, using consistent evaluation metrics
 \end{itemize}
