@@ -57,17 +57,7 @@ The software architecture mirrors the hardware modularity and is structured into
 
 These modules are executed sequentially within a timed control loop, ensuring deterministic behavior and repeatable experimental conditions.
 
-
 \subsubsection{Data Flow and Control Loop}
-
-\begin{figure}[H]
-    \vspace{1em} 
-    \centering
-    \includegraphics[width=1\textwidth]{images/flowdiagram.jpg}
-    \vspace{0.25cm}
-    \caption{System Data Flow Diagram}
-    \label{fig:control_flow}
-\end{figure}
 
 Figure~\ref{fig:control_flow} represents the primary data and control flow of the system. The flow proceeds as follows:
 
@@ -87,3 +77,12 @@ Figure~\ref{fig:control_flow} represents the primary data and control flow of th
 \end{itemize}
 
 This closed-loop operation continues until convergence criteria are met or the system is manually terminated.
+
+\begin{figure}[H]
+    \vspace{1em} 
+    \centering
+    \includegraphics[width=1\textwidth]{images/flowdiagram.jpg}
+    \vspace{0.25cm}
+    \caption{System Data Flow Diagram}
+    \label{fig:control_flow}
+\end{figure}
