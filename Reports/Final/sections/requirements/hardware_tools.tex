@@ -20,6 +20,14 @@ The firmware is developed using the Arduino IDE for rapid prototyping.
     {\centering \small\itshape (Source: ESP32 Series Datasheet, Espressif Systems)\par}
 \end{figure}
 
+Figure~\ref{fig:esp32_block_diagram} highlights why the ESP32-S3 is suitable as the
+central node of the proposed system. The diagram shows that USB-to-UART programming,
+on-chip power regulation, wireless communication, and general peripheral interfacing are
+all integrated around the main module. For this project, that integration reduces the
+need for additional support circuitry and allows a single controller to handle RSSI
+acquisition, actuator control, and serial debugging within a compact embedded platform.
+
+\vspace{0.5cm}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/esp32_gpio_diagram.png} 
@@ -29,6 +37,14 @@ The firmware is developed using the Arduino IDE for rapid prototyping.
     \vspace{0.3em} 
     {\centering \small\itshape (Source: ESP32 Series Datasheet, Espressif Systems)\par}
 \end{figure}
+
+Figure~\ref{fig:esp32_gpio} is useful from an implementation perspective because it maps
+the physical board elements that are directly relevant during prototyping. The exposed
+pin headers provide the electrical interface for PWM, digital motor-control signals, and
+power distribution, while the reset and boot buttons simplify firmware upload and test
+iteration. This figure supports the practical requirement that the
+controller must be easy to program, debug, and connect to the rest of the alignment
+hardware.
 
 
 \subsubsection{Stepper Motor}
@@ -44,6 +60,12 @@ The NEMA 17 stepper motor typically has a full-step angle of 1.8°, providing 20
     \vspace{0.3em} 
     {\centering \small\itshape (Source: ATO Nema 17 Stepper Motor Specs)\par}
 \end{figure}
+
+Figure~\ref{fig:stepper_motor} shows the mechanical outline and mounting dimensions of
+the NEMA 17 motor. This is important as a specification reference and also for
+mechanical integration of the antenna platform, since the shaft size, body dimensions,
+and mounting-hole pattern determine how the motor can be fixed to the rotating base and
+how reliably azimuth torque can be transmitted to the antenna assembly.
 
 Stepper motors can be directly interfaced with the ESP32 via a step/direction driver like the A4988. This allows precise control of angular displacement through simple pulse sequences, eliminating the need for feedback sensors such as encoders.
 
@@ -62,6 +84,12 @@ The TowerPro MG90S micro servo was selected to control the elevation (tilt) angl
     \vspace{0.3em} 
     {\centering \small\itshape (Source: TowerPro MG90S Datasheet)\par}
 \end{figure}
+
+Figure~\ref{fig:mg90s_servo} provides the dimensional constraints of the selected tilt
+actuator. For this project, the compact form factor is significant because the servo is
+mounted on the moving structure together with the antenna and controller hardware. The
+small size and standard horn geometry make it easier to achieve a lightweight tilt
+mechanism without adding excessive inertia that could degrade positioning stability.
 
 The MG90S operates on a 4.8-6 V DC supply and draws a stall current of up to 650 mA. 
 Control is achieved via standard PWM pulses from the ESP32-S3, which allows direct 
@@ -86,6 +114,14 @@ The A4988 is a complete microstepping driver designed for bipolar stepper motors
     {\centering \small\itshape (Source: Allegro Microsystems product documentation)\par}
 \end{figure}
 
+Figure~\ref{fig:stepper_motor_driver} explains the
+signal flow between the controller and the azimuth actuator. The diagram shows that the
+microcontroller only needs low-complexity control signals such as STEP, DIR, and mode
+selection, while the A4988 handles the higher-current phase driving required by the
+motor. This separation is valuable in the present system because it keeps the ESP32-S3
+interface simple and allows precise motor motion without burdening the controller with
+direct coil commutation.
+
 The A4988 receives step commands from the ESP32-S3 according to the RL-based alignment algorithm, precisely rotating the stepper motors to orient the directional antenna. Its microstepping capability ensures smooth and repeatable movements, which is essential for stable and accurate RSSI-based alignment.
 
 
@@ -109,6 +145,13 @@ The antenna's~low~mass ($\approx$19--40~g) allows reliable mounting on small ste
     \vspace{0.3em} 
     {\centering \small\itshape (Source: Yagi Antenna Datasheet, ANTOSIYA)\par}
 \end{figure}
+
+Figure~\ref{fig:pcb_antenna} illustrates both the physical antenna geometry and its
+directional radiation behavior. The 3D radiation pattern confirms the presence of a
+dominant main lobe, which is essential for RSSI-based alignment because antenna rotation
+produces a measurable change in received signal strength. This the property
+that enables the controller, whether baseline or RL-based, to infer better orientations
+from RSSI feedback.
 
 \subsubsection{RF Interfacing}
 
