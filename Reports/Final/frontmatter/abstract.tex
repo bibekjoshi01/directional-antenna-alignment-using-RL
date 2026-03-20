@@ -20,10 +20,14 @@ the system is designed to be evaluated against conventional baseline methods,
 including fixed orientation, exhaustive angular scanning, and RSSI-based
 hill-climbing. The evaluation framework considers convergence time, alignment
 accuracy, link stability, and mechanical efficiency under indoor and outdoor test
-conditions. The work therefore establishes a complete hardware and firmware platform
-for investigating whether lightweight reinforcement learning can provide practical
-benefits for autonomous directional antenna alignment on resource-constrained
-wireless systems.
+conditions. Across the tested practical scenarios, the reinforcement learning controller 
+achieved an average final RSSI of $-49.55$~dBm, compared to $-48.95$~dBm obtained using 
+exhaustive angular scanning, indicating a marginal reduction in peak signal strength. 
+However, the proposed method reduced the average convergence time from 54.20~s to 9.62~s, 
+corresponding to an improvement of approximately 82.25\%.
+These results indicate that the proposed method provides a useful time--accuracy trade-off
+for autonomous directional antenna alignment on resource-constrained wireless
+systems, rather than absolute RSSI superiority over exhaustive search.
 
 \vspace{0.5cm}
 
