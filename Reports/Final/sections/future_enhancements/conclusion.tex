@@ -1,26 +1,28 @@
 \newpage
 \section{CONCLUSION}
 
-This project developed and validated an autonomous directional antenna alignment system
-based on reinforcement learning and low-cost embedded hardware. The work combined a custom
+This project developed an autonomous directional antenna alignment prototype based on
+reinforcement learning and low-cost embedded hardware. The work combined a custom
 mechanical platform, ESP32-S3-based sensing and actuation, offline Q-learning, and both
-simulation and practical evaluation into a complete end-to-end prototype.
-The final results show that the proposed RL-based controller outperformed the selected
-baseline methods in the most important practical metrics. Compared with exhaustive
-scanning, the RL controller achieved substantially lower convergence time while also
-producing stronger final RSSI in the tested scenarios. Compared with hill-climbing, the
-RL method showed superior robustness, better convergence reliability, and greater immunity
-to local maxima, particularly in multipath-rich indoor trials and partially obstructed
-outdoor trials.
+simulation and practical evaluation into a complete end-to-end system.
+The final results indicate that, in the tested scenarios, the RL-based controller offered
+a useful trade-off between alignment quality and convergence time. Compared with
+exhaustive scanning, the RL controller converged substantially faster while achieving
+final RSSI values that remained close to the exhaustive reference. Compared with
+hill-climbing, the RL method showed more consistent performance across the practical
+trials, especially in indoor multipath conditions and partially obstructed outdoor
+conditions.
 
 The system was developed under constraints of cost and component availability, which
 influenced certain hardware design decisions, including the use of a custom PCB-based slip
-ring and readily available actuators. While these choices enabled a functional and
-cost-effective prototype, they also introduce limitations in terms of long-term reliability,
-signal integrity, and mechanical precision.
+ring and readily available actuators; as a result, the current prototype remains limited
+in long-term reliability, signal integrity, mechanical precision, and the range of
+practical conditions tested.
+In addition, the RL controller depends on offline training over a discretized state space,
+so its performance may reduce when operating conditions differ significantly from those
+represented during training.
 
-Overall, the project demonstrates that reinforcement learning can provide an effective and
-practical solution for autonomous antenna alignment in low-cost wireless systems. The
-prototype and results presented in this report establish a strong foundation for future
-work on adaptive beam steering, intelligent wireless links, and embedded RL-driven control
-systems.
+Overall, the project suggests that reinforcement learning is a good approach for
+autonomous antenna alignment in low-cost wireless systems. The prototype and results
+presented in this report provide a foundation for future work on adaptive beam steering,
+intelligent wireless links, and embedded RL-driven control systems.
