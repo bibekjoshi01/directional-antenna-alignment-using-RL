@@ -1,6 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import matplotlib as mpl
+
+mpl.rcParams['font.family'] = 'serif'
+mpl.rcParams['font.family'] = 'Times New Roman'
+mpl.rcParams['axes.titlesize'] = 12
+mpl.rcParams['axes.labelsize'] = 12
+mpl.rcParams['legend.fontsize'] = 11
+mpl.rcParams['xtick.labelsize'] = 10
+mpl.rcParams['ytick.labelsize'] = 10
 
 from baseline_algos.exhaustive_scan import ExhaustiveScan2D
 from ant_env.environment import AntennaEnvironmentSim

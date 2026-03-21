@@ -3,6 +3,17 @@ from q_learning.rl_env import RLEnvironment
 from ant_env.environment import AntennaEnvironmentSim
 from q_learning.train import train_agent
 
+import matplotlib as mpl
+
+mpl.rcParams["font.family"] = "serif"
+mpl.rcParams["font.family"] = "Times New Roman"
+mpl.rcParams["axes.titlesize"] = 14
+mpl.rcParams["axes.labelsize"] = 14
+mpl.rcParams["legend.fontsize"] = 14
+mpl.rcParams["xtick.labelsize"] = 12
+mpl.rcParams["ytick.labelsize"] = 12
+
+
 antenna_env = AntennaEnvironmentSim()
 env_wrapper = RLEnvironment(antenna_env=antenna_env)
 agent = QLearningTrainer()

@@ -6,6 +6,17 @@ from q_learning.rl_env import RLEnvironment
 from ant_env.environment import AntennaEnvironmentSim
 from q_learning.test import test_agent
 
+import matplotlib as mpl
+
+mpl.rcParams["font.family"] = "serif"
+mpl.rcParams["font.family"] = "Times New Roman"
+mpl.rcParams["axes.titlesize"] = 12
+mpl.rcParams["axes.labelsize"] = 12
+mpl.rcParams["legend.fontsize"] = 11
+mpl.rcParams["xtick.labelsize"] = 10
+mpl.rcParams["ytick.labelsize"] = 10
+
+
 # Initialize environment
 antenna_env = AntennaEnvironmentSim()
 env_wrapper = RLEnvironment(

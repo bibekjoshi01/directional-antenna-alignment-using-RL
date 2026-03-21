@@ -3,6 +3,16 @@ import matplotlib.pyplot as plt
 from baseline_algos.hill_climbing import HillClimb2D
 from ant_env.environment import AntennaEnvironmentSim
 
+import matplotlib as mpl
+
+mpl.rcParams['font.family'] = 'serif'
+mpl.rcParams['font.family'] = 'Times New Roman'
+mpl.rcParams['axes.titlesize'] = 12
+mpl.rcParams['axes.labelsize'] = 12
+mpl.rcParams['legend.fontsize'] = 11
+mpl.rcParams['xtick.labelsize'] = 10
+mpl.rcParams['ytick.labelsize'] = 10
+
 env = AntennaEnvironmentSim()
 
 hc = HillClimb2D(
@@ -14,7 +24,7 @@ hc = HillClimb2D(
     max_iters=200,
     patience=15,
     settle_time=0.0,
-    init_point=(140, 70),  # deliberately bad start
+    init_point=(150, 70),  # deliberately bad start
 )
 
 start_time = time.time()
@@ -64,7 +74,7 @@ rssi_values = [p["rssi"] for p in path]
 plt.figure(figsize=(6, 4))
 plt.plot(range(len(rssi_values)), rssi_values, "-o")
 plt.xlabel("Step")
-plt.ylabel("Measured RSSI")
+plt.ylabel("Measured RSSI (dBm)")
 plt.title("RSSI Convergence During Hill Climbing")
 plt.grid(True)
 plt.show()
