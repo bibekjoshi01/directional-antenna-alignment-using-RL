@@ -42,7 +42,7 @@ would converge reliably without overfitting to a single start angle.
 \caption{Q-Learning Training Configuration}
 \label{tab:q_learning_parameters}
 \renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|p{5.2cm}|c|p{5.2cm}|}
+\begin{tabular}{|p{5.2cm}|p{2.6cm}|p{5.2cm}|}
 \hline
 \textbf{Parameter} & \textbf{Value} & \textbf{Purpose} \\
 \hline
@@ -58,7 +58,7 @@ Initial exploration rate $\epsilon$ & 1.0 & Supports broad exploration at the st
 \hline
 Final exploration rate & 0.05 & Preserves limited exploration near convergence \\
 \hline
-Exploration decay & 0.995 per episode & Gradually shifts learning toward exploitation \\
+Exploration decay & 0.995 / episode & Gradually shifts learning toward exploitation \\
 \hline
 Movement penalty $\lambda$ & 0.35 & Discourages unnecessary actuator motion \\
 \hline
@@ -76,7 +76,7 @@ runtime file parsing on the microcontroller and ensured deterministic startup be
 \caption{Embedded RL Deployment Summary}
 \label{tab:rl_deployment_summary}
 \renewcommand{\arraystretch}{1.4}
-\begin{tabular}{|p{4.8cm}|c|p{5.3cm}|}
+\begin{tabular}{|p{4.8cm}|p{2.6cm}|p{5.3cm}|}
 \hline
 \textbf{Item} & \textbf{Value} & \textbf{Remarks} \\
 \hline
@@ -94,7 +94,7 @@ Stored numeric type & 32-bit float & Preserves training precision with low memor
 \hline
 Estimated memory footprint & 12.3~kB & Well within ESP32-S3 memory constraints \\
 \hline
-Inference policy & Greedy $\arg\max Q(s,a)$ & No online learning during hardware testing \\
+Inference policy & $\arg\max Q(s,a)$ & No online learning during hardware testing \\
 \hline
 \end{tabular}
 \end{table}

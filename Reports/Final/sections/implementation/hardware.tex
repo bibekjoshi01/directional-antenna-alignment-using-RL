@@ -9,8 +9,6 @@ modular separation between power, logic, and actuation subsystems.
 
 The physical architecture is organized into a vertical stack consisting of a Power Deck, a Logic Deck, and a rotating Top Floor.
 
-\textbf{Stationary Base (Power \& Logic Decks):} The lower foundation, designated as the Power Deck, houses the energy source consisting of a 3S Li-Ion battery pack. This deck features a dovetail rail mechanism to facilitate easy removal and maintenance of the batteries. Power is routed through a Battery Management System (BMS) to a female XT60 connector. Above this sits the Logic Deck, which encloses the primary azimuth actuator, a NEMA 17 bipolar stepper motor. This motor bears the structural load of the rotating upper assembly.
-
 \begin{figure}[H]
     \vspace{1em} 
     \centering
@@ -18,6 +16,8 @@ The physical architecture is organized into a vertical stack consisting of a Pow
     \caption{3D Design of the Hardware Enclosure}
     \label{fig:case_design}
 \end{figure}
+
+\textbf{Stationary Base (Power \& Logic Decks):} The lower foundation, designated as the Power Deck, houses the energy source consisting of a 3S Li-Ion battery pack. This deck features a dovetail rail mechanism to facilitate easy removal and maintenance of the batteries. Power is routed through a Battery Management System (BMS) to a female XT60 connector. Above this sits the Logic Deck, which encloses the primary azimuth actuator, a NEMA 17 bipolar stepper motor. This motor bears the structural load of the rotating upper assembly.
 
 \textbf{Rotating Turret:} The upper rotating platform acts as the mounting chassis for
 the main controller (ESP32-S3), the elevation actuator (MG90S servo), and the antenna
@@ -35,18 +35,17 @@ cost, allow custom signal routing, and enable tight integration with the system
 mechanical envelope. The design also permits easy modification of ring width and
 spacing to improve contact reliability during iterative prototyping.
 
-
-\textbf{Stator (Base Side):} The stator consists of a copper-clad board etched with four concentric conductive rings. These rings correspond to the required transmission channels: 5V power, ground,
-and digital control signals (STEP and DIR) for the azimuth motor driver.
-
 \begin{figure}[H]
     \vspace{1.5em} 
     \centering
-    \includegraphics[width=1\textwidth]{images/copper_plate.jpg}
+    \includegraphics[width=0.9\textwidth]{images/copper_plate.jpg}
     \vspace{0.15cm}
     \caption{Design of Concentric Copper Plate}
     \label{fig:elect_inteface}
 \end{figure}
+
+\textbf{Stator (Base Side):} The stator consists of a copper-clad board etched with four concentric conductive rings. These rings correspond to the required transmission channels: 5V power, ground,
+and digital control signals (STEP and DIR) for the azimuth motor driver.
 
 \textbf{Rotor (Top Side):} The rotating contact mechanism utilizes spring-loaded pogo pins. These are arranged in redundant pairs for each ring to ensure continuous electrical continuity even if one pin momentarily disconnects due to mechanical vibration.
 
@@ -74,7 +73,7 @@ tilt-control signal needs to cross the slip ring.
 \begin{figure}[H]
     \centering
     \rotatebox{90}{%
-        \includegraphics[width=0.85\textheight]{images/circuit_diagram.png}
+        \includegraphics[width=0.9\textheight]{images/circuit_diagram.png}
     }
     \caption{Schematic Diagram of Circuit Connections}
     \label{fig:circuit_diagram}

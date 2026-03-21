@@ -7,12 +7,6 @@ field validation within a single end-to-end workflow. The implementation was car
 out in four tightly connected stages: hardware fabrication, firmware development,
 offline model training, and practical experimentation.
 
-At the hardware level, a two degree-of-freedom positioning mechanism was developed to rotate the
-receiving directional antenna in pan and tilt while preserving stable power and signal
-routing across the rotating interface. At the embedded level, the ESP32-S3 was used
-as the central controller for packet reception, RSSI extraction, servo and stepper
-actuation, and policy execution.
-
 \vspace{0.5cm}
 \begin{table}[H]
 \centering
@@ -22,7 +16,7 @@ actuation, and policy execution.
 \begin{tabular}{|
 >{\raggedright\arraybackslash}p{3.2cm}|
 >{\raggedright\arraybackslash}p{4.2cm}|
->{\raggedright\arraybackslash}p{6.2cm}|
+>{\raggedright\arraybackslash}p{5.4cm}|
 }
 \hline
 \textbf{Stage} & \textbf{Primary Output} & \textbf{Purpose} \\
@@ -37,6 +31,12 @@ Practical Validation & Indoor and outdoor trial records at 10~m to 30~m & To gen
 \hline
 \end{tabular}
 \end{table}
+
+At the hardware level, a two degree-of-freedom positioning mechanism was developed to rotate the
+receiving directional antenna in pan and tilt while preserving stable power and signal
+routing across the rotating interface. At the embedded level, the ESP32-S3 was used
+as the central controller for packet reception, RSSI extraction, servo and stepper
+actuation, and policy execution.
 
 The implementation details in the following subsections describe how these stages were
 realized and how the final prototype was prepared for experimental evaluation.
