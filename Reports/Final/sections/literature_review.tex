@@ -12,45 +12,49 @@ Omnidirectional antennas provide wide coverage but suffer from lower gain and hi
 In contrast, directional antennas concentrate energy in specific directions, offering higher gain, extended range, reduced interference, and improved energy efficiency~\cite{ref6}. 
 Directional antennas are therefore widely adopted in long-range networks such as Wireless Sensor Networks (WSNs), UAV communication systems, IoT deployments, and mobile ad-hoc networks. 
 However, their performance depends critically on accurate alignment between transmitter and receiver. 
-For directional antennas to function effectively, precise orientation is essential. 
-Traditional antenna alignment relies on GPS-based coordinate tracking methods or signal tracking control methods (TCM)~\cite{ref7,ref8}. 
-Other control-theoretic methods include imitation human intelligence control approaches, which attempt to mimic expert decision-making for antenna tracking~\cite{ref9}. 
-Servo tracking systems have also been designed to enable precise mechanical alignment of vehicle-mounted antennas, demonstrating early practical implementations of automated antenna control~\cite{ref10}. 
-These methods can improve performance over simple feedback-based systems but often require complex modelling. 
-They suffer from limitations including GPS instability, high hardware cost, and reduced reliability in dynamic environments. 
-In the absence of reliable position information, alignment must be performed using signal feedback, particularly the Received Signal Strength Indicator (RSSI). 
-RSSI-based alignment allows the antenna to adjust orientation to maximize signal strength without explicit knowledge of node positions~\cite{ref11,ref12}.
+For directional antennas to function effectively, precise orientation is essential.
 
-Early RSSI-based approaches employed exhaustive scanning of antenna orientations to locate the direction that maximizes RSSI. 
-While simple, such methods are inefficient and unsuitable for real-time systems due to high latency and energy consumption~\cite{ref11,ref12}. 
-More advanced methods incorporate estimation and control techniques including Kalman filters, unscented Kalman filters, and fuzzy logic controllers, often fusing RSSI with partial GPS data~\cite{ref13}. 
-Autonomous antenna systems capable of self-orientation have also been explored to enhance wireless range and signal quality without human intervention~\cite{ref14}. 
-These approaches improve tracking accuracy but require additional sensors and accurate system models, making them impractical for low-cost embedded platforms. 
+Traditional antenna alignment methods rely on GPS-based coordinate tracking or signal tracking control methods (TCM)~\cite{ref7,ref8}. 
+While these approaches can achieve accurate alignment, they introduce additional hardware cost due to GPS modules and increase system complexity. 
+Furthermore, GPS-based methods suffer from signal instability in indoor or obstructed environments, limiting their reliability for real-time operation in practical deployments. 
+Control-theoretic approaches such as imitation human intelligence control~\cite{ref9} and servo tracking systems~\cite{ref10} provide improved automation but typically depend on accurate system modelling and parameter tuning. 
+This increases implementation complexity and reduces suitability for low-cost embedded systems where computational and sensing resources are limited.
+
+In scenarios where position information is unavailable or unreliable, antenna alignment must be performed using signal feedback, particularly the Received Signal Strength Indicator (RSSI). 
+RSSI-based alignment enables orientation control without explicit knowledge of node positions, reducing hardware requirements and system cost~\cite{ref11,ref12}. 
+However, early RSSI-based approaches rely on exhaustive scanning of antenna orientations to locate the direction that maximizes signal strength. 
+Although simple and low-cost, exhaustive scanning is computationally and mechanically inefficient, resulting in high convergence time and poor real-time feasibility, especially in dynamic environments.
+
+More advanced RSSI-based methods incorporate estimation and control techniques such as Kalman filtering, unscented Kalman filters, and fuzzy logic controllers~\cite{ref13}. 
+These approaches improve robustness by modelling signal variations, but they introduce additional computational overhead and often require auxiliary sensors or prior system knowledge. 
+As a result, hardware complexity increases and embedded suitability decreases, particularly for microcontroller-based implementations.
+
+Autonomous antenna systems capable of self-orientation have also been explored~\cite{ref14}. 
+These systems demonstrate the feasibility of low-cost mechanical alignment using RSSI feedback and servo-based actuation. 
+However, their reliance on heuristic search strategies limits adaptability in noisy or dynamic environments, and convergence speed remains a concern for real-time applications.
+
 A notable control-theoretic approach was introduced by Koru et al.~\cite{ref11}, who developed a nonlinear distributed RSSI feedback control law for GPS-free alignment of UAV-mounted directional antennas. 
-Their method achieves near-global convergence under specific assumptions but depends on accurate estimation of RSSI partial derivatives, which is difficult on low-cost hardware.
+While the method provides strong theoretical guarantees and eliminates the need for GPS, it requires perturbation-based estimation of RSSI gradients. 
+This introduces additional measurement overhead and sensitivity to noise, increasing computational complexity and limiting real-time feasibility on resource-constrained embedded hardware.
 
-Recent research has explored the application of machine learning (ML) to antenna alignment problems where analytical models are complex or unavailable. 
-Supervised learning approaches using MLP, CNN, and LSTM architectures have been shown to achieve high accuracy in predicting antenna alignment from S-parameter measurements~\cite{ref15}. 
-Also, studies have surveyed AI-based beamforming and management techniques for 5G and 6G systems, highlighting the potential of learning-based approaches for optimizing antenna orientation and beam alignment~\cite{ref16}. 
-However, these methods require large labelled datasets and controlled environments.
-Reinforcement Learning (RL) offers a model-free alternative, particularly suited for control problems involving unknown environments. 
-RL-based approaches have been applied to antenna orientation, channel selection, beam selection, and power control~\cite{ref17}. 
-Learning-based beam alignment methods for mmWave and 5G systems using DQN have demonstrated improved performance in highly dynamic environments~\cite{ref17}.
+Recent research has explored the application of machine learning (ML) to antenna alignment problems where analytical models are difficult to obtain. 
+Supervised learning approaches using MLP, CNN, and LSTM architectures have demonstrated high prediction accuracy for antenna alignment based on S-parameter measurements~\cite{ref15}. 
+However, these methods require large labelled datasets, offline training, and controlled data acquisition environments, which significantly increase system cost and limit their applicability for real-time embedded deployment.
 
-Multi-agent RL frameworks have also been investigated for antenna tilt optimization in cellular networks, enabling cooperative learning among neighbouring cells~\cite{ref18}. 
-However, most existing RL-based methods target high-end systems with antenna arrays, beamforming, continuous state spaces, and substantial computational resources, making them unsuitable for low-cost embedded platforms. 
+Similarly, deep reinforcement learning approaches such as Deep Q-Networks (DQN) have been applied to beam alignment in mmWave and 5G systems~\cite{ref17}. 
+These methods are effective in high-dimensional and dynamic environments but rely on neural network inference, which requires substantial memory and computational resources. 
+Such requirements exceed the capabilities of microcontroller-class devices and make these approaches unsuitable for low-cost embedded systems without hardware acceleration.
 
-While significant progress has been made in antenna alignment using RSSI-based control, filtering techniques, and learning-based methods, current solutions exhibit at least one of the following limitations:
+Multi-agent reinforcement learning techniques have also been investigated for antenna tilt optimization in cellular networks~\cite{ref18}. 
+While these methods enable cooperative optimization across multiple nodes, they assume network-level coordination and significant computational infrastructure, resulting in high system complexity and limited applicability to standalone embedded systems.
 
-\begin{itemize}
-    \item Dependence on GPS or additional sensors
-    \item Requirement of accurate system models and derivative estimation
-    \item High computational complexity unsuitable for low-cost embedded devices
-    \item Focus on antenna arrays and beamforming rather than mechanically steerable single antennas
-\end{itemize}
+Overall, existing approaches present clear trade-offs between performance and implementation feasibility. 
+Control-theoretic and estimation-based methods offer strong theoretical performance but require accurate models and higher computational complexity. 
+Exhaustive scanning methods are simple and low-cost but lack real-time efficiency. 
+Supervised and deep learning-based methods provide improved accuracy but demand large datasets and significant computational resources. 
+Additionally, many solutions focus on antenna arrays and beamforming techniques, which increase hardware cost and complexity compared to mechanically steerable single-antenna systems.
 
-This creates a clear research gap for a low-cost, RSSI-driven, reinforcement learning-based antenna alignment system capable of real-time operation on resource-constrained hardware.
-
+\newpage
 \setlength{\LTpre}{1cm}   % no space before table
 \setlength{\LTpost}{1cm}  % no space after table
 \renewcommand{\arraystretch}{1.4}
@@ -118,3 +122,9 @@ Effective in mmWave systems, but unsuitable for single-antenna, low-cost embedde
 \\ \hline
 
 \end{longtable}
+
+
+This analysis highlights a clear research gap for a low-cost, RSSI-driven antenna alignment system that can operate in real time on resource-constrained embedded hardware. 
+The proposed approach addresses this gap by combining simple hardware, RSSI-only feedback, and a lightweight reinforcement learning framework. 
+Unlike existing methods, it avoids dependence on GPS, complex modelling, large datasets, and high computational overhead. 
+As a result, it achieves a more practical balance between cost, hardware complexity, real-time feasibility, and embedded suitability, while maintaining effective alignment performance.
