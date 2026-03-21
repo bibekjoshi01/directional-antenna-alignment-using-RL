@@ -35,11 +35,11 @@ poor initialization.
 \hline
 \textbf{Method} & \textbf{Best RSSI (dBm)} & \textbf{Conv. Time (s)} & \textbf{Actuator Steps} & \textbf{RSSI Samples} & \textbf{Robustness} \\
 \hline
-Exhaustive scan & $-30.20$ & 67.68 & 945 & 18{,}900 & Very high \\
+Exhaustive scan & $-30.14$ & 67.68 & 945 & 18{,}900 & Very high \\
 \hline
-Hill-climbing & $-30.13$ & 6.51 & 42 & 840 & Low to moderate \\
+Hill-climbing & $-32.13$ & 6.51 & 39 & 780 & Low to moderate \\
 \hline
-RL (Q-learning) & $\mathbf{-29.82}$ & $\mathbf{5.51}$ & 100 & 2{,}000 & High \\
+RL (Q-learning) & $\mathbf{-30.82}$ & $\mathbf{5.51}$ & 25 & 500 & High \\
 \hline
 \end{tabular}
 \end{adjustbox}
@@ -78,7 +78,7 @@ robustness to starting orientation.
 \subsubsection{Exhaustive Scanning}
 
 The algorithm successfully identified the global maximum RSSI of
-$-30.20$~dBm at an antenna orientation of $(\theta_{\text{pan}}, \theta_{\text{tilt}}) =
+$-30.14$~dBm at an antenna orientation of $(\theta_{\text{pan}}, \theta_{\text{tilt}}) =
 (88^{\circ}, 90^{\circ})$. This confirms that the simulation environment and antenna
 radiation model produce a well-defined global optimum that can be reliably detected
 through exhaustive exploration.
@@ -99,7 +99,7 @@ angular sweep.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{images/Figure_1.png}
+\includegraphics[width=1\textwidth]{images/Figure_1.png}
 \caption{RSSI Variation During Exhaustive Scanning}
 \label{fig:exhaustive_rssi}
 \end{figure}
@@ -115,14 +115,14 @@ to terminate the search when no further improvement was observed.
 When initialized near the global optimum, the algorithm converged rapidly.
 Starting from an initial orientation of $(40^{\circ}, 70^{\circ})$, hill climbing
 successfully reached a near-optimal alignment of $(90^{\circ}, 86^{\circ})$ with
-a best RSSI of $-30.13$~dBm. Convergence was achieved in 42 actuator steps using
-840 RSSI samples, with a total convergence time of approximately 6.5~seconds.
+a best RSSI of $-32.13$~dBm. Convergence was achieved in 39 actuator steps using
+780 RSSI samples, with a total convergence time of approximately 6.51~seconds.
 This represents an order-of-magnitude improvement in convergence time compared
 to exhaustive scanning, while achieving comparable alignment accuracy.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{images/Figure_2.png}
+\includegraphics[width=0.9\textwidth]{images/Figure_2.png}
 \caption{Path Traced During Hill Climbing}
 \label{fig:hill_climbing_path}
 \end{figure}
@@ -142,7 +142,7 @@ local optimization methods, which lack mechanisms to explore beyond local maxima
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{images/Figure_6.png}
+\includegraphics[width=1\textwidth]{images/Figure_6.png}
 \caption{Unconverged RSSI Variation During Hill Climbing}
 \label{fig:hill_climbing_path_unconverged}
 \end{figure}
@@ -156,14 +156,14 @@ the exhaustive and hill climbing experiments.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{images/Figure_7.png}
+\includegraphics[width=1\textwidth]{images/Figure_7.png}
 \caption{RL Training Reward Per Episode}
 \label{fig:training_reward_rl}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{images/Figure_8.png}
+\includegraphics[width=1\textwidth]{images/Figure_8.png}
 \caption{Cumulative Best RSSI Over Episodes}
 \label{fig:cumulative_rl_path}
 \end{figure}
@@ -188,7 +188,7 @@ microcontrollers such as the ESP32-S3.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{images/Figure_9.png}
+\includegraphics[width=0.9\textwidth]{images/Figure_9.png}
 \caption{RL Q-Learning Path}
 \label{fig:rl_rssi_convergence}
 \end{figure}
@@ -196,6 +196,7 @@ microcontrollers such as the ESP32-S3.
 \begin{figure}[H]
 \centering
 \includegraphics[width=1\textwidth]{images/Figure_10.png}
+\vspace{0.15cm}
 \caption{RL RSSI Convergence}
 \label{fig:rl_rsssiconv}
 \end{figure}
