@@ -29,6 +29,29 @@ execute on an embedded platform with limited memory and deterministic runtime
 requirements. In this project, learning is performed offline and only the trained
 Q-table is deployed to the hardware.
 
+\subsubsection{Q-Learning}
+
+Q-learning was selected because it provides a good balance between learning capability,
+implementation simplicity, and embedded feasibility for the present problem. The antenna
+alignment task uses a compact discrete state-action space, and the controller must run
+with predictable memory and computation on the ESP32-S3. Under these constraints,
+tabular Q-learning can be trained offline and then deployed as a fixed lookup table with
+very low runtime overhead.
+
+SARSA was considered less suitable because it is an on-policy method, meaning that its
+updates depend on the same exploratory policy used during training. This often produces
+more conservative behavior, which can be useful in safety-critical domains, but in the
+present work the objective was to learn a strong greedy deployment policy from offline
+simulation and then execute it deterministically on hardware. Q-learning is more aligned
+with this objective because it directly estimates the value of the greedy target policy.
+
+Deep Q-Networks (DQN) were also not adopted because their advantages are more relevant
+to large or continuous state spaces. In this project, the state space is intentionally
+kept small through discretization, so a neural network would add training complexity,
+hyperparameter sensitivity, and higher deployment cost without a proportional practical
+benefit. DQN would also complicate on-device inference and reduce transparency compared
+with a tabular policy that can be inspected directly.
+
 
 The problem is formulated as a Markov Decision Process (MDP) comprising:
 \begin{itemize}
@@ -36,12 +59,93 @@ The problem is formulated as a Markov Decision Process (MDP) comprising:
     tilt index, and recent RSSI trend class.
     \item \textbf{Actions ($a_t$):} Discrete antenna adjustments consisting of pan
     left, pan right, tilt up, tilt down, and hold.
-    \item \textbf{Reward ($r_t$):} Scalar feedback representing the change in
+ \item \textbf{Reward ($r_t$):} Scalar feedback representing the change in
     averaged RSSI after taking an action, together with a small penalty on movement.
     \item \textbf{Policy:} During training, an $\epsilon$-greedy policy balances
     exploration and exploitation. During deployment, greedy action selection is used.
 \end{itemize}
 
+\subsubsection{Exploration--Exploitation Trade-off}
+
+The RL agent is trained using an $\epsilon$-greedy strategy so that it can first explore
+the search space and later exploit the best actions discovered during learning. A high
+initial exploration rate is necessary because the agent must experience both favorable
+and unfavorable antenna orientations in order to learn a meaningful Q-table rather than
+overfit to a few starting positions.
+
+As training progresses, $\epsilon$ is gradually reduced so that the updates increasingly
+reflect exploitation of higher-value actions. This decay is justified because once the
+agent has sampled the practical state space sufficiently, continuing strong exploration
+would only slow convergence of the Q-values and inject unnecessary randomness into the
+learned policy. During deployment, exploration is disabled entirely so that the embedded
+controller behaves repeatably and does not intentionally take suboptimal actions on
+hardware.
+
+\subsubsection{Training Convergence}
+
+Training convergence in this work refers to stabilization of the learned Q-table and the
+associated improvement trends over repeated episodes. In practice, convergence was judged
+from the reward-per-episode and best-RSSI curves: once these curves stopped showing
+meaningful long-term improvement and the policy repeatedly reached high-RSSI regions from
+diverse initial states, the Q-table was treated as sufficiently converged for export.
+
+This practical notion of convergence is appropriate here because the objective is not a
+formal proof of optimality in an abstract MDP, but a stable policy that can be deployed
+reliably on embedded hardware. The final number of training episodes and the exploration
+decay schedule were therefore chosen to produce repeatable convergence behavior without
+excessive offline training cost.
+
+\subsubsection{Q-Learning Algorithm Pseudocode}
+
+The following code-style pseudocode summarizes the adopted Q-learning training and
+deployment procedure.
+
+\begin{minted}[linenos, fontsize=\small]{c}
+# Initialize Q-table
+Initialize Q[s, a] for all states s and actions a
+Set alpha (learning rate), gamma (discount factor), 
+epsilon (exploration rate)
+
+for each episode:
+    reset environment to a valid random initial orientation
+    
+    measure averaged RSSI
+    encode current state s
+
+    for each step until terminal condition or max_steps:
+        
+        # Action selection (epsilon-greedy)
+        with probability epsilon:
+            choose a random action a
+        else:
+            choose a = argmax_a Q[s, a]
+
+        # Apply action
+        apply action a
+        
+        measure next averaged RSSI
+        compute reward r from RSSI change and movement penalty
+        
+        encode next state s_next
+
+        # Q-learning update
+        Q[s, a] = Q[s, a] + alpha * (
+            r + gamma * max_a' Q[s_next, a'] - Q[s, a]
+        )
+
+        s = s_next
+
+    # Exploration decay
+    decay epsilon
+
+# Export trained model
+export converged Q-table to ESP32-S3 firmware
+
+# Deployment (inference only)
+during deployment:
+    choose a = argmax_a Q[s, a]
+    do not perform online learning
+\end{minted}
 
 \subsubsection{State Space Design}
 The state space represents the information available to the RL agent at each decision

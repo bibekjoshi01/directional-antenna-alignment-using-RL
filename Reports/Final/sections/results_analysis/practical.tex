@@ -100,6 +100,10 @@ RL (Q-learning) & $-49.55$ & $\mathbf{9.62}$ & $\mathbf{57}$ & $\mathbf{95}$ & $
 \end{adjustbox}
 \end{table}
 
+In this table, the reported RSSI standard deviation corresponds to the RSSI variability
+metric defined in the methodology section and is used here to indicate repeatability
+across repeated trials.
+
 The overall averages show that RL achieved much faster convergence than exhaustive
 scan while maintaining a final RSSI close to the exhaustive reference and stronger
 average performance than hill-climbing. Exhaustive scan retained the best final RSSI and perfect
@@ -334,7 +338,7 @@ Exhaustive scan should be reliable but slow & Full search should locate the best
 \hline
 Hill-climbing should be fast but locally sensitive & Greedy local search can terminate at suboptimal peaks & Fast convergence but low-to-moderate robustness & Short practical convergence time but reduced success rate and weaker final RSSI indoors \\
 \hline
-RL should balance speed and robustness & Learned value estimates should guide the search beyond immediate local RSSI gradients & Fastest simulated convergence and best final RSSI & Near-exhaustive average RSSI, faster convergence than exhaustive scan, and strong repeatability \\
+RL should balance speed and robustness & Learned value estimates should guide the search beyond immediate local RSSI gradients & Fastest simulated convergence with competitive final RSSI & Near-exhaustive average RSSI, faster convergence than exhaustive scan, and strong repeatability \\
 \hline
 Indoor channels should be harder than outdoor channels & Multipath and obstruction distort the RSSI surface & Not fully captured in idealized form & Lower final RSSI and longer convergence time for all methods, especially hill-climbing \\
 \hline

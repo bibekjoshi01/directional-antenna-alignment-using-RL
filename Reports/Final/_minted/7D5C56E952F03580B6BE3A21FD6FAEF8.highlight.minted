@@ -1,0 +1,46 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Initialize Q\PYGZhy{}table}
+\PYG{n}{Initialize}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{all}\PYG{+w}{ }\PYG{n}{states}\PYG{+w}{ }\PYG{n}{s}\PYG{+w}{ }\PYG{n}{and}\PYG{+w}{ }\PYG{n}{actions}\PYG{+w}{ }\PYG{n}{a}
+\PYG{n}{Set}\PYG{+w}{ }\PYG{n}{alpha}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{learning}\PYG{+w}{ }\PYG{n}{rate}\PYG{p}{)}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gamma}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{discount}\PYG{+w}{ }\PYG{n}{factor}\PYG{p}{)}\PYG{p}{,}
+\PYG{n}{epsilon}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{exploration}\PYG{+w}{ }\PYG{n}{rate}\PYG{p}{)}
+
+\PYG{k}{for}\PYG{+w}{ }\PYG{n}{each}\PYG{+w}{ }\PYG{n}{episode}\PYG{o}{:}
+\PYG{+w}{    }\PYG{n}{reset}\PYG{+w}{ }\PYG{n}{environment}\PYG{+w}{ }\PYG{n}{to}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{n}{valid}\PYG{+w}{ }\PYG{n}{random}\PYG{+w}{ }\PYG{n}{initial}\PYG{+w}{ }\PYG{n}{orientation}
+
+\PYG{+w}{    }\PYG{n}{measure}\PYG{+w}{ }\PYG{n}{averaged}\PYG{+w}{ }\PYG{n}{RSSI}
+\PYG{+w}{    }\PYG{n}{encode}\PYG{+w}{ }\PYG{n}{current}\PYG{+w}{ }\PYG{n}{state}\PYG{+w}{ }\PYG{n}{s}
+
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{each}\PYG{+w}{ }\PYG{n}{step}\PYG{+w}{ }\PYG{n}{until}\PYG{+w}{ }\PYG{n}{terminal}\PYG{+w}{ }\PYG{n}{condition}\PYG{+w}{ }\PYG{n}{or}\PYG{+w}{ }\PYG{n}{max\PYGZus{}steps}\PYG{o}{:}
+
+\PYG{+w}{        }\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Action selection (epsilon\PYGZhy{}greedy)}
+\PYG{+w}{        }\PYG{n}{with}\PYG{+w}{ }\PYG{n}{probability}\PYG{+w}{ }\PYG{n}{epsilon}\PYG{o}{:}
+\PYG{+w}{            }\PYG{n}{choose}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{n}{random}\PYG{+w}{ }\PYG{n}{action}\PYG{+w}{ }\PYG{n}{a}
+\PYG{+w}{        }\PYG{n+nl}{else}\PYG{p}{:}
+\PYG{+w}{            }\PYG{n}{choose}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{argmax\PYGZus{}a}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}
+
+\PYG{+w}{        }\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Apply action}
+\PYG{+w}{        }\PYG{n}{apply}\PYG{+w}{ }\PYG{n}{action}\PYG{+w}{ }\PYG{n}{a}
+
+\PYG{+w}{        }\PYG{n}{measure}\PYG{+w}{ }\PYG{n}{next}\PYG{+w}{ }\PYG{n}{averaged}\PYG{+w}{ }\PYG{n}{RSSI}
+\PYG{+w}{        }\PYG{n}{compute}\PYG{+w}{ }\PYG{n}{reward}\PYG{+w}{ }\PYG{n}{r}\PYG{+w}{ }\PYG{n}{from}\PYG{+w}{ }\PYG{n}{RSSI}\PYG{+w}{ }\PYG{n}{change}\PYG{+w}{ }\PYG{n}{and}\PYG{+w}{ }\PYG{n}{movement}\PYG{+w}{ }\PYG{n}{penalty}
+
+\PYG{+w}{        }\PYG{n}{encode}\PYG{+w}{ }\PYG{n}{next}\PYG{+w}{ }\PYG{n}{state}\PYG{+w}{ }\PYG{n}{s\PYGZus{}next}
+
+\PYG{+w}{        }\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Q\PYGZhy{}learning update}
+\PYG{+w}{        }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{alpha}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}
+\PYG{+w}{            }\PYG{n}{r}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{gamma}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{max\PYGZus{}a}\PYG{err}{\PYGZsq{}}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s\PYGZus{}next}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{err}{\PYGZsq{}}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}
+\PYG{+w}{        }\PYG{p}{)}
+
+\PYG{+w}{        }\PYG{n}{s}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{s\PYGZus{}next}
+
+\PYG{+w}{    }\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Exploration decay}
+\PYG{+w}{    }\PYG{n}{decay}\PYG{+w}{ }\PYG{n}{epsilon}
+
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Export trained model}
+\PYG{n}{export}\PYG{+w}{ }\PYG{n}{converged}\PYG{+w}{ }\PYG{n}{Q}\PYG{o}{\PYGZhy{}}\PYG{n}{table}\PYG{+w}{ }\PYG{n}{to}\PYG{+w}{ }\PYG{n}{ESP32}\PYG{o}{\PYGZhy{}}\PYG{n}{S3}\PYG{+w}{ }\PYG{n}{firmware}
+
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Deployment (inference only)}
+\PYG{n}{during}\PYG{+w}{ }\PYG{n}{deployment}\PYG{o}{:}
+\PYG{+w}{    }\PYG{n}{choose}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{argmax\PYGZus{}a}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}
+\PYG{+w}{    }\PYG{k}{do}\PYG{+w}{ }\PYG{n}{not}\PYG{+w}{ }\PYG{n}{perform}\PYG{+w}{ }\PYG{n}{online}\PYG{+w}{ }\PYG{n}{learning}
+\end{MintedVerbatim}

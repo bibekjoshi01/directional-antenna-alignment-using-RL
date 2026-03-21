@@ -27,10 +27,10 @@ propagation conditions:
     trial set.
     \item The receiver starts from a deliberately misaligned orientation selected from
     the same predefined set for all compared algorithms.
-    \item Static runs are performed without intentional disturbance.
-    \item Disturbed runs are performed by introducing a controlled angular offset or a
-    short temporary obstruction after initial alignment.
-    \item Multiple trials are repeated for each environment and disturbance condition.
+    \item Practical evaluation is carried out under static conditions without
+    intentional disturbance so that the compared methods can be assessed under the same
+    controlled setup.
+    \item Multiple trials are repeated for each practical scenario.
 \end{itemize}
 
 \subsubsection{Evaluation Metrics}
@@ -41,45 +41,62 @@ methods, the following metrics are recorded:
 \textbf{Received Signal Strength Indicator (RSSI):} 
 The primary metric for assessing link quality. For each decision step, the reported
 RSSI is the average of 20 consecutive packet-level measurements acquired with a
-10~ms inter-sample delay.
-
-\textbf{Alignment Accuracy ($A_{acc}$):} 
-Measures how close the final orientation selected by an algorithm is to the reference
-orientation obtained by exhaustive scanning over the same practical search region:
+10~ms inter-sample delay. This metric is meaningful
+only if it improves the received signal level observed at the wireless receiver.
+Moreover, RSSI is the direct feedback signal available to all compared algorithms, so it
+serves as the most fundamental common basis for comparison.
 \begin{equation}
-A_{acc} = \left| \theta_{\text{alg}} - \theta_{\text{ref}} \right| +
-\left| \phi_{\text{alg}} - \phi_{\text{ref}} \right|
+RSSI_{\text{avg}}(k) = \frac{1}{N}\sum_{i=1}^{N} RSSI_i(k), \qquad N = 20
 \end{equation}
-where $(\theta_{\text{ref}}, \phi_{\text{ref}})$ denotes the azimuth-tilt pair that
-produces the highest averaged RSSI during the reference exhaustive scan, and
-$(\theta_{\text{alg}}, \phi_{\text{alg}})$ is the final orientation selected by the
-algorithm under test.
 
 \textbf{Convergence Time ($T_{conv}$):} 
-Time required for the algorithm to reach a stable alignment such that:
+Time required for the algorithm to reach a stable alignment decision in the practical
+control loop. In the deployed firmware, convergence is declared when the absolute RSSI
+improvement remains below 0.8~dB for four consecutive control cycles, or when the
+maximum allowed number of decision steps is reached.
+The same convergence rule and runtime stopping logic are applied across the compared
+methods during practical evaluation so that the reported convergence times remain
+directly comparable.
 \begin{equation}
-|RSSI(t) - RSSI_{\text{ref}}| \le \epsilon, \quad \forall t \in [T_{\text{conv}}, T_{\text{conv}}+\tau]
+\left| RSSI_{\text{avg}}(k) - RSSI_{\text{avg}}(k-1) \right| < 0.8~\text{dB},
+\quad \forall k \in [k_c, k_c+3]
 \end{equation}
-where $RSSI_{\text{ref}}$ is the reference maximum averaged RSSI measured by the
-exhaustive scan, $\epsilon = 2$~dB is the acceptance tolerance, and $\tau$ is a short
-verification window of four control cycles.
+\begin{equation}
+T_{conv} = t(k_c)
+\end{equation}
 
-\textbf{Link Stability ($S$):} 
-Variance of RSSI after convergence:
-\begin{equation}
-S = \text{Var}(RSSI(t)), \quad t \in [T_{conv}, T_{conv}+W]
-\end{equation}
-where $W$ corresponds to the next ten logged control cycles after convergence. Lower
-variance indicates better stability and resistance to environmental noise.
+The 0.8~dB threshold was selected as a practical dead-band for the final hardware
+system. It is small enough to indicate that the controller has entered a near-stationary
+high-RSSI region, but large enough to avoid treating packet-level RSSI fluctuation or
+actuator settling noise as meaningful improvement. This metric is included because the
+alignment system is intended for practical use, where fast recovery from misalignment is
+as important as final signal quality.
 
-\textbf{Mechanical Efficiency and Energy Proxy ($E$):} 
-Indirect measure of actuator effort:
+\textbf{Movement Count:} 
+The total number of commanded pan and tilt movements executed before convergence.
+Movement count is used as a practical proxy for actuation effort because lower motion
+generally implies lower mechanical wear, lower energy use, and faster physical
+alignment.
 \begin{equation}
-E = N_{\text{pan}} + N_{\text{tilt}}
+M = N_{\text{pan}} + N_{\text{tilt}}
 \end{equation}
-where $N_{\text{pan}}$ and $N_{\text{tilt}}$ denote the number of commanded azimuth
-and tilt movements respectively. This metric is used as a simple proxy for mechanical
-wear and actuation effort. Lower $E$ indicates more efficient alignment.
+
+\textbf{Success Rate:} 
+The percentage of repeated trials in which a method converges to a stable high-RSSI
+solution within the allowed search procedure. This metric is included to distinguish fast
+but unreliable methods from those that remain consistent across repeated runs.
+\begin{equation}
+SR(\%) = \frac{N_{\text{success}}}{N_{\text{trials}}} \times 100
+\end{equation}
+
+\textbf{RSSI Variability:} 
+The spread of final RSSI values across repeated trials, reported in the results chapter
+using the standard deviation of final RSSI. Lower variability indicates better
+repeatability and greater resistance to environmental and measurement noise.
+\begin{equation}
+\sigma_{\text{RSSI}} = \sqrt{\frac{1}{N_{\text{trials}}}\sum_{j=1}^{N_{\text{trials}}}
+\left(RSSI_{\text{final},j} - \overline{RSSI}_{\text{final}}\right)^2}
+\end{equation}
 
 \subsubsection{Experimental Protocol}
 
@@ -93,17 +110,15 @@ All experiments follow the same protocol to ensure reproducibility:
     settling delay across all algorithms.
     \item Record timestamps, averaged RSSI, orientation indices, chosen actions, and
     convergence status for every control cycle.
-    \item For disturbance tests, apply the same disturbance pattern across compared
-    runs within a trial set.
-    \item Repeat each test condition for at least 20 trials.
-    \item Compare the RL-based method with the baseline approaches: fixed orientation,
-    exhaustive angular scan, and RSSI-based hill-climbing.
+    \item Repeat each practical scenario 10 times for each compared method.
+    \item Compare the RL-based method with the baseline approaches: exhaustive angular
+    scan and RSSI-based hill-climbing.
 \end{itemize}
 
 \subsubsection{Statistical Analysis}
 
-For each metric ($A_{acc}, T_{conv}, S, E$), the mean and standard deviation are
-computed across trials. Because the compared algorithms are run from matched starting
-conditions, paired comparisons can be used where appropriate during the results stage.
-This structure supports a fair and quantitative evaluation of the proposed system under
-practical operating conditions.
+For the reported metrics, averages across repeated trials are used as the primary basis
+for comparison, with standard deviation reported where it helps indicate repeatability.
+Because the compared algorithms are run from matched starting conditions and shared
+runtime settings, the resulting analysis supports a fair practical comparison under the
+tested operating scenarios.
