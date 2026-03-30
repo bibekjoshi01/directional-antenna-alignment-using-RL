@@ -1,193 +1,219 @@
-
 #include <WiFi.h>
-#include <AccelStepper.h>
+#include <ESP32Servo.h>
+#include <Adafruit_NeoPixel.h>
 
 // ------------------- WiFi -------------------
-const char *ssid = "2_4G_SSID";
-const char *password = "WiFiPassword";
+const char *ssid = "ESP32_TX_AP";
+const char *password = "12345678";
 
-// ------------------- Stepper -------------------
-#define DIR_PIN 15
-#define STEP_PIN 2
-#define STEP_MODE AccelStepper::DRIVER
-#define STEPS_PER_DEGREE 5
+// ------------------- Stepper (PAN) -------------------
+#define DIR_PIN 7
+#define STEP_PIN 6
+#define STEPS_PER_DEGREE 2.222
+#define STEP_DELAY_US 3000
 
-AccelStepper stepper(STEP_MODE, STEP_PIN, DIR_PIN);
+Adafruit_NeoPixel LED_RGB(1, 48, NEO_GRBW + NEO_KHZ800);
 
-// ------------------- Parameters -------------------
-#define BUTTON_PIN 0
-
-const int STEP_ANGLE = 5;         // hill-climb step size (degrees)
-const int SAMPLES_PER_POINT = 20; // RSSI averaging
-const int SETTLE_TIME_MS = 500;
-
-#define HYSTERESIS_COUNT 3
-#define SCAN_COOLDOWN 1800000UL // 30 minutes
-
-int RSSI_THRESHOLD = -72; // adaptive later
+// ------------------- Servo (TILT) -------------------
+#define SERVO_PIN 21
+Servo tiltServo;
 
 // ------------------- State -------------------
-int currentAngle = 0;
-unsigned long lastScanTime = 0;
-int lowRssiCounter = 0;
+const int SETTLE_TIME_MS = 300;
+const int SAMPLES = 20;
 
 // ------------------- WiFi -------------------
 void connectWiFi()
 {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
 
-    Serial.print("Connecting WiFi");
-    unsigned long start = millis();
-    while (WiFi.status() != WL_CONNECTED)
+  Serial.print("Connecting WiFi");
+  unsigned long start = millis();
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+    if (millis() - start > 15000)
     {
-        delay(500);
-        Serial.print(".");
-        if (millis() - start > 15000)
-        {
-            Serial.println("\nWiFi failed");
-            return;
-        }
+      Serial.println("\nWiFi failed");
+      return;
     }
-    Serial.println("\nWiFi connected");
-    Serial.print("IP: ");
-    Serial.println(WiFi.localIP());
+    Serial.println("wifi wifi");
+  }
+  LED_RGB.setPixelColor(0, uint32_t(LED_RGB.Color(0, 255, 0)));
+  LED_RGB.show();
+  Serial.println("\nConnected");
 }
 
 // ------------------- RSSI -------------------
-int measureRSSI(int samples = SAMPLES_PER_POINT)
+int measureRSSI()
 {
-    long sum = 0;
-    for (int i = 0; i < samples; i++)
-    {
-        sum += WiFi.RSSI();
-        delay(20);
-    }
-    return sum / samples;
+  long sum = 0;
+  for (int i = 0; i < SAMPLES; i++)
+  {
+    sum += WiFi.RSSI();
+    delay(15);
+  }
+  return sum / SAMPLES;
 }
 
-// ------------------- Motor -------------------
-void rotateTo(int targetAngle)
+// ------------------- Movement -------------------
+long currentPanStep = 0; // absolute step position
+float currentPanDeg = 0; // 0-360 degrees
+
+void movePanTo(float targetDeg)
 {
-    targetAngle = (targetAngle + 360) % 360;
+  // --- normalize target ---
+  targetDeg = fmod(targetDeg, 360.0);
+  if (targetDeg < 0)
+    targetDeg += 360.0;
 
-    int delta = targetAngle - currentAngle;
-    int steps = delta * STEPS_PER_DEGREE;
+  // --- shortest path ---
+  float delta = targetDeg - currentPanDeg;
+  if (delta > 180)
+    delta -= 360;
+  if (delta < -180)
+    delta += 360;
 
-    stepper.move(steps);
-    unsigned long start = millis();
-    while (stepper.distanceToGo() != 0)
-    {
-        stepper.run();
-        if (millis() - start > 5000)
-            break; // safety
-    }
+  // --- convert to steps (rounded) ---
+  long moveSteps = (long)(abs(delta) * STEPS_PER_DEGREE + 0.5);
 
-    currentAngle = targetAngle;
-    delay(SETTLE_TIME_MS);
+  // --- set direction ---
+  bool dir = (delta >= 0);
+  digitalWrite(DIR_PIN, dir ? HIGH : LOW);
+  delayMicroseconds(5);
+
+  // --- step pulses ---
+  for (long i = 0; i < moveSteps; i++)
+  {
+    digitalWrite(STEP_PIN, HIGH);
+    delayMicroseconds(STEP_DELAY_US);
+
+    digitalWrite(STEP_PIN, LOW);
+    delayMicroseconds(STEP_DELAY_US);
+  }
+
+  // --- update state ---
+  currentPanStep += dir ? moveSteps : -moveSteps;
+  currentPanDeg = targetDeg;
 }
 
-// ------------------- Hill Climbing -------------------
-int hillClimb()
+int currentTiltDeg = 45;
+
+void moveTiltTo(int target)
 {
-    Serial.println("Starting hill-climbing...");
+  int TILT_MIN = 25;
+  int TILT_MAX = 75;
+  target = constrain(target, TILT_MIN, TILT_MAX);
+  tiltServo.write(target);
+  currentTiltDeg = target;
+}
 
-    int currentRSSI = measureRSSI();
-    bool improved = true;
-    int iterations = 0;
+void setOrientation(int pan, int tilt)
+{
+  movePanTo(pan);
+  moveTiltTo(tilt);
+  delay(SETTLE_TIME_MS);
+}
 
-    while (improved && iterations < 100)
+// ------------------- Hill Climb (2D) -------------------
+void hillClimb()
+{
+  Serial.println("Starting 2D hill climb...");
+
+  int panStep = 10;
+  int tiltStep = 5;
+  bool improved = true;
+  int iter = 0;
+
+  while (improved && iter < 25) // guard against endless loops
+  {
+    iter++;
+    improved = false;
+    int bestPan = currentPanDeg;
+    int bestTilt = currentTiltDeg;
+    int bestRSSI = measureRSSI();
+
+    // 8-direction neighborhood (includes diagonals)
+    int neighbors[8][2] = {
+        {bestPan + panStep, bestTilt},
+        {bestPan - panStep, bestTilt},
+        {bestPan, bestTilt + tiltStep},
+        {bestPan, bestTilt - tiltStep},
+        {bestPan + panStep, bestTilt + tiltStep},
+        {bestPan + panStep, bestTilt - tiltStep},
+        {bestPan - panStep, bestTilt + tiltStep},
+        {bestPan - panStep, bestTilt - tiltStep}};
+
+    for (int i = 0; i < 8; i++)
     {
-        iterations++;
-        improved = false;
+      int p = neighbors[i][0];
+      int t = neighbors[i][1];
 
-        int leftAngle = currentAngle - STEP_ANGLE;
-        int rightAngle = currentAngle + STEP_ANGLE;
+      // skip duplicate evaluations
+      if (p == currentPanDeg && t == currentTiltDeg)
+        continue;
 
-        rotateTo(leftAngle);
-        int leftRSSI = measureRSSI();
+      setOrientation(p, t);
+      int rssi = measureRSSI();
 
-        rotateTo(rightAngle);
-        int rightRSSI = measureRSSI();
-
-        Serial.print("Angle ");
-        Serial.print(currentAngle);
-        Serial.print(" | RSSI ");
-        Serial.println(currentRSSI);
-
-        if (leftRSSI > currentRSSI && leftRSSI >= rightRSSI)
-        {
-            rotateTo(leftAngle);
-            currentRSSI = leftRSSI;
-            improved = true;
-        }
-        else if (rightRSSI > currentRSSI)
-        {
-            rotateTo(rightAngle);
-            currentRSSI = rightRSSI;
-            improved = true;
-        }
+      if (rssi > bestRSSI)
+      {
+        bestRSSI = rssi;
+        bestPan = p;
+        bestTilt = t;
+        improved = true;
+      }
     }
 
-    Serial.print("Hill-climb converged at angle ");
-    Serial.print(currentAngle);
-    Serial.print(" | RSSI ");
-    Serial.println(currentRSSI);
+    if (improved)
+    {
+      setOrientation(bestPan, bestTilt);
+    }
+  }
+}
 
-    RSSI_THRESHOLD = currentRSSI - 10; // adaptive threshold
-    Serial.print("New RSSI threshold: ");
-    Serial.println(RSSI_THRESHOLD);
+void testMove()
+{
+  // 8-direction neighborhood (includes diagonals)
+  int neighbors[8] = {10, -10, -20, -40, 40, 180, -60, 0};
 
-    return currentAngle;
+  for (int i = 0; i < 8; i++)
+  {
+    setOrientation(neighbors[i], 45);
+    delay(3000);
+    Serial.println("current angle: ---> " + String(currentPanDeg));
+  }
 }
 
 // ------------------- Setup -------------------
 void setup()
 {
-    Serial.begin(115200);
-    delay(2000);
-    Serial.println("BOOT OK");
+  Serial.begin(115200);
+  delay(2000); // give time for monitor to connect
+  Serial.println("Serial ready");
 
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(STEP_PIN, OUTPUT);
+  pinMode(DIR_PIN, OUTPUT);
 
-    stepper.setMaxSpeed(1000);
-    stepper.setAcceleration(500);
+  LED_RGB.begin();
+  LED_RGB.setBrightness(50); // Set brightness to about 60%
 
-    connectWiFi();
+  tiltServo.attach(SERVO_PIN, 500, 2500);
 
-    rotateTo(0);
-    hillClimb();
-    lastScanTime = millis();
+  connectWiFi();
+
+  // Initial assumption (manual alignment)
+  setOrientation(0, 45);
+
+  hillClimb();
 }
 
 // ------------------- Loop -------------------
 void loop()
 {
-    unsigned long now = millis();
-
-    bool buttonPressed = (digitalRead(BUTTON_PIN) == LOW);
-    int avgRSSI = measureRSSI();
-
-    if (avgRSSI < RSSI_THRESHOLD)
-        lowRssiCounter++;
-    else
-        lowRssiCounter = 0;
-
-    bool rssiTrigger = (lowRssiCounter >= HYSTERESIS_COUNT);
-    bool cooldownPassed = (now - lastScanTime >= SCAN_COOLDOWN);
-
-    if ((rssiTrigger && cooldownPassed) || buttonPressed)
-    {
-        Serial.println("Re-triggering hill-climb...");
-        hillClimb();
-        lastScanTime = millis();
-        lowRssiCounter = 0;
-    }
-
-    Serial.print("Current RSSI: ");
-    Serial.println(avgRSSI);
-    Serial.print("Minutes since last climb: ");
-    Serial.println((now - lastScanTime) / 60000);
-
-    delay(1000);
+  Serial.println("Loop running...");
+  delay(1000);
 }
