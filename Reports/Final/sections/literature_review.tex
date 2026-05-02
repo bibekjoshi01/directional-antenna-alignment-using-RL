@@ -4,13 +4,13 @@
 Wireless communication has evolved significantly since the pioneering experiments of Marconi in the early 1900s, becoming a fundamental component of modern communication systems~\cite{ref3}. 
 Advancements in wireless networks have been driven by the increasing demand for mobility, higher data rates, and efficient spectrum utilization~\cite{ref4}. 
 Antennas remain one of the most critical components influencing communication range, throughput, and interference characteristics~\cite{ref5}. 
-Modern wireless systems employ a wide variety of technologies including WiFi (IEEE 802.11), Bluetooth, NFC, LTE, 5G, and LoRa, each optimized for different ranges, data rates, and energy requirements. 
+Modern wireless systems employ a wide variety of technologies including Wireless Fidelity (WiFi) (IEEE 802.11 standard), Bluetooth, Near Field Communication (NFC), Long-Term Evolution (LTE), Fifth Generation (5G) mobile networks, and Long Range (LoRa) communication, each optimized for different ranges, data rates, and energy requirements.
 Despite these advances, reliable long-distance communication continues to face challenges due to signal attenuation, interference, and environmental dynamics.
 
 Antennas are broadly classified as omnidirectional and directional. 
 Omnidirectional antennas provide wide coverage but suffer from lower gain and higher susceptibility to interference. 
 In contrast, directional antennas concentrate energy in specific directions, offering higher gain, extended range, reduced interference, and improved energy efficiency~\cite{ref6}. 
-Directional antennas are therefore widely adopted in long-range networks such as Wireless Sensor Networks (WSNs), UAV communication systems, IoT deployments, and mobile ad-hoc networks. 
+Directional antennas are therefore widely adopted in long-range networks such as Wireless Sensor Networks (WSNs), Unmanned Aerial Vehicle (UAV) communication systems, Internet of Things (IoT) deployments, and Mobile Ad Hoc Networks (MANETs).
 However, their performance depends critically on accurate alignment between transmitter and receiver. 
 For directional antennas to function effectively, precise orientation is essential.
 
@@ -26,14 +26,15 @@ However, early RSSI-based approaches rely on exhaustive scanning of antenna orie
 Although simple and low-cost, exhaustive scanning is computationally and mechanically inefficient, resulting in high convergence time and poor real-time feasibility, especially in dynamic environments.
 
 More advanced RSSI-based methods incorporate estimation and control techniques such as Kalman filtering, unscented Kalman filters, and fuzzy logic controllers~\cite{ref13}. 
-These approaches improve robustness by modelling signal variations, but they introduce additional computational overhead and often require auxiliary sensors or prior system knowledge. 
+These approaches improve robustness by modelling signal variations, however they introduce additional computational overhead and often require auxiliary sensors or prior system knowledge. 
 As a result, hardware complexity increases and embedded suitability decreases, particularly for microcontroller-based implementations.
 
 Autonomous antenna systems capable of self-orientation have also been explored~\cite{ref14}. 
 These systems demonstrate the feasibility of low-cost mechanical alignment using RSSI feedback and servo-based actuation. 
 However, their reliance on heuristic search strategies limits adaptability in noisy or dynamic environments, and convergence speed remains a concern for real-time applications.
 
-A notable control-theoretic approach was introduced by Koru et al.~\cite{ref11}, who developed a nonlinear distributed RSSI feedback control law for GPS-free alignment of UAV-mounted directional antennas. 
+
+A notable control-theoretic approach was introduced in \cite{ref11}, where a nonlinear distributed RSSI feedback control law for GPS-free alignment of UAV-mounted directional antennas was developed.
 While the method provides strong theoretical guarantees and eliminates the need for GPS, it requires perturbation-based estimation of RSSI gradients. 
 This introduces additional measurement overhead and sensitivity to noise, increasing computational complexity and limiting real-time feasibility on resource-constrained embedded hardware.
 
@@ -61,9 +62,9 @@ Additionally, many solutions focus on antenna arrays and beamforming techniques,
 \setlength{\tabcolsep}{8pt}
 
 \begin{longtable}{|
-    >{\raggedright\arraybackslash}p{4.4cm} |
-    >{\raggedright\arraybackslash}p{4.4cm} |
-    >{\raggedright\arraybackslash}p{4.4cm} |}
+    >{\raggedright\arraybackslash}p{4.3cm} |
+    >{\raggedright\arraybackslash}p{4.3cm} |
+    >{\raggedright\arraybackslash}p{4.1cm} |}
 
 \caption{Summary of Literature Review}
 \label{tab:literature-review} \\

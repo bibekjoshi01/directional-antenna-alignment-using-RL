@@ -20,7 +20,7 @@ The physical architecture is organized into a vertical stack consisting of a Pow
 \end{figure}
 
 \textbf{Rotating Turret:} The upper rotating platform acts as the mounting chassis for
-the main controller (ESP32-S3), the elevation actuator (MG90S servo), and the antenna
+the main controller (ESP32-S3), the tilt actuator (MG90S servo), and the antenna
 system. The azimuth motion of this turret is produced by the NEMA 17 stepper motor
 located in the stationary base, while the servo mounted on the turret provides the
 local tilt adjustment of the antenna. To address mechanical instability, a coupling was
@@ -63,7 +63,7 @@ the ESP32-S3 on the rotating turret and routed through the slip ring to the A498
 driver. These signals are carried over low-current tracks, with routing kept minimal to
 reduce susceptibility to noise introduced at the rotating interface.
 
-\textbf{Elevation Control Implementation:} The MG90S servo is directly connected to the
+\textbf{Tilt Control Implementation:} The MG90S servo is directly connected to the
 ESP32-S3 on the rotor. A dedicated PWM-capable GPIO pin is used, with short signal
 routing and local decoupling at the servo terminals to suppress switching noise during
 operation. Because the tilt actuator is located entirely on the rotating section, no
