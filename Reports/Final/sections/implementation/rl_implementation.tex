@@ -1,41 +1,41 @@
 \subsection{Reinforcement Learning Implementation}
 
-This subsection describes how the Q-learning controller was trained, converted into an
-embedded-friendly representation, and integrated into the practical alignment workflow.
-The design objective was to keep the learned policy lightweight enough for execution on
-the ESP32-S3 while retaining sufficient state information to handle noisy RSSI
-observations and changing starting orientations.
+This subsection explains the process of training the Q-learning controller, embedding
+it into a compact format suitable for use in the embedded platform and integrating it
+into the actual alignment procedure. The goal of this design was to make sure that the
+policy itself would be light enough to run on the ESP32-S3 chip, yet sufficiently rich
+to cope with the RSSI noisiness and varying starting orientation.
 
 \subsubsection{State, Action, and Reward Representation}
 
-The deployed RL state is defined as:
+In order to implement the reinforcement learning algorithm, we need to define the
+relevant state-space and actions:
 \begin{equation}
 s_k = \left( i_{\text{pan}},\; i_{\text{tilt}},\; \text{trend}_k \right)
 \end{equation}
-where the first two terms represent discretized pan and tilt indices and the third term
-captures the short-term RSSI trend. This representation allows the agent to exploit both
-spatial orientation and immediate signal feedback without requiring a large state space.
+Here, $i_{\text{pan}}$ and $i_{\text{tilt}}$ are discretizations of pan and tilt indices,
+respectively, while the third component stands for the short-term RSSI trend. Such state
+definition allowed to leverage the information about orientation and current RSSI value
+without creating a cumbersome state vector.
 
-The action set used during training and deployment is:
+We defined the following set of actions for both training and inference stages:
 \begin{equation}
 \mathcal{A} = \{(+\Delta_p,0), (-\Delta_p,0), (0,+\Delta_t), (0,-\Delta_t), (0,0)\}
 \end{equation}
-where $\Delta_p$ and $\Delta_t$ denote the practical pan and tilt increments. The hold
-action was retained so that the controller could stop moving once the alignment entered
-a stable high-RSSI region.
+where $\Delta_p$ and $\Delta_t$ denote the corresponding pan and tilt increments. The
+hold action was necessary for ensuring that the alignment stops moving when it enters
+high RSSI area.
 
-The reward function favors signal improvement while penalizing unnecessary movement:
+The reward is given by the following expression:
 \begin{equation}
 r_k = \Delta \text{RSSI}_k - \lambda \cdot \mathbb{I}_{\text{move}}
 \end{equation}
 This reward shaping improved convergence smoothness and reduced oscillatory behavior in
 both simulation and practical inference.
 
-\subsubsection{Training Configuration}
+\subsubsection{Training Setup}
 
-Offline training was carried out in the Python simulation environment using repeated
-episodes with randomized starting states. Hyperparameters were tuned so that the agent
-would converge reliably without overfitting to a single start angle.
+The training was performed offline in the Python environment by repeating episodes from random starting positions. The hyperparameters were configured to enable the agent to converge without any overfitting toward one start position.
 
 \begin{table}[H]
 \centering
@@ -65,11 +65,9 @@ Movement penalty $\lambda$ & 0.35 & Discourages unnecessary actuator motion \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Q-Table Storage and Embedded Deployment}
+\subsubsection{Storing the Q-Table and Embedding It into the System}
 
-After training convergence, the Q-table was exported from Python and converted into a
-static array representation suitable for firmware inclusion. This avoided the need for
-runtime file parsing on the microcontroller and ensured deterministic startup behavior.
+Upon completion of the learning process, the Q-table obtained through Python code was transformed to a static array structure to facilitate embedding it into firmware. The aim was to prevent dynamic file parsing at runtime by the microcontroller.
 
 \begin{table}[H]
 \centering
@@ -99,23 +97,20 @@ Inference policy & Greedy $\arg\max Q(s,a)$ & No online learning during hardware
 \end{tabular}
 \end{table}
 
-The practical firmware used inference only. Online updating of Q-values was disabled to
-avoid instability caused by noisy packet-level measurements, to keep computational cost
-low, and to guarantee repeatable behavior between trials.
+Inference was the sole method employed by the firmware in practice. On-line
+reinforcement learning based updates to Q-values were not performed to avoid the potential
+instability stemming from noise in packet-level metrics, to minimize computation time, and to
+ensure repeatability across trials.
 
 \subsubsection{Operational Sequence During Practical Trials}
 
-During field testing, the RL-based controller was executed as a two-stage procedure.
-First, the antenna was moved to a valid starting orientation and a reference RSSI batch
-was acquired. Second, the embedded controller repeatedly encoded the current state,
-selected the highest-valued action from the Q-table, and applied the corresponding motor
-command until convergence.
+At runtime, the controller based on RL was run through a two-step process.
+First, the antenna was positioned into a valid initial position and RSSI samples were collected. Second,
+the controller would continuously encode the input, choose the highest valued action according to the
+contents of the Q-table, and issue the corresponding commands to the motors until convergence.
 
-The trial was considered converged when either of the following conditions was met:
+Convergence was achieved in either one of these cases:
 \begin{itemize}
-\item The absolute RSSI improvement remained below 0.8~dB for four consecutive control cycles, or
-\item The algorithm reached the maximum allowed number of decision steps
+\item If the absolute RSSI gain was smaller than 0.8 dB for 4 consecutive iterations, or 
+\item When the maximum number of steps had been reached by the algorithm.
 \end{itemize}
-
-This stopping rule reduced unnecessary movement near the optimum and produced consistent
-trial durations for the comparison presented in the results chapter.

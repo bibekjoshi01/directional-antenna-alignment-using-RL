@@ -1,30 +1,30 @@
 
 \subsection{Overview of System Approach}
 
-The proposed system implements a closed-loop antenna alignment mechanism that autonomously adjusts the orientation of a directional antenna based on real-time Received Signal Strength Indicator (RSSI) feedback. The primary objective is to maximize received signal power at the receiver node by continuously adapting antenna orientation in response to observed wireless channel conditions.
+The suggested approach uses a closed-loop antenna alignment mechanism to dynamically orient the directional antenna based on RSSI feedback received during the process. In essence, the objective is to increase the signal strength at the receiving node by continuously adjusting the orientation of the antenna depending on the current wireless channel state.
 
-At a high level, the system operates as a feedback control loop comprising three core stages: signal measurement, decision making, and actuation. The receiver node periodically measures RSSI values from a fixed transmitter, processes this information using an alignment strategy, and issues motion commands to a stepper motor that rotates the directional antenna. The effect of each motion is observed through subsequent RSSI measurements, thereby closing the control loop.
+From the point of view of functionality, the system works as a simple feedback control loop comprised of three main components: signal sensing, decision making, and actuator control. RSSI values are continuously measured at the receiving node, then processed by a specific alignment algorithm, and converted into motor commands for rotating the antenna. Every change in the position of the antenna results in further sensing of RSSI signals, creating a full cycle in a control loop.
 
-Unlike open-loop or manually configured antenna systems, the proposed approach does not rely on prior knowledge of transmitter direction or explicit channel models. Instead, alignment decisions are driven purely by measured signal feedback, enabling operation in environments where propagation conditions are unknown or subject to change.
+Unlike open-loop antenna alignment or manual orientation of an antenna, the suggested solution does not involve any initial knowledge about the direction of the transmitter or particular models of the channel. Instead, all alignment actions are made based on feedback alone, thus allowing the use of propagation channels whose characteristics are unknown or constantly changing.
 
-To evaluate the effectiveness of adaptive alignment, the system supports multiple antenna orientation strategies. These include conventional baseline methods as well as a reinforcement learning (RL) based approach.
+To estimate the effectiveness of adaptive antenna alignment, several different orientation algorithms can be used, including conventional approaches and reinforcement learning (RL).
 
 Baseline strategies include:
 \begin{itemize}
-    \item \textbf{Exhaustive angular scanning}, where the antenna performs a full rotation to identify the angle yielding maximum RSSI.
-    \item \textbf{RSSI-based hill-climbing}, where incremental antenna adjustments are made based on local RSSI gradients.
+    \item Angular scanning with maximum RSSI, where the antenna is rotated in order to determine the optimal angle with respect to the maximum RSSI.
+    \item Hill climbing based on RSSI, which consists of small adjustments made to the antenna according to RSSI gradients.
 \end{itemize}
 
-These methods provide reference points with varying trade-offs between alignment accuracy, response time, mechanical overhead, and robustness to noise. In particular, exhaustive scanning approximates optimal alignment under static conditions but incurs significant latency and energy cost, while hill-climbing offers lightweight adaptivity but may converge to local maxima.
+Such approaches form the baseline performance measures that differ in their precision of alignment, speed, resource consumption, and robustness against noise, since exhaustive scanning is expected to yield optimal orientation in the static case, whereas hill climbing will suffer due to the possibility of local optimum.
 
-The reinforcement learning–based strategy is introduced as an adaptive decision-making mechanism that learns an effective alignment policy through interaction with the environment. Rather than performing repeated full scans, the RL agent incrementally refines antenna orientation using reward feedback derived from RSSI changes. This allows comparison between heuristic-based and learning-based control under identical experimental conditions.
+The reinforcement learning approach represents a method of making decisions for achieving certain goals by interacting with the environment. Instead of performing many scans, the RL system will make the necessary adjustments based on reward received by comparing RSSI values. Thus, it becomes possible to compare a heuristic versus a learning-based control in similar conditions.
 
-Several design decisions were made to ensure feasibility, reproducibility, and suitability for embedded implementation.
+Several decisions regarding design were made with the goal of increasing feasibility, repeatability, and embeddability.
 
-The ESP32 microcontroller was selected as the processing platform due to its integrated WiFi radio, hardware-level RSSI reporting, sufficient computational capability, and wide availability. Its ability to perform wireless communication, signal measurement, and control tasks within a single low-cost device simplifies system integration and reduces external dependencies.
+The ESP32 microcontroller board was selected due to its built-in WiFi radio, ability to read RSSI from hardware, sufficient computing power, and accessibility. Ability to handle wireless communication, signal reading, and control actions on a single and affordable piece of hardware is crucial to integration simplicity and reduction of dependencies.
 
-A stepper motor was chosen for antenna actuation to provide deterministic angular control and repeatable positioning. Compared to servo motors, stepper motors allow precise incremental rotation without the need for additional feedback sensors, which simplifies mechanical design and control logic. Discrete angular steps also align naturally with the discrete action space required by lightweight reinforcement learning algorithms.
+A stepper motor is utilized for antenna movement due to the possibility to accurately control the angle in which the antenna is positioned relative to the target node. As opposed to servo motors, stepper motors allow achieving deterministic movement without any additional sensors, thus simplifying the mechanical part of the design and the control algorithm. Discrete rotational angle steps make it easy to align this feature with discrete action space needed for light reinforcement learning.
 
-The reinforcement learning formulation is intentionally restricted to a discrete state and action space. This design choice avoids the complexity and resource demands of continuous-state or deep learning approaches, which are impractical for real-time execution on constrained embedded hardware. Tabular learning methods allow predictable memory usage, transparent behavior, and stable operation under noisy RSSI measurements.
+Reinforcement learning model is intentionally designed to work within the discrete state and action space. Such approach helps avoid excessive resource consumption required by continuous-state RL and deep learning algorithms. They simply aren't feasible when used on constrained hardware, whereas tabular learning methods are easier to implement, predictable in terms of memory requirements, and robust against noisy measurements.
 
-Importantly, the learning component is treated as an adaptive control enhancement rather than a black-box optimizer. The system remains operational even without learning enabled, and all baseline methods can be executed independently. This modular approach ensures that performance gains attributed to learning can be isolated, measured, and critically evaluated.
+It is important to note that RL in this design was treated as a way to optimize the control method, but not as a standalone optimizer. Control works without any training, and all baseline methods can be independently run and tested.

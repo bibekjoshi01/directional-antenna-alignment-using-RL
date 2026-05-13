@@ -1,11 +1,11 @@
 \begin{MintedVerbatim}[commandchars=\\\{\}]
 \PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{ Initialize Q\PYGZhy{}table}
-\PYG{n}{Initialize}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{all}\PYG{+w}{ }\PYG{n}{states}\PYG{+w}{ }\PYG{n}{s}\PYG{+w}{ }\PYG{n}{and}\PYG{+w}{ }\PYG{n}{actions}\PYG{+w}{ }\PYG{n}{a}
-\PYG{n}{Set}\PYG{+w}{ }\PYG{n}{alpha}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{learning}\PYG{+w}{ }\PYG{n}{rate}\PYG{p}{)}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gamma}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{discount}\PYG{+w}{ }\PYG{n}{factor}\PYG{p}{)}\PYG{p}{,}
+\PYG{n}{init}\PYG{+w}{ }\PYG{n}{Q}\PYG{p}{[}\PYG{n}{s}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{all}\PYG{+w}{ }\PYG{n}{states}\PYG{+w}{ }\PYG{n}{s}\PYG{+w}{ }\PYG{n}{and}\PYG{+w}{ }\PYG{n}{actions}\PYG{+w}{ }\PYG{n}{a}
+\PYG{n}{set}\PYG{+w}{ }\PYG{n}{alph}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{learning}\PYG{+w}{ }\PYG{n}{rate}\PYG{p}{)}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gamma}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{discount}\PYG{+w}{ }\PYG{n}{factor}\PYG{p}{)}\PYG{p}{,}
 \PYG{n}{epsilon}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{exploration}\PYG{+w}{ }\PYG{n}{rate}\PYG{p}{)}
 
 \PYG{k}{for}\PYG{+w}{ }\PYG{n}{each}\PYG{+w}{ }\PYG{n}{episode}\PYG{o}{:}
-\PYG{+w}{    }\PYG{n}{reset}\PYG{+w}{ }\PYG{n}{environment}\PYG{+w}{ }\PYG{n}{to}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{n}{valid}\PYG{+w}{ }\PYG{n}{random}\PYG{+w}{ }\PYG{n}{initial}\PYG{+w}{ }\PYG{n}{orientation}
+\PYG{+w}{    }\PYG{n}{reset}\PYG{+w}{ }\PYG{n}{env}\PYG{p}{.}\PYG{+w}{ }\PYG{n}{to}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{n}{valid}\PYG{+w}{ }\PYG{n}{random}\PYG{+w}{ }\PYG{n}{initial}\PYG{+w}{ }\PYG{n}{orientation}
 
 \PYG{+w}{    }\PYG{n}{measure}\PYG{+w}{ }\PYG{n}{averaged}\PYG{+w}{ }\PYG{n}{RSSI}
 \PYG{+w}{    }\PYG{n}{encode}\PYG{+w}{ }\PYG{n}{current}\PYG{+w}{ }\PYG{n}{state}\PYG{+w}{ }\PYG{n}{s}

@@ -1,16 +1,8 @@
-\subsection{Final Experimental Setup}
+\subsection{Final Experimental Design}
 
-The final evaluation was carried out in four practical scenarios selected to represent
-both outdoor and indoor operation under the practical conditions used in the final
-prototype. Outdoor testing was carried out at 20~m and 30~m, while indoor testing was
-performed at 10~m under both line-of-sight and obstructed conditions. All three
-alignment methods were tested using the same search limits, RSSI acquisition settings,
-and mechanical resolution so that the measured differences reflect the control
-strategy rather than a change in experimental setup.
+The last experiment was executed based on four practical scenarios that were aimed at testing both outdoor and indoor conditions that would apply to the last prototype in real use. The tests in the outdoor environment were carried out at the distances of 20~m and 30~m,  whereas indoor ones were performed at 10 m distance and with and without the line of sight between two devices. All three alignment strategies were tested under equal search range, RSSI collection conditions, and mechanical accuracy.
 
-Each practical scenario was repeated 10 times for every alignment method. The final
-RSSI, convergence time, movement count, and success rate reported in the following
-subsections are averages over those repeated trials.
+All the practical scenarios were run ten times for each alignment strategy. The data for RSSI, convergence time, number of movements, and success rates mentioned in the following subsections were calculated based on the average results from those runs.
 
 \setlength{\tabcolsep}{4pt}
 
@@ -69,9 +61,7 @@ S4 & Indoor & 10~m & Wall and corridor corner & Hardest indoor case with obstruc
 
 \subsection{Practical Trial Results}
 
-Practical trials provide the primary evidence for the final project because they
-include real RF noise, actuator delay, and mechanical imperfections that are not fully
-captured by the simulator.
+The practical trial data serves as the main evidence source for the concluding experiment, since practical experiments always contain such parameters as RF noise, actuator delay and mechanical inaccuracies that cannot be completely reflected in the simulation experiment. Here, in the presented table, the reported RSSI standard deviation refers to the RSSI variability index from the methodology and is used in this sense for representing repeatability of the process over several trial runs.
 
 \vspace{0.5cm}
 \begin{table}[H]
@@ -100,17 +90,7 @@ RL (Q-learning) & $-49.55$ & $\mathbf{9.62}$ & $\mathbf{57}$ & $\mathbf{95}$ & $
 \end{adjustbox}
 \end{table}
 
-In this table, the reported RSSI standard deviation corresponds to the RSSI variability
-metric defined in the methodology section and is used here to indicate repeatability
-across repeated trials.
-
-The overall averages show that RL achieved much faster convergence than exhaustive
-scan while maintaining a final RSSI close to the exhaustive reference and stronger
-average performance than hill-climbing. Exhaustive scan retained the best final RSSI and perfect
-success rate because it explores the full search space, but that reliability came at
-very high time and movement cost. Hill-climbing was faster than exhaustive scan,
-yet its lower success rate and weaker final RSSI show that it was more easily trapped
-by local RSSI peaks.
+As we can see from the total data obtained, reinforcement learning (RL) was much quicker compared to exhaustive searching while being able to produce similar RSSI and outperforming hill-climbing by other parameters. The exhaustively searching method had the highest RSSI value and 100\% success rate due to comprehensive exploring of the space. However, this high reliability was associated with a significant cost in time and moves. Hill-climbing proved to be faster than exhaustive searching but less successful and producing lower RSSI values.
 
 \subsubsection{Scenario-wise Practical Comparison}
 
@@ -264,17 +244,13 @@ Indoor, 10~m (obstructed) & $-1.1$~dB & 3.6~dB & 80.2\% & 22.1\% \\
 \end{adjustbox}
 \end{table}
 
-The improvement table confirms that RL does not surpass exhaustive scan in final
-RSSI, which is the realistic outcome for a complete search. Its practical advantage
-is instead the much lower convergence time, with only a small RSSI sacrifice relative
-to exhaustive scan and a clear gain over hill-climbing. This tradeoff is especially
-valuable in the harder indoor scenarios, where fast but purely greedy search becomes
-less reliable.
+According to the table showing the improvement achieved, the RL algorithm never outperforms the exhaustive algorithm in terms of the final RSSI since it depicts the realistic result of an exhaustive search. However, the practical gain that can be achieved through this approach is the considerable reduction in the time it takes to converge, while at the same time only making a minor sacrifice concerning RSSI compared to exhaustive search, as well as an obvious superiority over hill climbing.
 
 \subsection{Validation Through Theory, Simulation, and Practical Output}
 
 The measured outputs agree well with the expected qualitative behavior of the three
 algorithms. Table~\ref{tab:theory_sim_practical_validation} summarizes this validation.
+The experimental results match very well the expected qualitative behaviors of the three algorithms.
 
 \vspace{0.5cm}
 \renewcommand{\arraystretch}{1.25}
@@ -304,18 +280,7 @@ RL (Q-learning) & $-30.82$ & $-49.55$ & $-19.73$ & 5.51 s & 9.62 s & $+74.6\%$ \
 \hline
 \end{longtable}
 
-
-The absolute RSSI values in practice are lower than in simulation for all methods,
-which reflects a clear simulation-to-real gap. In the practical setup, antenna
-misalignment and radiation-pattern mismatch, RF losses in cables, connectors, and the
-slip-ring interface, limited resolution and fluctuation in ESP32 packet-level RSSI
-reporting, and environmental noise due to multipath, obstruction, and interference all
-contribute to weaker and more variable measurements than those produced by the simplified
-simulator. RL still transferred more favorably than hill-climbing in the sense that it
-preserved a stronger final RSSI and better repeatability, but the practical measurements
-also show that its performance remained below the exhaustive reference, which is
-consistent with a time-efficient search.
-
+In practice, the actual RSSI values have significantly decreased relative to the simulation in all three cases, showing that there is indeed a distinction between simulations and real-world scenarios. For the actual experiment, there are some aspects causing poorer readings due to misaligned antennas and mismatched radiation patterns, RF losses in wires and connectors, and the slip ring itself, low resolution of RSSI per packet measured by the ESP32 microcontroller, and ambient noise. All these aspects contribute to poorer RSSIs than the simple simulator, but the difference between the two is more obvious when hill climbing is used because of the large number of steps required. Nevertheless, despite reinforcement learning having an edge over hill climbing regarding the last RSSI and consistency, the actual experiments show that its performance is still inferior to the exhaustive reference.
 
 \vspace{0.5cm}
 \renewcommand{\arraystretch}{1.25}
@@ -344,34 +309,18 @@ Indoor channels should be harder than outdoor channels & Multipath and obstructi
 \hline
 \end{longtable}
 
-The comparison shows that the practical measurements did not contradict
-or simulated expectations. Instead, they preserved the same ranking of algorithmic
-behavior while introducing additional degradation associated with real hardware and RF
-conditions.
-
 \subsection{Limitations of RL}
 
-Although the RL controller performed well in the tested scenarios, the results also
-highlight several limitations of the adopted tabular Q-learning approach.
+Though the RL controller performed well in all test cases considered, there are certain limitations to note about the chosen Q-learning approach.
 
 \textbf{Dependence on discretization:}
-The deployed controller relies on discrete pan, tilt, and RSSI-trend states. This keeps
-the Q-table small enough for the ESP32-S3, but it also means that the learned policy can
-only choose from a limited set of orientations and may miss a better alignment that lies
-between the sampled angles.
+The implemented controller works with discrete values for pan, tilt, and RSSI trend states. Such discretization ensures the Q-table remains small enough to fit into the memory of the ESP32-S3 board; however, it confines the learned policy to a set of preselected orientations, possibly overlooking better configurations lying between the chosen angles.
 
 \textbf{Generalization limits:}
-Because the controller uses a fixed offline-trained Q-table, it does not generalize as
-flexibly as a continuously adaptive or higher-capacity learning method. Good performance
-in the tested indoor and outdoor scenarios does not guarantee the same behavior under
-different antenna hardware, search ranges, motion resolution, or channel conditions.
+Since the controller is based on a fixed Q-table obtained offline, its generalization ability is relatively lower compared to other types of models. Excellent performance in both indoor and outdoor experiments does not guarantee similar results when using different antenna designs, search spaces, motion precision, or transmission channels.
 
 \textbf{Sensitivity to the training environment:}
-The learned policy reflects the simplified simulator and training settings used during
-offline learning. When the real environment differs through stronger multipath,
-additional attenuation, RSSI fluctuation, or mechanical error, the practical policy can
-deviate from the behavior suggested by simulation, which is visible in the reduced RSSI
-and longer runtime observed on hardware.
+The learned policy includes the characteristics of the used simulator and offline training process. In case of increased multipath interference, additional attenuation, fluctuation of the received signal strength, or mechanical inaccuracies in the real scenario, the actual policy deviates from simulated instructions, leading to lower RSSI levels and increased runtime.
 
 \subsection{Error Analysis}
 
@@ -413,22 +362,11 @@ Simulation model simplification & Underestimates real environmental complexity &
 \hline
 \end{longtable}
 
-Among these sources, environmental multipath, RF losses, RSSI measurement limitations,
-and actuator non-idealities had the greatest influence on deviation from expected
-values. They are also the main reason why hill-climbing performed poorly in the indoor
-scenarios. The RL controller was less affected because it does not rely only on the
-instantaneous local gradient of RSSI, but these same factors still reduced its practical
-performance relative to simulation.
+Amongst these issues, the effect of environmental multipath, RF losses, limitations in RSSI measurement, and actuator imperfections had the largest impact on the difference from expected behavior. It can also be argued that this list represents the main reason why hill climbing performs poorly indoors. The RL controller was less affected by these problems due to the fact that it is not dependent purely on the local RSSI gradient, but these issues still negatively impacted its performance compared to simulations.
+
 
 \subsection{Overall Analysis}
 
-From an engineering perspective, the outputs of this chapter show that the proposed
-approach is feasible in both simulation and practical deployment. The compact Q-table
-could be deployed on the ESP32-S3, and the real system converged reliably in the tested
-scenarios. Within this evaluation, the RL controller provided the best overall trade-off
-between convergence time, final RSSI, and repeatability among the compared methods.
+Overall, from the engineering perspective, the results presented in this chapter show that the developed solution is viable in simulation and in the real environment as well. Since the Q-table used by the RL algorithm is relatively small, it is possible to implement the controller on the ESP32-S3 and test its convergence in practice. In such conditions, the RL controller provided the most optimal balance between convergence speed, RSSI value, and repeatability out of all the alternatives considered.
 
-The practical results are important because they show that the system did not rely on
-simulation alone. At the same time, the measured simulation-to-real gap and the
-limitations of the tabular RL formulation indicate that the reported performance should
-be interpreted within the tested hardware setup and operating conditions.
+Practical results obtained during this study are important since they prove the feasibility of the solution in actual conditions, even though the simulation-real difference and limitations inherent to the used tabular RL framework have to be taken into account when interpreting the results obtained.

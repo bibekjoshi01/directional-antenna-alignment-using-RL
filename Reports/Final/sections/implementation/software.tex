@@ -1,43 +1,44 @@
-\subsection{Software and Firmware Design}
+\subsection{Software and Firmware Architecture}
 
-\subsubsection{Firmware Structure}
+\subsubsection{Firmware Architecture}
 
-The embedded software was implemented as a deterministic control loop running on the
-ESP32-S3. A single-loop architecture was selected to keep the firmware predictable,
-portable, and easy to validate during repeated field trials. Instead of using an
-RTOS-based multi-task design, the implementation separates sensing, decision making,
-and actuation as sequential software blocks executed in a fixed order.
+The embedded program was designed as a control loop in the ESP32-S3 processor. A single
+loop configuration was adopted to make the firmware reliable, portable, and easier to test
+during multiple field tests. Rather than adopting an RTOS-based multi-threaded program
+configuration, the system implements sensing, decision-making, and actuation as different
+software modules run sequentially according to a set sequence of operations.
 
-Each control cycle performs the following operations:
+The control loop executes the following functions:
 \begin{itemize}
-\item Acquisition of a batch of RSSI samples from the received packets
-\item Averaging and filtering of the sampled RSSI values
-\item Encoding of the current pan angle, tilt angle, and RSSI trend
-\item Selection of the next action from the active alignment algorithm
-\item Execution of stepper and servo commands
-\item Logging of the experiment state for post-processing
+\item Collection of a batch of RSSI measurements from the received data packets.
+\item Filtering and averaging of the acquired RSSI samples.
+\item Encapsulation of the current pan and tilt angles and RSSI measurement trend.
+\item Decision on the next step based on the chosen alignment strategy.
+\item Stepper motor and servo command execution.
+\item Logging of experiment parameters for later analysis.
 \end{itemize}
 
-This execution order ensured that every alignment method operated on the same measured
-feedback and experienced the same settling delay between consecutive movements.
+The above sequence ensures that each alignment algorithm operates on identical feedback
+measurements and faces the same delay between successive movements.d the same settling delay between consecutive movements.
 
 
 \subsubsection{RSSI Processing and State Encoding}
 
-RSSI measurements are inherently noisy due to multipath propagation, short-term fading,
-and packet-to-packet fluctuations. To reduce this variability, a small batch of samples
-is collected at each orientation and averaged before the decision block is executed.
-The averaged RSSI at control step $k$ is given by:
+The RSSI signal is highly corrupted by multipath effects, small-scale fading, and
+fluctuations across successive packets. This is addressed by averaging a few packets
+collected for each orientation before running the decision block. The smoothed RSSI
+signal at step $k$ of the control algorithm is obtained as follows:
+
 \begin{equation}
 \overline{\text{RSSI}}_k = \frac{1}{N} \sum_{i=1}^{N} \text{RSSI}_{k,i}
 \end{equation}
-where $N$ denotes the number of samples collected at the current orientation.
-The short-term RSSI trend is then estimated as:
+where $N$ is the number of samples collected for the current orientation. The trend
+of the RSSI signal over a short period of time can be computed as:
 \begin{equation}
 \Delta \text{RSSI}_k = \overline{\text{RSSI}}_k - \overline{\text{RSSI}}_{k-1}
 \end{equation}
-The trend variable is quantized into increasing, stable, and decreasing classes using
-a small dead-band threshold $\epsilon$ to suppress noise-driven state changes.
+This variable is discretized into three states based on whether the RSSI value
+is increasing, constant, or decreasing using a dead-band of size $\epsilon$.
 
 The embedded state is encoded as:
 \begin{equation}
@@ -48,9 +49,7 @@ fixed angular step sizes.
 
 \subsubsection{Firmware Modules}
 
-The final firmware was organized into modular functions so that the exhaustive scan,
-hill-climbing method, and RL-based policy could share common sensing and actuation
-primitives. This reduced implementation bias during algorithm comparison.
+The firmware was structured in modules for the exhaustive search, hill climbing, and RL policies to use the same sensing and actuation primitives. This mitigated bias in comparing the algorithms.
 
 \vspace{0.5cm}
 \begin{table}[H]
@@ -81,17 +80,17 @@ Data Logger & UART serial output & Records trial identifier, angles, RSSI, elaps
 
 \subsubsection{Control Timing and Runtime Parameters}
 
-A consistent timing configuration was maintained across all algorithms to ensure fair
-comparison during practical evaluation. After every commanded movement, the firmware
-waited for mechanical settling before the next RSSI batch was sampled. This prevented
-measurement corruption caused by vibration and transient misalignment.
+An equal timing setup was kept throughout all the algorithms to make comparisons
+more accurate for the practical testing process. In addition, the firmware waited for
+mechanical settling after each movement before taking another RSSI sampling session.
+Such a measure was required to prevent possible measurement error due to vibrations
+and misalignment.
 
-The chosen runtime parameters reflect practical observations from the prototype. The
-pan range was restricted to the forward hemisphere visible to the transmitter during
-testing, the tilt range was chosen from the mechanical geometry of the mounting
-bracket, and the 180~ms settling delay was sufficient to let the platform stop
-oscillating before sampling. Likewise, 20 RSSI samples per orientation provided a good
-balance between noise reduction and total trial duration.
+The selected runtime parameters correspond to the actual findings made using the
+prototype. Specifically, the pan range was limited by the visible front hemisphere of
+the transmitter, tilt range was determined by mechanical considerations of the
+mounting bracket used, and 180~ms delay between movements allowed enough time to
+prevent oscillation before sampling.
 
 \vspace{0.5cm}
 \begin{table}[H]
@@ -126,12 +125,9 @@ Settling delay after movement & 180~ms & Allows mechanical oscillation to decay 
 \end{tabular}
 \end{table}
 
-\subsubsection{Experiment Logging Format}
+\subsubsection{Experiment Logging Structure}
 
-To simplify post-processing, each practical run was stored using a structured experiment
-header describing the environment and scan parameters. The recorded format followed the
-same field layout throughout the project, which made the generated data compatible with
-spreadsheet-based analysis and script-based aggregation.
+To aid post-analysis tasks, every practice run was logged using an experiment header that provided information about the test environment and scan settings. The log data structure remained consistent for the entire project duration, making the collected data compatible with spreadsheet and scripting analysis tools.
 
 \vspace{0.5cm}
 \begin{table}[H]

@@ -1,110 +1,101 @@
 \subsection{Simulation Environment Implementation}
 
-To enable systematic development and evaluation of antenna alignment
-algorithms prior to hardware integration, a dedicated simulation environment
-was implemented in Python. The simulation provides a controlled and repeatable
-approximation of the wireless propagation, antenna directivity, and mechanical
-actuation behavior of the proposed system.
+In order to facilitate the systematic design and testing of antenna
+alignment algorithms before hardware deployment, a simulation environment was
+implemented using the Python programming language. This simulation offers a
+reproducible approximation of the wireless transmission characteristics,
+antenna radiation pattern, and mechanical movement capabilities of the
+proposed system.
 
-The simulation environment is designed to emulate the interaction loop between
-an adaptive controller and a directional antenna system. It exposes a
-step-based interface compatible with reinforcement learning agents, while also
-supporting conventional baseline alignment strategies. All algorithms
-evaluated in this work operate on the same environment to ensure fairness and
-comparability.
+The simulation environment aims to mimic the iterative process of
+communication between an adaptive algorithm and a directional antenna
+system. It features a step-by-step interface that can be utilized by both
+reinforcement learning algorithms and traditional antenna alignment
+approaches.
 
+\subsubsection{Structure of Environment and State Representation}
 
-\subsubsection{Environment Structure and State Representation}
+The environment itself operates on the principles of discrete-time Markov
+decision process (MDP). Every time step involves updating the orientation of the
+antenna and calculating RSSI for it.
 
-The simulation environment is implemented as a discrete-time Markov decision
-process (MDP). At each time step, the environment maintains the antenna
-orientation and generates a corresponding RSSI measurement.
-
-The antenna orientation is parameterized by:
+Antenna orientation is characterized as:
 \begin{itemize}
-    \item Azimuth angle $\theta \in [0^\circ, 360^\circ)$, discretized at a fixed angular resolution
-    \item Elevation (tilt) angle $\phi \in [60^\circ, 120^\circ]$, discretized at $5^\circ$ resolution
+    \item Azimuth angle $\theta \in [0^\circ, 360^\circ)$ in equal angular steps 
+    \item Elevation (tilt) angle $\phi \in [60^\circ, 120^\circ]$ in $5^\circ$ steps
 \end{itemize}
 
-In addition to absolute orientation, the reinforcement learning agent receives
-a discretized RSSI trend indicator to capture short-term signal dynamics. The
-RSSI trend is encoded into three states: increasing, stable, or decreasing.
+Alongside absolute antenna orientation, the reinforcement learner is provided with an
+additional discrete value that describes short term changes in RSSI, namely whether it is rising, steady or declining. 
 
-The resulting state representation is given by:
+This leads to the following state description formula:
 \begin{equation}
-s = (\theta_i, \phi_j, r_k)
+    s = (\theta_i, \phi_j, r_k)
 \end{equation}
-where $\theta_i$ and $\phi_j$ denote discrete azimuth and tilt indices, and
-$r_k$ represents the RSSI trend state.
+where $\theta_i$ is an index of a certain azimuth angle step, $\phi_j$ is an index of elevation angle step and $r_k$ indicates RSSI trend.
 
-\subsubsection{RSSI Synthesis and Propagation Model}
+\subsubsection{RSSI Calculation and Propagation Model}
 
-The received signal strength is synthesized using a simplified yet physically
-motivated propagation model. The RSSI at a given antenna orientation is
-computed as a combination of path loss, antenna gain, and stochastic noise.
+RSSI values for each orientation of the antenna are calculated using an
+idealized but physically motivated propagation model. The value of RSSI for
+a particular orientation is determined by path loss, gain and random noise.
 
-The path loss component is modeled using the log-distance path loss model:
+Path loss is simulated using a log-distance path loss model:
 \begin{equation}
 PL(d) = PL(d_0) + 10n \log_{10}\left(\frac{d}{d_0}\right)
 \end{equation}
-where $d$ is the transmitter--receiver separation distance, $d_0$ is a
-reference distance, and $n$ is the path loss exponent \cite{ref3}. In the simulation,
-$d$ is fixed to represent a static transmitter location, allowing the effect
-of antenna orientation to be isolated.
+where $d$ denotes distance between the transmitter and the receiver, $d_0$ is a
+reference distance, and $n$ is path loss exponent \cite{ref3}. In the present simulations,
+distance $d$ is held constant to simulate a stationary transmitter.
 
-The received power is then expressed as:
+RSSI is thus defined as:
 \begin{equation}
 RSSI = P_t + G_t(\theta, \phi) + G_r - PL(d) + \eta
 \end{equation}
-where $P_t$ is the transmit power, $G_t(\theta, \phi)$ is the directional gain
-of the receiving antenna as a function of orientation, $G_r$ is the transmitter
-antenna gain, and $\eta$ is additive noise.
+where $P_t$ is the transmitting power, $G_t(\theta, \phi)$ is the directional gain
+of the receiving antenna as a function of its orientation, and $G_r$ is the gain
+of the transmitter antenna.
 
-\subsubsection{Noise Modeling and Measurement Variability}
+\subsubsection{Modeling Noise in RSSI Measurements}
 
-To approximate real-world RSSI fluctuations observed in Wi-Fi systems,
-additive noise is introduced into the synthesized RSSI measurements. The noise
-term $\eta$ is modeled as zero-mean Gaussian noise:
+For a more realistic simulation of RSSI fluctuations experienced in a Wi-Fi
+connection, additive noise is added to RSSI measurements. The noise variable
+$\eta$ is assumed to be zero-mean Gaussian:
 \begin{equation}
 \eta \sim \mathcal{N}(0, \sigma^2)
 \end{equation}
 
-Additionally, short-term averaging is applied to consecutive RSSI samples to
-replicate packet-level RSSI smoothing performed on the embedded system. This
-ensures that the simulated feedback closely resembles the characteristics of
-RSSI data obtained from the MCU Wi-Fi interface.
+Furthermore, moving average filtering is used to simulate the smoothing effect of
+packet-level averaging done in the embedded Wi-Fi interface implementation.
 
-\subsubsection{Action Space and Environment Dynamics}
+\subsubsection{Action Space and Environmental Dynamics}
 
-The environment supports a discrete action space corresponding to incremental
-antenna movements. Each action produces a bounded change in azimuth and/or
-tilt angle, subject to mechanical constraints.
+The environmental state includes support for discrete actions corresponding to small
+movements of the antenna. Each movement consists of some change in both azimuth and
+tilt angle, constrained by the physical nature of the problem.
 
-After an action is applied, the environment:
+At each time step after choosing an action, the environment does the following:
 \begin{itemize}
-    \item Updates the antenna orientation
-    \item Applies a simulated settling delay
-    \item Generates a new RSSI measurement based on the updated orientation
-    \item Computes the reward as a function of RSSI improvement
+    \item Performs a change in antenna orientation.
+    \item Simulates an environment delay for the change to take effect.
+    \item Obtains a measurement of RSSI according to the current antenna orientation.
+    \item Calculates the reward function based on RSSI increase.
 \end{itemize}
 
-This step-wise interaction model is shared across all evaluated algorithms,
-ensuring identical dynamics for reinforcement learning and baseline methods.
+This process is used in all experiments, ensuring that the dynamics of the
+environment are identical for all algorithms considered.
 
-\subsubsection{Algorithm Evaluation within the Simulation}
+\subsubsection{Evaluation of Algorithm in the Simulation}
 
-The simulation environment serves as a unified evaluation platform for all
-alignment strategies considered in this work. The reinforcement learning agent
-and baseline algorithms are executed over identical episodes, initial
-conditions, and noise realizations.
+The simulation framework provides a common basis for evaluation of all the alignment
+algorithms that have been discussed in this study. In particular, the performance of the reinforcement
+learning algorithm, as well as the baseline approaches, is tested on a set of episodes with the same
+initial conditions and RSSI noise samples.
 
-Performance is evaluated using metrics such as:
+Metrics used to evaluate algorithm performance include:
 \begin{itemize}
-    \item Convergence time to optimal alignment
-    \item Maximum achieved RSSI
-    \item Number of antenna movements
-    \item Stability under RSSI noise
+    \item Time required for reaching optimal alignment
+    \item Highest reached RSSI level
+    \item Number of antenna moves
+    \item Resistance to RSSI noise
 \end{itemize}
-
-This simulation-based evaluation enables controlled comparison and informed
-algorithm selection prior to embedded deployment.

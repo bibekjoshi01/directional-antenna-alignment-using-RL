@@ -1,20 +1,20 @@
 \subsection{Reinforcement Learning Model}
 
-The core of the autonomous antenna alignment system is a lightweight reinforcement
-learning (RL) agent that adapts the receiver antenna orientation to maximize received
-signal strength. Unlike conventional control methods, RL enables the system to learn a
-useful alignment policy from interaction data without relying on an explicit channel
-model.
+The basic model used in our intelligent antenna alignment framework consists of a
+lightweight reinforcement learning (RL) algorithm designed to learn the optimal
+orientation of the receiver antenna by maximizing the received signal strength.
+Unlike the typical model-based control approaches, RL allows us to learn a useful
+control policy without using any channel model information.
 
+\subsubsection{Overview of Reinforcement Learning Framework}
 
-\subsubsection{RL Framework Overview}
+Reinforcement learning is a kind of learning approach whereby an intelligent agent
+learns how to take actions to maximize total cumulative rewards in a given
+environment. In contrast to supervised learning, which assumes the knowledge of the
+input-output mappings, RL only involves scalar feedbacks telling the agent whether it
+has done something well or not. The RL framework is highly appropriate for
+controlling systems with no available models~\cite{ref19}.
 
-RL is a learning paradigm in which an agent learns to make sequential decisions by
-interacting with an environment and maximizing cumulative reward. Unlike supervised
-learning, where correct input-output pairs are provided, RL relies on scalar reward
-feedback indicating whether an action improved or degraded performance. This framework
-is particularly suitable for control problems in which explicit models are unavailable
-or impractical to obtain~\cite{ref19}.
 \begin{figure}[H]
     \vspace{1em} 
     \centering
@@ -22,92 +22,88 @@ or impractical to obtain~\cite{ref19}.
     \caption{Reinforcement Learning Process Flow}
     \label{fig:rl_flow}
 \end{figure}
-Model-free reinforcement learning methods, such as Q-learning, estimate the expected
-long-term return associated with state-action pairs without requiring an explicit model
-of the environment. Such methods are attractive here because the final controller must
-execute on an embedded platform with limited memory and deterministic runtime
-requirements. In this project, learning is performed offline and only the trained
-Q-table is deployed to the hardware.
+
+Model-free reinforcement learning algorithms, such as Q-learning, approximate the
+expected long-term return of taking a particular action at a state without modeling
+the environment dynamics explicitly. This approach is promising for our case study,
+as the resulting controller should execute on a resource-constrained platform that has
+deterministic runtime requirements. Here, learning is done off-line, while only the learned
+Q-table is uploaded onto the device.
 
 \subsubsection{Q-Learning}
 
-Q-learning was selected because it provides a good balance between learning capability,
-implementation simplicity, and embedded feasibility for the present problem. The antenna
-alignment task uses a compact discrete state-action space, and the controller must run
-with predictable memory and computation on the ESP32-S3. Under these constraints,
-tabular Q-learning can be trained offline and then deployed as a fixed lookup table with
-very low runtime overhead.
+Q-learning was chosen due to its favorable trade-off of learning capacity, implementation
+simplicity, and embedded feasibility in this scenario. Antenna alignment is formulated as a
+task with a small state-action space and runs deterministically in terms of memory usage
+and compute requirements, therefore the tabular variant of Q-learning is an optimal choice.
+The algorithm learns a policy off-line, after which it can be applied as a simple fixed-size
+lookup table with very low latency.
 
-SARSA was considered less suitable because it is an on-policy method, meaning that its
-updates depend on the same exploratory policy used during training. This often produces
-more conservative behavior, which can be useful in safety-critical domains, but in the
-present work the objective was to learn a strong greedy deployment policy from offline
-simulation and then execute it deterministically on hardware. Q-learning is more aligned
-with this objective because it directly estimates the value of the greedy target policy.
+The alternative SARSA was ruled out, since it is an on-policy algorithm, and hence its
+learning relies on the same exploratory policy. On-policy learners are known to yield more
+conservative results, which is a nice property in some safety-sensitive applications.
+However, in the present scenario, we wanted to learn a strong greedy policy and apply it
+deterministically on hardware. Thus, Q-learning is more aligned with our aims, as it
+directly optimizes a greedy policy's values.
 
-Deep Q-Networks (DQN) were also not adopted because their advantages are more relevant
-to large or continuous state spaces. In this project, the state space is intentionally
-kept small through discretization, so a neural network would add training complexity,
-hyperparameter sensitivity, and higher deployment cost without a proportional practical
-benefit. DQN would also complicate on-device inference and reduce transparency compared
-with a tabular policy that can be inspected directly.
+Finally, Deep Q-Networks were not considered, since their strengths manifest themselves
+in cases where the state space is relatively large or continuous. However, in this project,
+the state space was intentionally kept small via discretization, so the application of a
+neural network-based DQN algorithm would require additional training complexity,
+hyperparameter tuning, and increased deployment costs.
 
-
-The problem is formulated as a Markov Decision Process (MDP) comprising:
+The model is cast as a Markov Decision Problem (MDP) that consists of:
 \begin{itemize}
-    \item \textbf{States ($s_t$):} Each state represents the current azimuth index,
-    tilt index, and recent RSSI trend class.
-    \item \textbf{Actions ($a_t$):} Discrete antenna adjustments consisting of pan
-    left, pan right, tilt up, tilt down, and hold.
- \item \textbf{Reward ($r_t$):} Scalar feedback representing the change in
-    averaged RSSI after taking an action, together with a small penalty on movement.
-    \item \textbf{Policy:} During training, an $\epsilon$-greedy policy balances
-    exploration and exploitation. During deployment, greedy action selection is used.
+    \item \textbf{State ($s_t$):} The state space comprises the present azimuth,
+    tilt indices, and RSSI trend classification.
+    \item \textbf{Action ($a_t$):} The actions space includes discrete movements
+    such as panning left, panning right, tilting up, tilting down, and holding the position.
+    \item \textbf{Reward ($r_t$):} The scalar reward denotes the variation in
+    averaged RSSI from the action, along with a minor cost for movement.
+    \item \textbf{Policy:} An $\epsilon$-greedy strategy explores and exploits in
+    the learning process. A greedy strategy is adopted at inference time.
 \end{itemize}
 
-\subsubsection{Exploration--Exploitation Trade-off}
+\subsubsection{Exploration--Exploitation Balance}
 
-The RL agent is trained using an $\epsilon$-greedy strategy so that it can first explore
-the search space and later exploit the best actions discovered during learning. A high
-initial exploration rate is necessary because the agent must experience both favorable
-and unfavorable antenna orientations in order to learn a meaningful Q-table rather than
-overfit to a few starting positions.
+In the training process, the reinforcement learning agent uses an $\epsilon$-greedy approach
+to first explore the problem space and then use it to exploit what it learns from its past
+experiences. Initially, exploration rate needs to be large, since the agent has to go through
+favorable and unfavorable states in terms of the antenna position in order to form an
+appropriate Q-table and not just optimize from few positions that it starts from.
 
-As training progresses, $\epsilon$ is gradually reduced so that the updates increasingly
-reflect exploitation of higher-value actions. This decay is justified because once the
-agent has sampled the practical state space sufficiently, continuing strong exploration
-would only slow convergence of the Q-values and inject unnecessary randomness into the
-learned policy. During deployment, exploration is disabled entirely so that the embedded
-controller behaves repeatably and does not intentionally take suboptimal actions on
-hardware.
+During the learning process, the exploration factor is slowly decayed, allowing more exploitation.
+Decay was appropriate in this case because after sampling the space adequately, further
+exploration would lead to increased convergence time. In other words, once the space was
+sufficiently explored, further exploration served only the purpose of adding unnecessary noise
+to the learning process and slowing the convergence of Q-values. Exploration rate drops
+to zero during deployment for repeatability purposes.
 
-\subsubsection{Training Convergence}
+\subsubsection{Learning Convergence}
 
-Training convergence in this work refers to stabilization of the learned Q-table and the
-associated improvement trends over repeated episodes. In practice, convergence was judged
-from the reward-per-episode and best-RSSI curves: once these curves stopped showing
-meaningful long-term improvement and the policy repeatedly reached high-RSSI regions from
-diverse initial states, the Q-table was treated as sufficiently converged for export.
+Convergence in our context means convergence of the Q-table values together with the
+corresponding trend toward improved performance of the algorithm. From a practical point
+of view, convergence could be defined as the point at which the reward-per-episode curve,
+as well as RSSI improvement, stops increasing significantly and the policy reaches favorable
+states in diverse scenarios. In other words, the point of convergence corresponds to the
+situation when the improvement of the performance does not show clear trends anymore.
 
-This practical notion of convergence is appropriate here because the objective is not a
-formal proof of optimality in an abstract MDP, but a stable policy that can be deployed
-reliably on embedded hardware. The final number of training episodes and the exploration
-decay schedule were therefore chosen to produce repeatable convergence behavior without
-excessive offline training cost.
+This approach was appropriate in our case due to the fact that the goal was to develop an
+effective deployment policy, not to prove an optimal solution to the underlying problem in
+the abstract Markov Decision Process.
 
 \subsubsection{Q-Learning Algorithm Pseudocode}
 
-The following code-style pseudocode summarizes the adopted Q-learning training and
-deployment procedure.
+The below pseudocode summarizes the adopted Q-learning training and deployment procedure that was used.
 
 \begin{minted}[linenos, fontsize=\small]{c}
 # Initialize Q-table
-Initialize Q[s, a] for all states s and actions a
-Set alpha (learning rate), gamma (discount factor), 
+init Q[s, a] for all states s and actions a
+set alph (learning rate), gamma (discount factor), 
 epsilon (exploration rate)
 
 for each episode:
-    reset environment to a valid random initial orientation
+    reset env. to a valid random initial orientation
     
     measure averaged RSSI
     encode current state s
@@ -147,40 +143,43 @@ during deployment:
     do not perform online learning
 \end{minted}
 
-\subsubsection{State Space Design}
-The state space represents the information available to the RL agent at each decision
-step. To maintain a compact representation suitable for the ESP32-S3, the deployed
-controller uses the practical motion limits of the hardware rather than a full
-$360^{\circ}$ scan:
+
+\subsubsection{Design of State Space}
+The state space contains all the information that is accessible to the RL agent in
+every decision-making step. In order to ensure a compact design of the state space,
+the implemented controller utilizes only practical limitations of movement of the
+hardware instead of a $360^{\circ}$ rotation:
 \begin{itemize}
-    \item Azimuth angle is discretized into $N_\theta = 19$ positions over
-    $0^{\circ}$ to $180^{\circ}$ at $10^{\circ}$ resolution
-    \item Tilt angle is discretized into $N_\phi = 11$ positions over
-    $25^{\circ}$ to $75^{\circ}$ at $5^{\circ}$ resolution
-    \item RSSI trend is encoded into $N_r = 3$ classes: increasing, stable, and
-    decreasing
+    \item Discretization of the azimuth angle into $N_\theta = 19$ states
+    within the range $0^{\circ}$-$180^{\circ}$ with $10^{\circ}$ increment
+    \item Discretization of the tilt angle into $N_\phi = 11$ states
+    within the range $25^{\circ}$-$75^{\circ}$ with $5^{\circ}$ increment
+    \item Classification of RSSI change into $N_r = 3$ categories: ascending,
+    constant, and descending
 \end{itemize}
-The final state vector is a combination of azimuth index, tilt index, and RSSI trend
-index:
+Thus, the resulting state is defined as the combination of the indexes of the
+azimuth, tilt angles, and RSSI change:
 \begin{equation}
 s_t = \left(i_{\theta},\, i_{\phi},\, i_r \right)
 \end{equation}
-The number of distinct states is therefore:
+The number of possible states is equal to:
 \begin{equation}
 \left|S\right| = N_\theta \times N_\phi \times N_r = 19 \times 11 \times 3 = 627
 \end{equation}
 
-\subsubsection{Q-Table Size and Memory Footprint}
 
-The Q-table size depends on the number of discrete states and actions. Let the pan
-(azimuth) and tilt (elevation) angles be discretized into $N_\theta$ and $N_\phi$
-positions respectively, let the RSSI trend take $N_r$ discrete values, and let there
-be $N_a$ possible actions. Then, the total Q-table size is:
+\subsubsection{Size of the Q-Table and Storage Requirement}
+
+Q-table size is a function of the number of discrete state and action spaces. Assume
+that the pan (azimuth) angle takes on $N_\theta$ positions and that the tilt
+(elevation) angle takes on $N_\phi$ positions. Further, assume that there are $N_r$
+discrete values for RSSI trends and $N_a$ actions available. The size of the
+Q-table is:
 \begin{equation}
 \left|Q\right| = N_\theta \times N_\phi \times N_r \times N_a
 \end{equation}
 
-For the deployed controller:  
+In the case of the deployed controller:
 \begin{itemize}
     \item Pan states: $N_\theta = 19$
     \item Tilt states: $N_\phi = 11$
@@ -201,9 +200,9 @@ This memory footprint is comfortably within the RAM capacity available on the
 ESP32-S3, confirming the feasibility of direct on-device inference.
 
 \subsubsection{Action Space Design}
-The action space defines the set of possible antenna movements available to the RL
-agent. Actions are discrete and correspond directly to the implemented actuator
-commands:
+The action space comprises the available movement possibilities for the antenna
+that can be taken by the RL agent. The actions are defined as discrete values
+corresponding directly to the actual actuator commands.
 
 \begin{itemize}
     \item \textbf{Pan left}: decrease azimuth by one $10^{\circ}$ step
@@ -212,15 +211,15 @@ commands:
     \item \textbf{Tilt down}: decrease tilt by one $5^{\circ}$ step
     \item \textbf{Hold}: retain the current orientation
 \end{itemize}
-Pan actions are executed through the stepper motor driver, while tilt actions are
-executed through the servo output. This discrete action set keeps inference simple and
-ensures that the learned policy maps directly to repeatable physical motions.
+
+Pan actions are performed using the stepper motor controller, whereas tilt actions
+are performed using the servo output signal. The discrete nature of the action
+space simplifies the inference process.
 
 \subsubsection{Reward Function}
-The reward function provides evaluative feedback to the reinforcement learning agent by
-quantifying the impact of each antenna movement on link quality. The objective is to
-increase RSSI while discouraging unnecessary movement that may lead to oscillatory
-behavior, increased wear, or slow convergence.
+The reward function gives feedback to the reinforcement learning algorithm
+by assessing the effect of each antenna motion on link quality. In particular,
+the aim is to maximize RSSI without making any unnecessary movements that might cause oscillation, wear, or delay in convergence.
 
 The instantaneous reward at time step $t$ is defined as:
 \begin{equation}
@@ -234,40 +233,37 @@ where:
     \item $\lambda$ is a weighting factor that penalizes unnecessary actuation
 \end{itemize}
 
-A positive reward is obtained when an action results in an improvement in RSSI, encouraging movements that align the antenna more closely with the transmitter. Conversely, actions that degrade RSSI yield negative rewards, guiding the agent away from suboptimal orientations. The motion penalty term discourages excessive or unnecessary antenna movements, promoting stable convergence and reducing oscillations around local maxima.
+In this way, when the action leads to an increase in RSSI, there will be a positive reward. On the other hand, negative rewards will follow in case the action leads to a decrease in RSSI values, which makes the learning algorithm move towards optimal positions for antenna. Lastly, the motion penalty ensures that the antenna movements do not take place unnecessarily.
 
-The parameter $\lambda$ is selected empirically during simulation so that the reward
-remains dominated by RSSI improvement while still penalizing inefficient actuation.
-This formulation enables the agent to learn a policy that balances communication
-performance with mechanical efficiency under embedded constraints.
+Parameter $\lambda$ is empirically chosen such that the reward always consists mainly of RSSI increases rather than any unnecessary antenna movements.
+
 \subsubsection{Learning and Action Selection}
 
-The reinforcement learning agent operates on a pre-trained Q-table stored on the MCU.
-The Q-table is generated offline in the simulation environment using repeated episodes
-with randomized starting orientations. During deployment, no further Q-value updates
-are performed; the system executes inference only.
+In the process of performing actions, the agent utilizes the pre-trained Q-table 
+on the MCU. The Q-table was pre-computed offline in the simulator based on multiple 
+episodes with varying initial states in terms of orientation angles.
 
-\textbf{Action Selection:} 
-The agent selects actions using the learned Q-values:
+\textbf{Actions Selection:} 
+The agent decides its action according to Q-values that were obtained previously:
 \begin{equation}
-a_t = \arg\max_{a} Q(s_t, a)
+a_t = \arg\max_a Q(s_t, a)
 \end{equation}
-where $s_t$ is the current state composed of orientation indices and recent RSSI trend.
+Here $s_t$ is the current state described by orientation index values and RSSI change trend.
 
-No exploration is applied during deployment so that hardware trials remain stable,
+There was no exploration applied during deployment so that hardware trials remain stable,
 repeatable, and comparable across runs.
 
-\subsubsection{Implementation Considerations on ESP32-S3}
+\subsubsection{Implementation Considerations for ESP32-S3}
 
 \begin{itemize}
-    \item \textbf{Memory footprint:} The deployed Q-table occupies approximately
-    $12.3$~kB, which is small enough for direct static allocation
-    \item \textbf{Computation:} Action selection requires only table lookup and
-    simple arithmetic, enabling deterministic runtime
-    \item \textbf{Real-time operation:} The ESP32-S3 continuously measures RSSI,
-    encodes the current state, retrieves the best action, and commands the actuators
-    \item \textbf{Stability:} Since no online learning occurs, the deployed system
-    avoids trial-to-trial drift caused by exploration and noisy on-device updates
+    \item \textbf{Memory usage:} The Q-table size is about
+    $12.3$~kB and can be allocated statically
+    \item \textbf{Computational overhead:} Action determination involves just table
+    lookup and arithmetic operations
+    \item \textbf{Real-time performance:} ESP32-S3 constantly monitors RSSI, extracts
+    the state code, selects the optimal action, and controls actuators
+    \item \textbf{System stability:} As there is no learning phase, the solution does
+    not experience drift from trial to trial
 \end{itemize}
 
-This design ensures that the antenna alignment system is fully autonomous, responsive to changing signal conditions, and feasible for embedded deployment without the overhead of online training.
+In conclusion, the presented design makes the antenna adjustment procedure fully automated and sensitive to environmental changes while being easy to implement as an embedded solution.

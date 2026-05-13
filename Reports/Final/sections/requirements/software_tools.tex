@@ -1,40 +1,34 @@
 \subsection{Software Tools}
 
-This project relies on a combination of development environments, libraries, and simulation tools to implement, test, and validate the autonomous directional antenna system. The software stack has been chosen for compatibility with the ESP32 microcontroller, real-time signal processing, and lightweight reinforcement learning algorithms.
+Such a heterogeneous combination of development platforms, libraries, and simulators is applied for developing the system and validating its efficiency. In particular, the chosen set of software components ensures compatibility of the system with ESP32 microcontroller and supports implementation of real-time signal processing and reinforcement learning algorithm.
 
 \subsubsection{Arduino IDE}
-
-The Arduino Integrated Development Environment (IDE) is used for programming and deploying firmware to the ESP32 DevKit microcontroller. It provides a user-friendly interface, built-in support for ESP32 libraries, and easy integration with peripherals such as PWM motors, ADC sensors, and Wi-Fi modules. 
-The IDE allows rapid prototyping and testing of algorithms, including RSSI acquisition and servo motor control. Additionally, it supports serial communication for debugging and real-time monitoring.
-
+The Arduino IDE is applied for programming and flashing the firmware to the ESP32 DevKit microcontroller. The integrated development platform features a user-friendly interface, built-in ESP32 libraries, and easy-to-use peripherals support for working with pulse-width modulation (PWM) motors, analog-to-digital conversion (ADC) sensors, and Wi-Fi modules. With Arduino IDE, developers can prototype their algorithms, test the functionality of RSSI measurement and servo motor movement, and perform serial communication debugging.
 
 \subsubsection{Programming Languages}
 
-\textbf{Python:} Python Programming Language is used for data analysis, simulation, and reinforcement learning experiments. Libraries such as NumPy, Matplotlib, and Pandas allow signal processing, visualization of RSSI data, and testing RL policies before deployment on the microcontroller. Python also facilitates post-processing of logged data to evaluate system performance under different environmental conditions.
+\textbf{Python:} The Python programming language is used for conducting simulations, analysis of collected datasets, and reinforcement learning experiment. Namely, such libraries as NumPy, Matplotlib, and Pandas allow performing signal processing operations, analyzing visualized RSSI results, and testing reinforcement learning policies before their deployment onto microcontrollers. 
 
-Custom Python-based simulation scripts are used to model antenna orientation, RSSI feedback, and reinforcement learning policies. Lightweight tabular reinforcement learning algorithms are evaluated offline before being translated into microcontroller-compatible logic.
+Additionally, Python allows conducting post-processing of collected data and analyzing the performance of the proposed solution in different environmental conditions. Besides that, Python allows designing a simulation script modeling antenna orientation, RSSI feedback, and reinforcement learning policies. Off-line validation of lightweight tabular reinforcement learning policies will be conducted using Python scripts and their further translation into on-board logic for ESP32.
 
-\textbf{C/C++:} The firmware running on the ESP32 microcontroller is implemented primarily in C/C++, using the Arduino framework and PlatformIO toolchain. These languages provide low-level hardware access, deterministic execution, and efficient memory usage, which are essential for real-time RSSI sampling, servo motor control, and on-device decision-making. The use of C/C++ ensures compatibility with embedded libraries and enables deployment of lightweight reinforcement learning logic within the constrained resources of the microcontroller.
+\textbf{C/C++:} The firmware running on ESP32 microcontroller will be written in C/C++ using Arduino IDE/PlatformIO toolchains. Such a choice is motivated by the need to have deterministic execution, low-level hardware support, and efficient memory management when implementing complex algorithms like RSSI measurement and servo motor control.
 
 \subsubsection{PlatformIO}
 
-PlatformIO is used as an advanced firmware development environment for the ESP32. Built on top of Visual Studio Code, it provides robust dependency management, multi-environment builds, and improved debugging support compared to the Arduino IDE. PlatformIO enables structured project organization and simplifies integration of third-party libraries required for motor control, RSSI acquisition, and communication.
+PlatformIO is an advanced firmware development environment for ESP32 microcontrollers based on Visual Studio Code. It offers better support for dependencies management, multi-environment building, and debugging compared to the Arduino IDE.
 
 \subsubsection{Version Control}
 
-Git and GitHub are used for version control of all source code, configuration files, and documentation. It ensures proper tracking of changes, collaboration among team members, and maintains a history of experimental setups for reproducibility.
+Git and GitHub services are applied for maintaining version histories of all source code, configurations, and documentation developed within the course of the research.
 
 \subsubsection{Trello}
 
-Trello is used as a project management and collaboration tool. 
-It helps organize tasks, assign responsibilities, and track progress of individual modules and team milestones. 
-Using Trello boards, lists, and cards, the team can coordinate software and hardware development efficiently.
+Trello is used for managing and tracking project-related tasks assigned to different members of the research team. The described application allows organizing tasks in boards, lists, and cards in order to facilitate project management.
 
 \subsubsection{Draw.io}
 
-Draw.io (also known as diagrams.net) is employed for designing system diagrams, flowcharts, and hardware schematics. It provides a flexible, web-based interface for creating clear and structured visual representations of the project workflows.
-
+The Draw.io diagrams editor is used for creating system diagrams and flowcharts. It provides users with a convenient way of making structured and understandable visuals.
 
 \subsubsection{KiCad}
 
-KiCad EDA was used for designing the schematic and PCB layouts of the system. It allowed precise placement of components, custom routing of power and signal lines, and integration of the slip-ring connections. KiCad’s 3D visualization tools were also employed to verify mechanical clearance and ensure proper alignment between the rotating and stationary sections.
+KiCad EDA was used to create the schematics and PCB layout for the design. It was helpful in arranging the components and customizing the power and signal lines, as well as ensuring slip rings are connected. The three-dimensional feature provided by KiCad was useful in confirming mechanical clearance and ensuring that the moving and stationary parts are aligned correctly.

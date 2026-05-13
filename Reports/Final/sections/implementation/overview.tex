@@ -1,17 +1,16 @@
 \newpage
 \section{IMPLEMENTATION DETAILS}
 
-The final implementation of the proposed autonomous antenna alignment system combines
-mechanical actuation, embedded RSSI acquisition, offline reinforcement learning, and
-field validation within a single end-to-end workflow. The implementation was carried
-out in four tightly connected stages: hardware fabrication, firmware development,
-offline model training, and practical experimentation.
+This final deployment of the suggested system consists of mechanical actuation, RSSI embedding,
+offline RL, and field testing in one chain. This final process consists of four
+intertwined phases: hardware design, embedded software implementation, offline
+training, and field experimentations.
 
-At the hardware level, a two degree-of-freedom positioning mechanism was developed to rotate the
-receiving directional antenna in pan and tilt while preserving stable power and signal
-routing across the rotating interface. At the embedded level, the ESP32-S3 was used
-as the central controller for packet reception, RSSI extraction, servo and stepper
-actuation, and policy execution.
+Hardware-wise, a mechanism of two degrees of freedom was constructed to rotate the
+receiving antenna in pan and tilt while maintaining power and data communication
+through the rotating part of the interface. Embedded-wise, ESP32-S3 was chosen as a
+primary processor of packets received from the wireless network, the extraction of
+RSSI information, as well as control over servos and steppers.
 
 \vspace{0.5cm}
 \begin{table}[H]
@@ -38,5 +37,6 @@ Practical Validation & Indoor and outdoor trial records at 10~m to 30~m & To gen
 \end{tabular}
 \end{table}
 
-The implementation details in the following subsections describe how these stages were
-realized and how the final prototype was prepared for experimental evaluation.
+The implementation details are mentioned in following subsections describe how these stages were
+realized and how final prototype was prepared for experimental evaluation.
+

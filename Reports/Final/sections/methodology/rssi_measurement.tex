@@ -1,71 +1,64 @@
 \subsection{RSSI Measurement and Signal Conditioning}
 
-The performance of the autonomous antenna alignment system relies heavily on
-consistent measurement of received signal strength. Received Signal Strength
-Indicator (RSSI) is a hardware-reported metric representing the power of incoming
-radio packets, typically expressed in dBm. Higher RSSI values correspond to stronger
-received signals and therefore provide a practical feedback signal for antenna
-alignment.
+The performance of the antenna alignment algorithm is very sensitive to
+accurate signal strength readings. RSSI or Received Signal Strength Indicator is
+the metric for measuring the radio strength of incoming packets in dBm. Higher RSSI
+means higher signal strength which could be leveraged to measure the alignment.
 
-Due to multipath propagation, fading, packet-to-packet variation, and environmental
-interference, raw RSSI values are too noisy to be used directly for control decisions.
-The measurement pipeline therefore applies lightweight conditioning before the signal
-is used by the baseline algorithms or the RL policy.
+The raw RSSI readings, however, have multipaths, fading, packet-to-packet
+differences and other interference that makes them quite noisy to use directly. Thus,
+a simple signal conditioning is applied to the input before applying it to the
+algorithms and policies.
 
 \subsubsection{RSSI Sampling}
 
-RSSI is obtained from the ESP32-S3 integrated Wi-Fi radio from packets received by the
-directional antenna. Each RSSI batch is associated with a specific azimuth and tilt
-orientation. In the practical implementation, 20 consecutive RSSI samples are
-collected at each orientation with a 10~ms inter-sample delay, producing an effective
-measurement window of approximately 200~ms per decision step. This configuration was
-chosen to reduce short-term fluctuations while remaining short relative to actuator
-movement and settling time.
+RSSI data is collected from the integrated Wi-Fi radio on the ESP32-S3 board from
+packets collected by the directional antenna. The RSSI measurements are performed
+for each orientation (azimuth and tilt) in sequence. In the actual implementation
+of the task, there were taken 20 RSSI measurements per angle with 10 ms interval in
+between, which amounts to 200 ms per decision step.
 
-\subsubsection{Noise Mitigation and Filtering}
+\subsubsection{Noise Elimination and Filtering}
 
-RSSI measurements can fluctuate significantly even when the antenna orientation remains
-fixed. To ensure robust control and learning, the following techniques are applied:
+RSSI readings vary widely even if antenna orientation is kept constant. For reliable
+control and learning, the following filters have been employed:
 \begin{itemize}
-    \item \textbf{Short-term averaging:} Multiple consecutive RSSI readings at the
-    same orientation are averaged to reduce random noise
-    \item \textbf{Dead-band trend classification:} The change between consecutive
-    averaged RSSI values is classified using a small threshold so that minor
-    fluctuations do not trigger unnecessary state changes
+    \item \textbf{Temporal averaging:} Averaging successive RSSI readings from the
+    same orientation to eliminate noise
+    \item \textbf{Dead-zone trend detection:} The difference between successive
+    average RSSI values is used to classify whether there was any significant change
+    in signal strength
 \end{itemize}
 
-This conditioning ensures that the controller reacts to meaningful signal trends
-rather than instantaneous fluctuations.
+These preprocessing techniques enable the agent to react to trends and not noise.
 
-\subsubsection{State Feature Construction}
+\subsubsection{Feature Extraction for State Space}
 
-The RL agent requires a compact representation of the environment in the form of a
-state vector. The state vector is constructed using:
+To efficiently capture the environment, an RL agent needs to build a compact state
+representation as vectors. The state vector will be built using:
 \begin{itemize}
-    \item \textbf{Antenna orientation:} Azimuth is discretized over the practical
-    search range of $0^{\circ}$ to $180^{\circ}$ using $10^{\circ}$ steps, and tilt is
-    discretized over $25^{\circ}$ to $75^{\circ}$ using $5^{\circ}$ steps.
-    \item \textbf{RSSI trend:} The rate of change of averaged RSSI values is
-    classified into three discrete states:
+    \item \textbf{Antenna Orientation:} Azimuth is discretized using increments of
+    $10^{\circ}$ from $0^{\circ}$ to $180^{\circ}$. Tilt is discretized using increments
+    of $5^{\circ}$ from $25^{\circ}$ to $75^{\circ}$.
+    \item \textbf{Signal Trend:} Rate of change in averaged RSSI values is classified
+    into three different categories:
         \begin{itemize}
-            \item \textbf{Increasing:} $\Delta RSSI > +0.8$ dB
-            \item \textbf{Stable:} $-0.8 \leq \Delta RSSI \leq +0.8$ dB
-            \item \textbf{Decreasing:} $\Delta RSSI < -0.8$ dB
+            \item \textbf{Rising:} $\Delta RSSI > +0.8$ dB
+            \item \textbf{Constant:} $-0.8 \leq \Delta RSSI \leq +0.8$ dB
+            \item \textbf{Falling:} $\Delta RSSI < -0.8$ dB
         \end{itemize}
 \end{itemize}
 
-The resulting state vector is expressed as:
+The resulting state vector will be represented by the following equation:
 \begin{equation}
 \mathbf{s} = \left( i_{\text{az}},\, i_{\text{tilt}},\, \Delta \mathrm{RSSI} \right)
 \label{eq:state_vector}
 \end{equation}
-This representation captures both the current antenna orientation and short-term signal
-behavior while keeping the state space small enough for direct Q-table deployment on
-the ESP32-S3.
+This approach combines both the antenna orientation and signal trend into the state
+vector without increasing its size too much. Consequently, the Q-table can be deployed
+on the ESP32-S3.
 
 \subsubsection{Data Logging}
 
-For debugging, performance evaluation, and offline analysis, RSSI measurements are
-logged together with timestamps, azimuth and tilt indices, selected actions, and trial
-identifiers. This logging supports later comparison of baseline and RL behavior under
-matched runtime conditions.
+To facilitate debugging, performance evaluation, and further analysis, RSSI readings are
+stored along with timestamp, azimuth and tilt index, chosen action, and trial ID.

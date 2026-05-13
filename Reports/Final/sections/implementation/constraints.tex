@@ -1,60 +1,52 @@
-\subsection{Implementation Constraints and Practical Issues}
+\subsection{Implementation Constraints and Practical Problems}
 
-This section discusses the key practical limitations encountered during the implementation of the antenna alignment system and the mitigation strategies adopted in software and firmware. The focus is on observed constraints
-during simulation and hardware-oriented design.
+This section describes the main implementation challenges that arose while implementing the proposed antenna alignment approach and solutions that have been used in terms of software and firmware development. The emphasis is made on the practical constraints observed during simulations and hardware-based implementation.
 
-\subsubsection{RSSI Measurement Noise}
+\subsubsection{RSSI Value Noisiness}
 
-RSSI measurements are inherently noisy due to multipath effects, receiver sensitivity variations, and thermal noise. In both the simulated environment and real RF systems, successive RSSI readings at the same antenna orientation can differ significantly.
+The RSSI values are affected by the phenomena of signal interference, receiver's gain instability, and the presence of thermal noise. Both simulated and real-life scenarios show great variance in repeated RSSI samples taken with the same antenna orientation.
 
-\textbf{Observed issue:}
+\textbf{Problem:}
 \begin{itemize}
-\item Single RSSI samples caused unstable reward signals
-\item Small random fluctuations triggered unnecessary action changes in the RL agent
+    \item Single RSSI sample value led to noisy reward signal
+    \item Tiny RSSI value fluctuations led to unwanted actions changes of the RL agent
 \end{itemize}
 
-\textbf{Implemented mitigation:}
+\textbf{Solution applied:}
 \begin{itemize}
-\item RSSI values are averaged over a fixed sampling window.
-\item State transitions depend on the \emph{sign} of RSSI change (increase / stable / decrease), rather than raw magnitude.
+    \item RSSI values are calculated as an average across sampling period
+    \item The direction of RSSI variation (\emph{increase / no change / decrease}) is used to trigger state transition
 \end{itemize}
 
-This reduced sensitivity to high-frequency noise without increasing computational complexity.
+\subsubsection{Errors Related to Quantization and Discretization}
 
-\subsubsection{Quantization and Discretization Errors}
+The continuous pan, tilt, and RSSI dimensions were discretized to allow for Q-learning through table lookup.
 
-The continuous pan, tilt, and RSSI domains were discretized to enable tabular Q-learning.
-
-\textbf{Observed issue:}
+\textbf{Observed problem:}
 \begin{itemize}
-\item Fine angular variations could not be represented
-\item The true optimal orientation may lie between discrete states
+\item Very small angle changes could not be captured
+\item The optimum angle could potentially fall between two discrete points
 \end{itemize}
 
-\textbf{Implemented mitigation:}
+\textbf{Solution employed:}
 \begin{itemize}
-\item Discretization step size was selected to balance resolution and table size
-\item The deployed controller was limited to the practical search region used during hardware testing so that the state space remained compact and physically meaningful
+\item The discretization interval was chosen carefully based on resolution versus table size considerations
+\item The applied controller operated within a realistic search area tested experimentally on physical hardware
 \end{itemize}
 
-This ensured acceptable alignment accuracy without excessive memory usage.
+\subsubsection{Constraints on Memory of Embedded Hardware}
 
+ESP32 has low SRAM and flash memory capacity that makes it difficult to perform dynamic or high dimensional models.
 
-\subsubsection{Memory Constraints on Embedded Hardware}
-
-The ESP32 has limited SRAM and flash memory, making dynamic or high-dimensional models impractical.
-
-\textbf{Observed issue:}
+\textbf{Identified problem:}
 \begin{itemize}
-\item Neural network-based policies were unsuitable for on-device inference
-\item Online Q-table updates would increase memory and runtime complexity
+\item Policies based on neural networks were not suitable for running on ESP32
+\item Updating the Q-table in an online fashion would require more complex computation and increase memory requirements
 \end{itemize}
 
-\textbf{Implemented mitigation:}
+\textbf{Proposed solution:}
 \begin{itemize}
-\item Q-learning was performed offline on a PC
-\item Only the trained Q-table was deployed to the ESP32-S3
-\item No learning or parameter updates occur during deployment
+\item Q-learning was implemented offline on the PC
+\item The Q-table from the Q-learning step was only uploaded on ESP32-S3
+\item There is no learning done after the deployment phase.
 \end{itemize}
-
-This resulted in deterministic execution and predictable memory usage.

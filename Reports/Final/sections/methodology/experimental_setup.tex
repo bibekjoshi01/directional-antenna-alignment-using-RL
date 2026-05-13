@@ -1,62 +1,60 @@
-\subsection{Experimental Setup and Evaluation}
+\subsection{Experimental Setup and Assessment Methodology}
 
-This section defines the experimental setup used to evaluate the autonomous antenna
-alignment system, the metrics considered for assessment, and the protocol used to
-compare the RL-based controller with the baseline methods. The goal is to ensure that
-all algorithms are tested under the same initial conditions, actuator limits, and RSSI
-measurement pipeline.
+In this section, the experimental setup for evaluating the proposed autonomous antenna
+alignment mechanism, metrics to measure performance, and comparison protocol with other
+algorithms will be discussed. The aim is to make sure that all algorithms are
+evaluated under identical initial state, actuator constraints, and RSSI measurement
+procedure.
 
 \subsubsection{Experimental Environment}
 
-The system is tested in two primary environments to assess behavior under varying
-propagation conditions:
+The experimental setting consists of two main environments that simulate different
+propagation environments:
 
 \begin{itemize}
-    \item \textbf{Indoor environment:} Laboratory or corridor settings with
-    reflective surfaces such as walls and metallic objects. These conditions introduce
-    multipath propagation and noticeable RSSI fluctuation.
-    \item \textbf{Outdoor environment:} Open or semi-open areas with transmitter and
-    receiver separation in the range of 10--30~m during practical trials. These
-    conditions provide stronger line-of-sight behavior while still allowing mild
-    obstruction scenarios.
+    \item \textbf{Indoor setting:} Lab or corridor-like settings where reflective
+    surfaces like walls and metallic items exist. Multipath propagation and RSSI
+    variation become more pronounced in such settings.
+    \item \textbf{Outdoor setting:} Open or semi-open environments where the
+    distance between the transmitter and receiver varies from 10 to 30~m in practice.
+    This setting exhibits line-of-sight behavior with some obstacles present.
 \end{itemize}
 
-\noindent Experiments are conducted under the following conditions:
+The experiments are performed in the presence of the following assumptions:
 \begin{itemize}
-    \item The transmitter orientation and transmit power are kept fixed throughout a
-    trial set.
-    \item The receiver starts from a deliberately misaligned orientation selected from
-    the same predefined set for all compared algorithms.
-    \item Practical evaluation is carried out under static conditions without
-    intentional disturbance so that the compared methods can be assessed under the same
-    controlled setup.
-    \item Multiple trials are repeated for each practical scenario.
+    \item The orientation and the transmission power of the transmitter are held
+    constant during an experiment.
+    \item The orientation of the receiver is started with a deliberate initial misalignment
+    chosen from the same predetermined set for all compared algorithms.
+    \item In order to compare the performance of the algorithms practically, static tests
+    are made under a disturbance-free environment.
+    \item Repeated experiments are carried out for different practical situations.
 \end{itemize}
 
 \subsubsection{Evaluation Metrics}
 
-To enable quantitative and fair comparison of RL-based alignment against baseline
-methods, the following metrics are recorded:
+In order to allow for a quantitative comparison of the proposed RL-based alignment scheme with
+baselines approaches, the following performance measures are collected:
 
 \textbf{Received Signal Strength Indicator (RSSI):} 
-The primary metric for assessing link quality. For each decision step, the reported
-RSSI is the average of 20 consecutive packet-level measurements acquired with a
-10~ms inter-sample delay. This metric is meaningful
-only if it improves the received signal level observed at the wireless receiver.
-Moreover, RSSI is the direct feedback signal available to all compared algorithms, so it
-serves as the most fundamental common basis for comparison.
+This measure is considered to be a main metric of evaluating the quality of the communication
+link. The RSSI value used for analysis corresponds to the averaged one measured within
+each decision step as an average over 20 packets with 10~ms interval between them. 
+This parameter is considered to be meaningful only if it provides additional gain on
+the received signal strength level with respect to the initial one observed at the
+wireless receiver side. In addition, the RSSI is directly used by the RL agent as an
+observation and is thus a natural choice for a fundamental comparison basis.
+
 \begin{equation}
 RSSI_{\text{avg}}(k) = \frac{1}{N}\sum_{i=1}^{N} RSSI_i(k), \qquad N = 20
 \end{equation}
 
 \textbf{Convergence Time ($T_{conv}$):} 
-Time required for the algorithm to reach a stable alignment decision in the practical
-control loop. In the deployed firmware, convergence is declared when the absolute RSSI
-improvement remains below 0.8~dB for four consecutive control cycles, or when the
-maximum allowed number of decision steps is reached.
-The same convergence rule and runtime stopping logic are applied across the compared
-methods during practical evaluation so that the reported convergence times remain
-directly comparable.
+This parameter indicates the amount of time required to achieve a steady state within the practical
+loop. Within the deployment firmware implementation, the convergence criterion is met if the absolute
+difference of the averaged RSSI does not exceed 0.8~dB for four subsequent control cycles, or the maximum
+number of decision steps is reached. This criterion is used consistently during the comparison of all methods
+in practical conditions to ensure comparability of the reported values.
 \begin{equation}
 \left| RSSI_{\text{avg}}(k) - RSSI_{\text{avg}}(k-1) \right| < 0.8~\text{dB},
 \quad \forall k \in [k_c, k_c+3]
@@ -65,34 +63,30 @@ directly comparable.
 T_{conv} = t(k_c)
 \end{equation}
 
-The 0.8~dB threshold was selected as a practical dead-band for the final hardware
-system. It is small enough to indicate that the controller has entered a near-stationary
-high-RSSI region, but large enough to avoid treating packet-level RSSI fluctuation or
-actuator settling noise as meaningful improvement. This metric is included because the
-alignment system is intended for practical use, where fast recovery from misalignment is
-as important as final signal quality.
+0.8~dB was chosen as a practical dead band for further hardware implementation. The value is high enough to
+consider the achieved RSSI steady enough to be considered as a high gain value, yet low enough not to be
+affected by fluctuations in packet-level measurements and actuator dynamics.
 
 \textbf{Movement Count:} 
-The total number of commanded pan and tilt movements executed before convergence.
-Movement count is used as a practical proxy for actuation effort because lower motion
-generally implies lower mechanical wear, lower energy use, and faster physical
-alignment.
+Total number of executed movements of the commanded pan and tilt operations before convergence.
+Number of movements is chosen to estimate the actuation effort due to the inverse relation between motions
+and wear of the mechanical elements, energy consumption, and time spent on alignment.
 \begin{equation}
 M = N_{\text{pan}} + N_{\text{tilt}}
 \end{equation}
 
 \textbf{Success Rate:} 
-The percentage of repeated trials in which a method converges to a stable high-RSSI
-solution within the allowed search procedure. This metric is included to distinguish fast
-but unreliable methods from those that remain consistent across repeated runs.
+The success rate is defined as the percentage of trials in which the method succeeds in converging
+to a high RSSI solution. This metric serves to differentiate fast algorithms that often yield
+erroneous solutions from those consistently achieving correct solutions.
 \begin{equation}
 SR(\%) = \frac{N_{\text{success}}}{N_{\text{trials}}} \times 100
 \end{equation}
 
 \textbf{RSSI Variability:} 
-The spread of final RSSI values across repeated trials, reported in the results chapter
-using the standard deviation of final RSSI. Lower variability indicates better
-repeatability and greater resistance to environmental and measurement noise.
+Spread of final RSSI values after each repeated trial reported in the results section by using
+the standard deviation of RSSI. The smaller the variance, the more reliable the method,
+i.e., it is less prone to variations due to changes in environment and other factors.
 \begin{equation}
 \sigma_{\text{RSSI}} = \sqrt{\frac{1}{N_{\text{trials}}}\sum_{j=1}^{N_{\text{trials}}}
 \left(RSSI_{\text{final},j} - \overline{RSSI}_{\text{final}}\right)^2}
@@ -100,25 +94,27 @@ repeatability and greater resistance to environmental and measurement noise.
 
 \subsubsection{Experimental Protocol}
 
-All experiments follow the same protocol to ensure reproducibility:
+Every test follows a protocol designed for reproducibility:
 
 \begin{itemize}
-    \item Select an initial azimuth and tilt pair from a predefined list of
-    misaligned starting states.
-    \item Run each algorithm from the same starting state within the same environment.
-    \item Use identical runtime parameters for RSSI sampling, actuator limits, and
-    settling delay across all algorithms.
-    \item Record timestamps, averaged RSSI, orientation indices, chosen actions, and
-    convergence status for every control cycle.
-    \item Repeat each practical scenario 10 times for each compared method.
-    \item Compare the RL-based method with the baseline approaches: exhaustive angular
-    scan and RSSI-based hill-climbing.
+    \item The algorithm starts from one of the defined pairs of an azimuth and tilt 
+    values corresponding to initial misalignment states.
+    \item The algorithm is run starting from the selected state in a consistent 
+    simulation environment.
+    \item Runtime parameters are consistent between the algorithms including RSSI 
+    sampling rate, actuator limitations, and time delay before settling down.
+    \item Every control loop logs a timestamp, averaged RSSI readings, 
+    orientation indices, performed actions, and whether alignment occurred.
+    \item Each practical situation is simulated 10 times using the selected 
+    method for every compared approach.
+    \item For a comparison, the presented reinforcement learning method is tested against
+    exhaustive search and hill-climbing based on RSSI values.
 \end{itemize}
 
 \subsubsection{Statistical Analysis}
 
-For the reported metrics, averages across repeated trials are used as the primary basis
-for comparison, with standard deviation reported where it helps indicate repeatability.
-Because the compared algorithms are run from matched starting conditions and shared
-runtime settings, the resulting analysis supports a fair practical comparison under the
-tested operating scenarios.
+For statistical indicators, the average value over several repetitions serves as a 
+benchmark for the performance comparison, whereas standard deviations can provide 
+additional information on consistency of results. As all tests are done on matching 
+starting states with equal runtime configurations, the performed analysis allows to compare 
+algorithms in practice.

@@ -1,20 +1,5 @@
 \subsection{Problem Definition}
 
-Existing reinforcement learning approaches for antenna alignment mainly target mmWave
-beamforming systems, antenna arrays, or other high-computation settings, leaving a
-clear gap for lightweight embedded implementation using only RSSI
-feedback. At the same time, classical RSSI-based methods such as exhaustive scanning
-and hill-climbing are simple to implement but remain insufficient for this problem:
-exhaustive scanning is too slow for responsive operation, while hill-climbing is easily
-degraded by noise, multipath effects, and local optima. As a result, there is still no
-clear low-cost solution that combines embedded reinforcement learning, RSSI-only
-sensing, and practical mechanical antenna steering on a resource-constrained platform.
+Current reinforcement learning methods for antenna alignment have been developed with applications mainly focusing on the mmWave beamforming system or antenna array or similar systems where a lot of computational power is available. As a result, there is a gap left when it comes to developing low cost methods for embedded devices with antenna alignment that operates based on RSSI readings. Moreover, classic algorithms like exhaustive scanning and hill climbing, although simple to design, are not suitable for solving the current task – exhausts scanning takes too long while hill climbing can be hindered by noise, multipaths and local maximum.
 
-This project addresses that gap by defining the problem as real-time alignment of a
-mechanically steerable directional antenna at the receiver using only packet-level RSSI
-measurements and internally tracked antenna orientation. The controller must run on an
-ESP32-S3 with limited computation, memory, and power, without relying on phased
-arrays, GPS, angle-of-arrival estimation, or detailed propagation models. Within these
-constraints, the work investigates whether a tabular reinforcement learning policy can
-be deployed on embedded hardware, validated in real-world operation against simulation
-expectations.
+The main objective of this project is to fill this gap by formulating the problem as antenna alignment using only the received RSSI signal for making decisions and the internal antenna angle estimation as state space parameters. The algorithm should be implemented on an ESP32-S3 with low computational power, memory and energy while using only a mechanically steerable antenna without any phased arrays, GPS, AOA and propagation model. Therefore, this project explores the possibility of running the tabular reinforcement learning algorithm on an embedded device.

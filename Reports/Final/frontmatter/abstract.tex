@@ -3,31 +3,7 @@
 \phantomsection
 \addcontentsline{toc}{section}{ABSTRACT}
 
-Precise alignment of directional antennas is critical for maintaining reliable
-wireless communication links, particularly in low-cost and resource-constrained
-systems where phased arrays and complex beamforming hardware are impractical.
-This project presents the design and implementation of an autonomous antenna
-alignment system that uses a reinforcement learning-based policy to select antenna
-orientations based on Received Signal Strength Indicator (RSSI) measurements. The
-system comprises a fixed transmitter node and a receiver node equipped with an
-ESP32-S3 microcontroller, a high-gain 2.4~GHz directional antenna, a stepper-driven
-azimuth stage, and a servo-driven tilt stage. RSSI measurements are averaged and
-encoded into a compact discrete state representation, which is used to query a
-pre-trained tabular Q-learning policy stored on the ESP32-S3. The selected actions
-command the azimuth and tilt actuators to adjust the antenna orientation in real
-time. To assess the suitability of this approach for low-cost embedded deployment,
-the system is designed to be evaluated against conventional baseline methods,
-including fixed orientation, exhaustive angular scanning, and RSSI-based
-hill-climbing. The evaluation framework considers convergence time, alignment
-accuracy, link stability, and mechanical efficiency under indoor and outdoor test
-conditions. Across the tested practical scenarios, the reinforcement learning controller 
-achieved an average final RSSI of $-49.55$~dBm, compared to $-48.95$~dBm obtained using 
-exhaustive angular scanning, indicating a marginal reduction in peak signal strength. 
-However, the proposed method reduced the average convergence time from 54.20~s to 9.62~s, 
-corresponding to an improvement of approximately 82.25\%.
-These results indicate that the proposed method provides a useful time--accuracy trade-off
-for autonomous directional antenna alignment on resource-constrained wireless
-systems, rather than absolute RSSI superiority over exhaustive search.
+The precise positioning of the directional antenna is important for establishing stable wireless connections, especially in inexpensive and constrained systems where expensive phased arrays and beamforming technology cannot be implemented. This work presents the design and implementation of an autonomous antenna alignment system where the direction and orientation of an antenna can be controlled by a policy learned via reinforcement learning based on the RSSI values. The system consists of one stationary transmitter node and one receiver node consisting of an ESP32-S3, 2.4~GHz  high-gain directional antenna, azimuth stepper and tilt servo actuators. The measured RSSI value is averaged and encoded into a discretized state space to be used to retrieve pre-trained tabulated Q-learning policy on the ESP32-S3. Selected actions are then used to drive the azimuth and tilt actuators and control antenna direction accordingly. In order to evaluate the viability of reinforcement learning in such applications, the method is intended to be evaluated in relation to several baseline strategies, such as fixed direction, full angular scanning and hill climbing based on RSSI. The evaluation methodology will take into consideration the convergence speed, accuracy of the alignment, stability of the connection and mechanical efficiency of the antenna actuation both indoor and outdoor. When tested in a number of realistic environments, the reinforcement learning-based antenna alignment provided the average final RSSI of $-48.95$~dBm, while the exhaustive angular scanning achieved an RSSI of $-49.55$~dBm, implying only slightly lower maximum RSSI with respect to the exhaustive scanning. Nevertheless, the reinforcement learning reduced average convergence time from 54.20~s to 9.62~s, improving the speed of finding the best antenna orientation by almost 82.25\%.
 
 \vspace{0.5cm}
 
